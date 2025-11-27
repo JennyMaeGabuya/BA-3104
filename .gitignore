@@ -1,0 +1,11 @@
+/vendor/
+composer.phar
+
+.env
+
+.vscode/
+
+*.log
+*.tmp
+
+htdocs/
