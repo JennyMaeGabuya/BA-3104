@@ -14,30 +14,53 @@ if (!$user_id) {
 $stmt = $conn->prepare("
     SELECT 
         appointment_id,
-        user_id,
-        name,   
+        appointment_date,
+        appointment_time,
+        reason,
+        name,
         contact_no,
         email,
-        gender,
         age,
+        gender,
         date_of_birth,
         address,
-        appointment_date,
-        appointment_time, 
-        reason,
-        status,
-        created_at
-    FROM appointments 
-    WHERE user_id = ? 
+        status
+    FROM appointments
+    WHERE user_id = ?
     ORDER BY appointment_date DESC
 ");
+
+if (!$stmt) {
+    echo json_encode(["success" => false, "msg" => "Query error: " . $conn->error]);
+    exit;
+}
 
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
 $appointments = [];
+
 while ($row = $result->fetch_assoc()) {
+
+    // normalize status: if null → pending
+    if (!$row['status']) {
+        $row['status'] = "pending";
+    }
+
+    // make sure it is always one of allowed statuses
+    $allowedStatuses = [
+        "pending",
+        "accepted",
+        "declined",
+        "completed",
+        "rescheduled_pending"
+    ];
+
+    if (!in_array($row['status'], $allowedStatuses, true)) {
+        $row['status'] = "pending";
+    }
+
     $appointments[] = $row;
 }
 

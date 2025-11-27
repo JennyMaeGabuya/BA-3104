@@ -1,50 +1,158 @@
-// Patient Dashboard Script
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Patient dashboard loaded successfully!");
 
-    generateTimeSlots();
-
     const dateInput = document.getElementById("appointmentDate");
-    const timeInput = document.getElementById("appointmentTime");
+    const sessionInput = document.getElementById("appointmentSession");
+    const newDateInput = document.getElementById("newAppointmentDate");
 
-    if (dateInput) dateInput.addEventListener("change", updateSlotInfo);
-    if (timeInput) timeInput.addEventListener("change", updateSlotInfo);
-
-    initializeDashboard();
-    loadBookedAppointments();
-});
-
-/* --------------------------------------------------------------
-   TIME SLOT GENERATION (08:00–12:00, 13:00–19:00; every 30 mins)
--------------------------------------------------------------- */
-function generateTimeSlots() {
-    const select = document.getElementById("appointmentTime");
-    if (!select) return;
-
-    // Clear existing
-    select.innerHTML = '<option value="">Select time</option>';
-
-    function addSlots(startHour, endHour) {
-        for (let h = startHour; h < endHour; h++) {
-            for (let m = 0; m < 60; m += 30) {
-                const hh = String(h).padStart(2, "0");
-                const mm = String(m).padStart(2, "0");
-                const value = `${hh}:${mm}:00`; // stored as HH:MM:SS in DB
-                const label = formatTimeLabel(h, m); // pretty text
-                const option = document.createElement("option");
-                option.value = value;
-                option.textContent = label;
-                select.appendChild(option);
-            }
-        }
+    // Booking section (new appointment)
+    if (dateInput && sessionInput) {
+        dateInput.addEventListener("change", refreshAvailableSlots);
+        sessionInput.addEventListener("change", refreshAvailableSlots);
     }
 
-    // Morning: 08:00–12:00 (12 excluded – lunch break)
-    addSlots(8, 12);
+    // Reschedule modal
+    if (newDateInput) {
+        newDateInput.addEventListener("change", refreshRescheduleSlots);
+    }
 
-    // Afternoon: 13:00–19:00
-    addSlots(13, 19);
+    initializeDashboard();
+});
+
+
+/* --------------------------------------------------------------
+   TIME SLOT HELPERS (15-minute slots)
+   AM:  8:00–11:45  (limit 12 patients / day)
+   PM: 13:00–16:45  (limit 16 patients / day)
+-------------------------------------------------------------- */
+
+function getSessionConfig(session) {
+    if (session === "am") {
+        return {
+            startHour: 8,
+            endHour: 11,
+            endMinute: 45,
+            limit: 12,
+            label: "AM"
+        };
+    } else if (session === "pm") {
+        return {
+            startHour: 13,
+            endHour: 16,
+            endMinute: 45,
+            limit: 16,
+            label: "PM"
+        };
+    }
+    return null;
 }
+
+// Build all 15-minute slots for a given session
+function buildSessionSlots(session) {
+    const config = getSessionConfig(session);
+    if (!config) return [];
+
+    const slots = [];
+    for (let h = config.startHour; h <= config.endHour; h++) {
+        for (let m = 0; m < 60; m += 15) {
+            if (h === config.endHour && m > config.endMinute) break;
+
+            const hh = String(h).padStart(2, "0");
+            const mm = String(m).padStart(2, "0");
+
+            slots.push({
+                value: `${hh}:${mm}:00`,
+                label: formatTimeLabel(h, m)
+            });
+        }
+    }
+    return slots;
+}
+
+/* --------------------------------------------------------------
+   REFRESH AVAILABLE SLOTS (date + AM/PM)
+-------------------------------------------------------------- */
+async function refreshAvailableSlots() {
+    const dateInput = document.getElementById("appointmentDate");
+    const sessionInput = document.getElementById("appointmentSession");
+    const timeSelect = document.getElementById("appointmentTime");
+    const info = document.getElementById("slotInfo");
+
+    if (!dateInput || !sessionInput || !timeSelect || !info) return;
+
+    const date = dateInput.value;
+    const session = sessionInput.value;
+
+    // Reset
+    timeSelect.innerHTML = '<option value="">Select time</option>';
+    timeSelect.disabled = true;
+    info.textContent = "";
+
+    if (!date || !session) return;
+
+    const config = getSessionConfig(session);
+    if (!config) {
+        info.textContent = "Invalid session selected.";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("appointmentDate", date);
+    formData.append("session", session);
+
+    try {
+        const res = await fetch("../../controllers/get_slot_usage.php", {
+            method: "POST",
+            body: formData,
+        });
+
+        const result = await res.json();
+        if (!result.success) {
+            info.textContent = "Unable to load available slots.";
+            console.error(result.msg);
+            return;
+        }
+
+        const takenTimes = result.times || [];      // array of "HH:MM:SS"
+        const bookedCount = result.count || 0;
+        const limit = result.limit || config.limit;
+        const remaining = Math.max(limit - bookedCount, 0);
+
+        if (bookedCount >= limit) {
+            info.textContent = `This ${config.label} session is fully booked. Please choose another date or session.`;
+            return;
+        }
+
+        const allSlots = buildSessionSlots(session);
+        let added = 0;
+
+        allSlots.forEach(slot => {
+            if (!takenTimes.includes(slot.value)) {
+                const opt = document.createElement("option");
+                opt.value = slot.value;
+                opt.textContent = slot.label;
+                timeSelect.appendChild(opt);
+                added++;
+            }
+        });
+
+        if (added === 0) {
+            info.textContent = `No available time slots left in this ${config.label} session.`;
+            return;
+        }
+
+        timeSelect.disabled = false;
+        info.textContent = `${remaining} appointment slot(s) remaining for this ${config.label} session.`;
+
+    } catch (err) {
+        console.error("Error loading session slots:", err);
+        info.textContent = "Unable to load available slots right now.";
+    }
+}
+
+/* --------------------------------------------------------------
+   TIME LABEL HELPERS
+-------------------------------------------------------------- */
 
 // Format 24h hour + minute to 12h label (for dropdown)
 function formatTimeLabel(hour24, minute) {
@@ -64,56 +172,6 @@ function formatTimeFromDB(timeString) {
     const m = parseInt(parts[1], 10);
     if (Number.isNaN(h) || Number.isNaN(m)) return timeString;
     return formatTimeLabel(h, m);
-}
-
-/* --------------------------------------------------------------
-   SLOT INFO (HOW MANY APPOINTMENTS IN THIS TIME)
--------------------------------------------------------------- */
-async function updateSlotInfo() {
-    const dateInput = document.getElementById("appointmentDate");
-    const timeInput = document.getElementById("appointmentTime");
-    const info = document.getElementById("slotInfo");
-
-    if (!dateInput || !timeInput || !info) return;
-
-    const date = dateInput.value;
-    const time = timeInput.value;
-
-    if (!date || !time) {
-        info.textContent = "";
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("appointmentDate", date);
-    formData.append("appointmentTime", time);
-
-    try {
-        const res = await fetch("../../controllers/get_slot_usage.php", {
-            method: "POST",
-            body: formData,
-        });
-
-        const result = await res.json();
-
-        if (!result.success) {
-            info.textContent = "Unable to load slot info right now.";
-            return;
-        }
-
-        const count = result.count || 0;
-
-        if (count === 0) {
-            info.textContent = "No other appointments in this time slot yet.";
-        } else if (count === 1) {
-            info.textContent = "There is 1 appointment already in this time slot.";
-        } else {
-            info.textContent = `There are ${count} appointments already in this time slot.`;
-        }
-    } catch (err) {
-        console.error("Error getting slot usage:", err);
-        info.textContent = "Unable to load slot info.";
-    }
 }
 
 /* --------------------------------------------------------------
@@ -148,6 +206,8 @@ function initializeDashboard() {
 
             // Fill booking form
             fillBookingForm(user);
+            loadBookedAppointments();
+            loadCancelledAppointments();
         });
 }
 
@@ -173,36 +233,37 @@ async function handleBooking(event) {
     event.preventDefault();
 
     const formData = new FormData();
-    formData.append("name", document.getElementById("name").value);
-    formData.append("contactNo", document.getElementById("contactNo").value);
-    formData.append("email", document.getElementById("email").value);
-    formData.append("age", document.getElementById("age").value);
+    formData.append("name", document.getElementById("name").value.trim());
+    formData.append("contactNo", document.getElementById("contactNo").value.trim());
+    formData.append("email", document.getElementById("email").value.trim());
+    formData.append("age", document.getElementById("age").value.trim());
     formData.append("gender", document.getElementById("gender").value);
-    formData.append("address", document.getElementById("address").value);
+    formData.append("address", document.getElementById("address").value.trim());
     formData.append("dateOfBirth", document.getElementById("dateOfBirth").value);
     formData.append("appointmentDate", document.getElementById("appointmentDate").value);
     formData.append("appointmentTime", document.getElementById("appointmentTime").value);
     formData.append("reason", document.getElementById("reason").value);
 
-    const res = await fetch("../../controllers/booking_controller.php", {
-        method: "POST",
-        body: formData,
-    });
+    try {
+        const res = await fetch("../../controllers/booking_controller.php", {
+            method: "POST",
+            body: formData
+        });
 
-    const result = await res.json(); // ✅ Only once
-    alert(result.msg);
+        const result = await res.json();
+        console.log("booking result:", result);
+        alert(result.msg);
 
-    if (result.success) {
-        // Reload appointments & user info
-        await loadBookedAppointments();
-        await initializeDashboard();
-        fillBookingForm(window.currentUserData);
-
-        // Clear only appointment-specific fields
-        document.getElementById("appointmentDate").value = "";
-        document.getElementById("appointmentTime").value = "";
-        document.getElementById("reason").value = "";
-        document.getElementById("slotInfo").textContent = "";
+        if (result.success) {
+            await loadBookedAppointments?.();
+            document.getElementById("appointmentTime").value = "";
+            document.getElementById("reason").value = "";
+            document.getElementById("appointmentSession").value = "";
+            document.getElementById("slotInfo").textContent = "";
+        }
+    } catch (err) {
+        console.error("Booking error:", err);
+        alert("Booking failed.");
     }
 }
 
@@ -210,20 +271,22 @@ async function handleBooking(event) {
    SWITCH SECTION (Overview / Booking / Profile)
 -------------------------------------------------------------- */
 function switchSection(sectionId) {
-    document
-        .querySelectorAll(".content-section")
-        .forEach((s) => s.classList.remove("active"));
-    document
-        .querySelectorAll(".nav-item")
-        .forEach((n) => n.classList.remove("active"));
-
+    document.querySelectorAll(".content-section").forEach(section => {
+        section.classList.remove("active");
+    });
     document.getElementById(sectionId).classList.add("active");
-    document
-        .querySelector(`[onclick="switchSection('${sectionId}')"]`)
+
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    document.querySelector(`[onclick="switchSection('${sectionId}')"]`)
         .classList.add("active");
 
     if (sectionId === "overview") {
         loadBookedAppointments();
+        loadCancelledAppointments();
+    } else {
+        document.getElementById("pendingTable").innerHTML = "";
+        document.getElementById("approvedTable").innerHTML = "";
+        document.getElementById("cancelledTable").innerHTML = "";
     }
 }
 
@@ -245,7 +308,9 @@ async function loadBookedAppointments() {
 
         console.log("Loaded appointments:", appointments);
 
-        const pending = appointments.filter((a) => a.status === "pending");
+        const pending = appointments.filter(
+            (a) => a.status === "pending" || a.status === "rescheduled_pending"
+        );
         const approved = appointments.filter((a) => a.status === "accepted");
 
         document.getElementById("pendingCount").textContent = pending.length;
@@ -261,8 +326,6 @@ async function loadBookedAppointments() {
 
 /* --------------------------------------------------------------
    UPDATE APPOINTMENT TABLES
-   - pendingTable & approvedTable: Date | Time | Reason | Name | Contact | Email | Age | DOB | Actions
-   - bookedTable: Date | Time | Reason | Name | Contact | Email | Gender | Age | DOB | Address
 -------------------------------------------------------------- */
 function updateAppointmentTable(tableId, appointments, showActions) {
     const tableBody = document.getElementById(tableId);
@@ -275,7 +338,6 @@ function updateAppointmentTable(tableId, appointments, showActions) {
     }
 
     appointments.forEach((app) => {
-        // FULL BOOKED TABLE (bottom card)
         if (tableId === "bookedTable") {
             tableBody.innerHTML += `
                 <tr>
@@ -294,7 +356,6 @@ function updateAppointmentTable(tableId, appointments, showActions) {
             return;
         }
 
-        // PENDING + APPROVED TABLES (overview)
         tableBody.innerHTML += `
             <tr>
                 <td>${formatDate(app.appointment_date)}</td>
@@ -336,12 +397,85 @@ async function cancelAppointment(appointmentId) {
         const result = await res.json();
         alert(result.msg);
 
-        if (result.success) loadBookedAppointments();
+        if (result.success) {
+            await loadBookedAppointments();
+            await loadCancelledAppointments();
+        }
+
     } catch (err) {
         console.error(err);
         alert("Cancellation failed.");
     }
 }
+
+
+/* --------------------------------------------------------------
+   RESCHEDULE: ONLY SHOW FREE SLOTS FOR SELECTED DATE
+-------------------------------------------------------------- */
+async function refreshRescheduleSlots() {
+    const dateInput = document.getElementById("newAppointmentDate");
+    const timeSelect = document.getElementById("newAppointmentTime");
+
+    if (!dateInput || !timeSelect) return;
+
+    const date = dateInput.value;
+
+    // Reset
+    timeSelect.innerHTML = '<option value="">Select time</option>';
+    timeSelect.disabled = true;
+
+    if (!date) return;
+
+    const formData = new FormData();
+    formData.append("appointmentDate", date);
+    formData.append("day_only", "1"); // special mode for reschedule
+    if (currentAppointmentId) {
+        formData.append("exclude_appointment_id", currentAppointmentId);
+    }
+
+    try {
+        const res = await fetch("../../controllers/get_slot_usage.php", {
+            method: "POST",
+            body: formData,
+        });
+
+        const result = await res.json();
+        if (!result.success) {
+            console.error("Reschedule slots error:", result.msg);
+            return;
+        }
+
+        const takenTimes = result.times || []; // array of "HH:MM:SS"
+        const allSlots = [
+            ...buildSessionSlots("am"),
+            ...buildSessionSlots("pm"),
+        ];
+
+        let added = 0;
+        allSlots.forEach(slot => {
+            if (!takenTimes.includes(slot.value)) {
+                const opt = document.createElement("option");
+                opt.value = slot.value;
+                opt.textContent = slot.label;
+                timeSelect.appendChild(opt);
+                added++;
+            }
+        });
+
+        if (added === 0) {
+            const opt = document.createElement("option");
+            opt.value = "";
+            opt.textContent = "No available times for this date";
+            timeSelect.appendChild(opt);
+        } else {
+            timeSelect.disabled = false;
+        }
+
+    } catch (err) {
+        console.error("Error loading reschedule slots:", err);
+    }
+}
+
 
 /* --------------------------------------------------------------
    RESCHEDULE FUNCTIONS
@@ -349,19 +483,37 @@ async function cancelAppointment(appointmentId) {
 function openRescheduleModal(appointmentId) {
     currentAppointmentId = appointmentId;
     document.getElementById("rescheduleModal").style.display = "flex";
+
+    const dateInput = document.getElementById("newAppointmentDate");
+    const timeSelect = document.getElementById("newAppointmentTime");
+
+    if (dateInput && timeSelect) {
+        // Clear previous values
+        // (user chooses date, then we load free slots)
+        if (!dateInput.value) {
+            timeSelect.innerHTML = '<option value="">Select time</option>';
+            timeSelect.disabled = true;
+        } else {
+            // If date is already set, immediately load available slots
+            refreshRescheduleSlots();
+        }
+    }
 }
+
 
 async function saveReschedule() {
     const newDate = document.getElementById("newAppointmentDate").value;
+    const newTime = document.getElementById("newAppointmentTime").value;
 
-    if (!newDate) {
-        alert("Please select a date.");
+    if (!newDate || !newTime) {
+        alert("Please select both date and time.");
         return;
     }
 
     const formData = new FormData();
     formData.append("appointment_id", currentAppointmentId);
     formData.append("new_date", newDate);
+    formData.append("new_time", newTime);
 
     try {
         const res = await fetch("../../controllers/reschedule_appointment.php", {
@@ -585,4 +737,41 @@ function logout() {
         .catch(() => {
             window.location.href = "../auth/login.php";
         });
+}
+
+/* --------------------------------------------------------------
+   LOAD CANCELLED APPOINTMENTS
+-------------------------------------------------------------- */
+async function loadCancelledAppointments() {
+    try {
+        const res = await fetch("../../controllers/get_cancelled_appointments.php");
+        const cancelled = await res.json();
+
+        document.getElementById("cancelledCount").textContent = cancelled.length;
+
+        const tbody = document.getElementById("cancelledTable");
+        tbody.innerHTML = "";
+
+        if (cancelled.length === 0) {
+            tbody.innerHTML =
+                `<tr><td colspan="6" class="empty-state">No cancelled appointments</td></tr>`;
+            return;
+        }
+
+        cancelled.forEach(app => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${formatDate(app.appointment_date)}</td>
+                    <td>${formatTimeFromDB(app.appointment_time)}</td>
+                    <td>${app.reason}</td>
+                    <td>${app.name}</td>
+                    <td>${app.contact_no}</td>
+                    <td>${app.email}</td>
+                </tr>
+            `;
+        });
+
+    } catch (error) {
+        console.error("Error loading cancelled appointments:", error);
+    }
 }

@@ -3,7 +3,7 @@ require_once "../../config/db_connection.php";
 header("Content-Type: application/json");
 
 try {
-    // Only allow POST
+    // Only POST
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         echo json_encode(["success" => false, "msg" => "Invalid request method"]);
         exit;
@@ -17,26 +17,75 @@ try {
     $appointment_id = (int)$_POST['appointment_id'];
     $status = $_POST['status'];
 
-    // allowed statuses
-    $allowed = ['pending', 'accepted', 'declined', 'completed'];
+    // All valid statuses
+    $allowed = ['pending', 'accepted', 'declined', 'completed', 'rescheduled_pending'];
     if (!in_array($status, $allowed, true)) {
         echo json_encode(["success" => false, "msg" => "Invalid status"]);
         exit;
     }
 
+    // Get full appointment record BEFORE updating or deleting
+    $get = $conn->prepare("
+        SELECT * FROM appointments WHERE appointment_id = ?
+    ");
+    $get->bind_param("i", $appointment_id);
+    $get->execute();
+    $appointment = $get->get_result()->fetch_assoc();
+
+    if (!$appointment) {
+        echo json_encode(["success" => false, "msg" => "Appointment not found"]);
+        exit;
+    }
+
+    // --------------------------------------------------------------
+    // 1️⃣ Update status normally
+    // --------------------------------------------------------------
     $stmt = $conn->prepare("UPDATE appointments SET status = ? WHERE appointment_id = ?");
     $stmt->bind_param("si", $status, $appointment_id);
 
     if (!$stmt->execute()) {
-        echo json_encode(["success" => false, "msg" => "Database update failed"]);
+        echo json_encode(["success" => false, "msg" => "Failed to update status"]);
         exit;
+    }
+
+    // --------------------------------------------------------------
+    // 2️⃣ If DECLINED → archive to cancelled_appointments and delete
+    // --------------------------------------------------------------
+    if ($status === "declined") {
+
+        // Move to cancelled_appointments table
+        $archive = $conn->prepare("
+            INSERT INTO cancelled_appointments 
+            (appointment_id, user_id, name, email, contact_no, reason,
+             appointment_date, appointment_time, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'cancelled')
+        ");
+
+        $archive->bind_param(
+            "iissssss",
+            $appointment['appointment_id'],
+            $appointment['user_id'],
+            $appointment['name'],
+            $appointment['email'],
+            $appointment['contact_no'],
+            $appointment['reason'],
+            $appointment['appointment_date'],
+            $appointment['appointment_time']
+        );
+
+        $archive->execute();
+
+        // Delete original
+        $delete = $conn->prepare("DELETE FROM appointments WHERE appointment_id = ?");
+        $delete->bind_param("i", $appointment_id);
+        $delete->execute();
     }
 
     echo json_encode([
         "success" => true,
-        "msg"     => "Status updated",
-        "status"  => $status,
-        "id"      => $appointment_id
+        "msg" => "Status updated successfully",
+        "status" => $status,
+        "id" => $appointment_id
     ]);
 } catch (Exception $e) {
     echo json_encode(["success" => false, "msg" => $e->getMessage()]);

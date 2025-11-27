@@ -11,24 +11,25 @@ function formatTime(timeString) {
     return `${hour12}:${String(minute).padStart(2, '0')} ${ampm}`;
 }
 
-
 let appointments = [];
-
 let medicalRecords = [];
-
+let cancelledAppointments = []; // NEW: separate list for cancelled
 let currentAppointmentId = null;
+
+// --------------------------------------------------------------
+// INIT
+// --------------------------------------------------------------
 function init() {
 
-    // ====== NEW: Fetch Appointments from Database ======
+    // Load appointments from DB
     fetch("/booking-management/controllers/admin_controllers/get_all_appointments.php")
         .then(res => res.json())
         .then(res => {
             if (res.success) {
-
                 appointments = res.data.map(row => ({
                     id: row.id,
                     date: row.date,
-                    time: formatTime(row.time),   // <-- FIXED + formatted
+                    time: formatTime(row.time),
                     reason: row.reason,
                     fullName: row.fullName,
                     contactNo: row.contactNo,
@@ -42,22 +43,31 @@ function init() {
                 loadAppointments();
                 loadNotifications();
             }
-        });
+        })
+        .catch(err => console.error("Error loading appointments:", err));
 
-    // ====== Your existing logic ======
+    // Load medical records from localStorage (client-side only)
     loadMedicalRecords();
 
     const storedAppointments = localStorage.getItem('adminAppointments');
     if (storedAppointments) {
-        appointments = JSON.parse(storedAppointments);
-        loadAppointments();
-        loadNotifications();
+        try {
+            appointments = JSON.parse(storedAppointments);
+            loadAppointments();
+            loadNotifications();
+        } catch (e) {
+            console.error("Failed to parse stored appointments:", e);
+        }
     }
 
     const storedRecords = localStorage.getItem('medicalRecords');
     if (storedRecords) {
-        medicalRecords = JSON.parse(storedRecords);
-        loadMedicalRecords();
+        try {
+            medicalRecords = JSON.parse(storedRecords);
+            loadMedicalRecords();
+        } catch (e) {
+            console.error("Failed to parse stored records:", e);
+        }
     }
 }
 
@@ -67,7 +77,9 @@ function saveData() {
     localStorage.setItem('medicalRecords', JSON.stringify(medicalRecords));
 }
 
-// Load appointments into table
+// --------------------------------------------------------------
+// LOAD APPOINTMENTS TABLE (NO MORE ACCEPT/DECLINE)
+// --------------------------------------------------------------
 function loadAppointments() {
     const tbody = document.getElementById('appointmentTable');
     const count = document.getElementById('appointmentCount');
@@ -90,20 +102,13 @@ function loadAppointments() {
         let statusBadge = '';
         let statusActions = '';
 
-        if (apt.status === 'pending') {
-            statusBadge = `<span class="badge badge-pending">Pending</span>`;
-            statusActions = `
-                <div class="status-actions">
-                    <button class="btn btn-sm btn-success" onclick="openStatusModal(${apt.id})">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Review
-                    </button>
-                </div>
-            `;
-        } else if (apt.status === 'accepted') {
-            statusBadge = `<span class="badge badge-accepted">Accepted</span>`;
+        // We no longer manually accept/decline.
+        // Treat all non-completed as "Scheduled" / "Rescheduled".
+        if (apt.status === 'completed') {
+            statusBadge = `<span class="badge badge-completed">Completed</span>`;
+            statusActions = '';
+        } else if (apt.status === 'rescheduled_pending') {
+            statusBadge = `<span class="badge badge-warning">Rescheduled</span>`;
             statusActions = `
                 <button class="btn btn-sm btn-primary" onclick="openNoteModal(${apt.id})">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,10 +117,17 @@ function loadAppointments() {
                     Add Note
                 </button>
             `;
-        } else if (apt.status === 'declined') {
-            statusBadge = `<span class="badge badge-declined">Declined</span>`;
-        } else if (apt.status === 'completed') {
-            statusBadge = `<span class="badge badge-completed">Completed</span>`;
+        } else {
+            // pending / accepted → both treated as scheduled
+            statusBadge = `<span class="badge badge-accepted">Scheduled</span>`;
+            statusActions = `
+                <button class="btn btn-sm btn-primary" onclick="openNoteModal(${apt.id})">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Add Note
+                </button>
+            `;
         }
 
         return `
@@ -139,38 +151,71 @@ function loadAppointments() {
     }).join('');
 }
 
-// Load notifications data
-function loadNotifications() {
-    const canceledAppointments = appointments.filter(apt => apt.status === 'declined');
-    const rescheduledAppointments = appointments.filter(apt => apt.status === 'rescheduled');
+// --------------------------------------------------------------
+// NOTIFICATIONS: CANCELLED + RESCHEDULED
+// --------------------------------------------------------------
+async function loadNotifications() {
+    try {
+        const res = await fetch("/booking-management/controllers/admin_controllers/get_cancelled_admin.php");
+
+        const json = await res.json();
+
+        if (json.success && Array.isArray(json.data)) {
+            cancelledAppointments = json.data.map(row => ({
+                id: row.id,
+                date: row.date,
+                time: formatTime(row.time),
+                fullName: row.fullName,
+                email: row.email,
+                statusLabel: 'Cancelled'
+            }));
+        } else {
+            cancelledAppointments = [];
+        }
+    } catch (err) {
+        console.error("Error loading cancelled appointments:", err);
+        cancelledAppointments = [];
+    }
+
+    // 2) Rescheduled appointments: from active appointments list
+    const rescheduledAppointments = appointments
+        .filter(apt => apt.status === 'rescheduled_pending')
+        .map(apt => ({
+            ...apt,
+            statusLabel: 'Rescheduled'
+        }));
 
     const canceledCount = document.getElementById('canceledCount');
     const rescheduledCount = document.getElementById('rescheduledCount');
 
-    if (canceledCount) canceledCount.textContent = canceledAppointments.length;
+    if (canceledCount) canceledCount.textContent = cancelledAppointments.length;
     if (rescheduledCount) rescheduledCount.textContent = rescheduledAppointments.length;
 
-    updateNotificationTable('canceledTable', canceledAppointments);
+    updateNotificationTable('canceledTable', cancelledAppointments);
     updateNotificationTable('rescheduledTable', rescheduledAppointments);
 }
 
 // Update notification table
-function updateNotificationTable(tableId, appointments) {
+function updateNotificationTable(tableId, rows) {
     const tbody = document.getElementById(tableId);
     if (!tbody) return;
 
-    if (appointments.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No appointments found</td></tr>';
+    if (!rows || rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No appointments found</td></tr>';
         return;
     }
 
-    tbody.innerHTML = appointments.map(apt => {
+    tbody.innerHTML = rows.map(apt => {
         const appointmentDate = new Date(apt.date);
         const formattedDate = appointmentDate.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
         });
+
+        const label = apt.statusLabel || 'Notification';
+        const isCancelled = label === 'Cancelled';
+        const badgeClass = isCancelled ? 'badge-declined' : 'badge-warning';
 
         return `
             <tr>
@@ -179,16 +224,23 @@ function updateNotificationTable(tableId, appointments) {
                 <td>${apt.time}</td>
                 <td>${apt.email}</td>
                 <td>
-                    <span class="badge ${apt.status === 'declined' ? 'badge-declined' : 'badge-warning'}">
-                        ${apt.status === 'declined' ? 'Canceled' : 'Rescheduled'}
+                    <span class="badge ${badgeClass}">
+                        ${label}
                     </span>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="deleteNotification(${apt.id}, '${label}')">
+                        ✖ Delete
+                    </button>
                 </td>
             </tr>
         `;
     }).join('');
 }
 
-// Load medical records
+// --------------------------------------------------------------
+// MEDICAL RECORDS (unchanged)
+// --------------------------------------------------------------
 function loadMedicalRecords() {
     const tbody = document.getElementById('medicalRecordsTable');
     const count = document.getElementById('recordsCount');
@@ -220,7 +272,9 @@ function loadMedicalRecords() {
     }).join('');
 }
 
-// Toggle sidebar
+// --------------------------------------------------------------
+// SIDEBAR + SECTIONS
+// --------------------------------------------------------------
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
@@ -229,7 +283,6 @@ function toggleSidebar() {
     overlay.classList.toggle('active');
 }
 
-// Switch sections
 function switchSection(sectionName) {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
@@ -246,63 +299,9 @@ function switchSection(sectionName) {
     if (sectionName === 'notifications') loadNotifications();
 }
 
-// Open status modal
-function openStatusModal(appointmentId) {
-    currentAppointmentId = appointmentId;
-    const appointment = appointments.find(apt => apt.id === appointmentId);
-
-    if (appointment) {
-        document.getElementById('modalPatientName').textContent =
-            `Update status for ${appointment.fullName}'s appointment on ${appointment.date} at ${appointment.time}`;
-        document.getElementById('statusModal').classList.add('active');
-    }
-}
-
-// Close status modal
-function closeModal() {
-    document.getElementById('statusModal').classList.remove('active');
-    currentAppointmentId = null;
-}
-
-// ====== UPDATED: Update appointment AND database ======
-function updateStatus(status) {
-    if (!currentAppointmentId) return;
-
-    const formData = new FormData();
-    formData.append("appointment_id", currentAppointmentId);
-    formData.append("status", status);
-
-    fetch("/booking-management/controllers/admin_controllers/update_appointment_status.php", {
-        method: "POST",
-        body: formData
-    })
-        .then(res => res.json())
-        .then(res => {
-            console.log("update_status response:", res);
-
-            if (!res.success) {
-                alert(res.msg || "Failed to update status");
-                return;
-            }
-
-            const apt = appointments.find(a => a.id == currentAppointmentId);
-            if (apt) apt.status = status;
-
-            saveData();
-            loadAppointments();
-            loadNotifications();
-            closeModal();
-
-            alert(`Appointment has been ${status}.`);
-        })
-        .catch(err => {
-            console.error("updateStatus error:", err);
-            alert("Error updating status.");
-        });
-}
-
-
-// Open note modal
+// --------------------------------------------------------------
+// NOTE MODAL + COMPLETE STATUS (client-side only)
+// --------------------------------------------------------------
 function openNoteModal(appointmentId) {
     currentAppointmentId = appointmentId;
     const appointment = appointments.find(apt => apt.id === appointmentId);
@@ -315,13 +314,11 @@ function openNoteModal(appointmentId) {
     }
 }
 
-// Close note modal
 function closeNoteModal() {
     document.getElementById('noteModal').classList.remove('active');
     currentAppointmentId = null;
 }
 
-// Save doctor's note
 function saveDoctorNote() {
     if (!currentAppointmentId) return;
 
@@ -345,6 +342,7 @@ function saveDoctorNote() {
 
         medicalRecords.push(medicalRecord);
 
+        // Mark as completed (local only)
         appointment.status = 'completed';
 
         saveData();
@@ -357,14 +355,18 @@ function saveDoctorNote() {
     }
 }
 
-// Logout
+// --------------------------------------------------------------
+// LOGOUT
+// --------------------------------------------------------------
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
         window.location.href = '../auth/login.php';
     }
 }
 
-// Close sidebar when clicking outside
+// --------------------------------------------------------------
+// CLICK HANDLERS
+// --------------------------------------------------------------
 document.addEventListener('click', function (event) {
     const sidebar = document.getElementById('sidebar');
     const menuToggle = document.getElementById('menuToggle');
@@ -377,14 +379,25 @@ document.addEventListener('click', function (event) {
     }
 });
 
-// Close modals when clicking outside
 window.addEventListener('click', function (event) {
-    const statusModal = document.getElementById('statusModal');
     const noteModal = document.getElementById('noteModal');
 
-    if (event.target === statusModal) closeModal();
     if (event.target === noteModal) closeNoteModal();
 });
 
-// Initialize
+// --------------------------------------------------------------
+// DELETE NOTIFICATION (ONLY FROM VIEW, NOT DB)
+// --------------------------------------------------------------
+function deleteNotification(id, type) {
+    if (!confirm("Delete this notification from the list?")) return;
+
+    if (type === 'Cancelled') {
+        cancelledAppointments = cancelledAppointments.filter(a => a.id !== id);
+    }
+    // For rescheduled, we don't remove from DB or appointments; just refresh list
+    loadNotifications();
+    alert("Notification removed.");
+}
+
+// --------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', init);

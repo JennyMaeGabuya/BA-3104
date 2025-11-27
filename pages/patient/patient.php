@@ -81,9 +81,7 @@
             <section id="overview" class="content-section active">
                 <div class="section-header">
                     <h2>Overview</h2>
-
                 </div>
-
                 <div class="appointments-container">
                     <!-- Pending Appointments -->
                     <div class="appointment-card">
@@ -145,6 +143,34 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- Cancelled Appointments -->
+                    <div class="appointment-card">
+                        <div class="card-header">
+                            <h3>Cancelled Appointments</h3>
+                            <span class="badge badge-danger" id="cancelledCount">0</span>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="appointment-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Reason</th>
+                                        <th>Name</th>
+                                        <th>Contact No.</th>
+                                        <th>Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cancelledTable">
+                                    <tr>
+                                        <td colspan="6" class="empty-state">No cancelled appointments</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
             </section>
 
@@ -208,16 +234,25 @@
 
                             <div class="form-row">
                                 <div class="form-group">
+                                    <label class="form-label">Session *</label>
+                                    <select class="form-select" id="appointmentSession" required>
+                                        <option value="">Select session</option>
+                                        <option value="am">AM (8:00 AM – 11:45 AM)</option>
+                                        <option value="pm">PM (1:00 PM – 4:45 PM)</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
                                     <label class="form-label">Appointment Time *</label>
-                                    <!-- We will fill this with allowed slots via JS -->
                                     <select class="form-select" id="appointmentTime" required>
                                         <option value="">Select time</option>
                                     </select>
                                     <small id="slotInfo" style="display:block;margin-top:4px;font-size:0.85rem;color:#555;">
-                                        <!-- JS will show: "There are X appointments in this time slot" -->
+                                        <!-- JS will show session availability info -->
                                     </small>
                                 </div>
                             </div>
+
 
 
                             <div class="form-group">
@@ -326,7 +361,13 @@
         <div class="modal-box">
             <h3>Reschedule Appointment</h3>
 
+            <label>New Date</label>
             <input type="date" id="newAppointmentDate" class="modal-input" required>
+
+            <label>New Time</label>
+            <select id="newAppointmentTime" class="modal-input" required>
+                <option value="">Select time</option>
+            </select>
 
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeRescheduleModal()">Cancel</button>
@@ -334,6 +375,7 @@
             </div>
         </div>
     </div>
+
 
     <script src="../../js/patient_js/patient-script.js"></script>
 </body>
