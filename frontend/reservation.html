@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ParkEase — University Parking Reservation</title>
+  <meta name="description" content="ParkEase — Simple reservation page for University Parking System" />
+  <script src="./src//reservation.js" type="module">
+  </script>
+</head>
+
+<body class="m-0 bg-(--bg) text-[#0f1724] font-inter">
+
+  <div class="max-w-[980px] mx-auto my-9 p-5">
+    
+    <!-- Header -->
+    <header class="flex gap-4 items-center mb-4">
+      <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-blue-300 flex items-center justify-center text-white font-bold">
+        PE
+      </div>
+
+      <div>
+        <h1 class="text-xl font-semibold m-0">ParkEase</h1>
+        <p class="text-muted text-sm m-0">University Parking Reservation System</p>
+      </div>
+    </header>
+
+    <!-- Main Card -->
+    <main class="bg-(--card) shadow-xl rounded-xl p-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5">
+
+        <!-- Left Section -->
+        <section>
+
+          <h2 class="m-0 text-lg font-semibold">Create a Reservation</h2>
+          <p class="text-muted text-sm">Reserve a parking slot ahead of time. Fill in your details and choose a zone and slot.</p>
+
+          <form id="reservationForm" novalidate class="mt-4 space-y-4">
+
+            <!-- Row 1 -->
+            <div class="flex gap-3">
+              <div class="flex-1">
+                <label class="text-muted text-sm">Full name</label>
+                <input id="fullName" name="fullName" class="w-full p-2 border rounded-md" placeholder="Juan Dela Cruz" required />
+              </div>
+
+              <div class="flex-1">
+                <label class="text-muted text-sm">Student / Staff ID</label>
+                <input id="studentId" name="studentId" class="w-full p-2 border rounded-md" placeholder="2025-00001" required />
+              </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="flex gap-3">
+              <div class="flex-1">
+                <label  class="text-muted text-sm">Vehicle plate</label>
+                <input id="vPlate" name="vPlate" class="w-full p-2 border rounded-md" placeholder="ABC-1234" required />
+              </div>
+
+              <div class="flex-1">
+                <label for="vType" class="text-muted text-sm">Vehicle type</label>
+                <select id="vType" name="vType" class="w-full p-2 border rounded-md">
+                  <option value="car">Car</option>
+                  <option value="motorcycle">Motorcycle</option>
+                  <option value="bicycle">Bicycle</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="flex gap-3 w-full">
+              <div class="flex-1 w-full">
+                <label class="text-muted text-sm">Reservation date</label>
+                <input id="rDate" name="rDate" type="date" class="w-full p-2 border rounded-md" required />
+              </div>
+
+              <div class="flex-1">
+                <label class="text-muted text-sm">From</label>
+                <input id="startTime" name="startTime" type="time" class="w-full p-2 border rounded-md" required />
+              </div>
+
+              <div class="flex-1">
+                <label class="text-muted text-sm">To</label>
+                <input id="endTime" name="endTime" type="time" class="w-full p-2 border rounded-md" required />
+              </div>
+            </div>
+
+            <!-- Zone -->
+            <div>
+              <label class="text-muted text-sm">Parking zone</label>
+              <select id="zone" class="w-full p-2 border rounded-md">
+                <option value="A">Zone A — Main Gate (Covered)</option>
+                <option value="B">Zone B — Library (Open)</option>
+                <option value="C">Zone C — Faculty (Reserved)</option>
+              </select>
+            </div>
+
+            <!-- Spots -->
+            <div>
+              <label class="text-muted text-sm">Pick a parking spot</label>
+              <div id="spotList" class="flex flex-wrap gap-2 mt-2"></div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center gap-3 mt-4">
+              <button type="button" id="previewBtn" class="bg-(--accent) text-white px-4 py-2 rounded-md">
+                Preview Reservation
+              </button>
+
+              <button type="reset" class="border border-(--accent) text-black px-4 py-2 rounded-md">
+                Reset
+              </button>
+
+              <div class="ml-auto text-xs text-muted">Max reservation: 8 hours</div>
+            </div>
+          </form>
+
+          <hr class="my-4 border-gray-200" />
+
+          <!-- Quick Rules -->
+          <section>
+            <h3 class="font-semibold mb-2">Quick rules</h3>
+            <ul class="text-muted text-sm list-disc pl-5 space-y-1">
+              <li>Arrive within 15 minutes of your reserved time or reservation may be released.</li>
+              <li>Faculty/reserved zones require valid staff ID.</li>
+              <li>Do not block driveways or emergency lanes.</li>
+            </ul>
+          </section>
+
+        </section>
+
+        <!-- Right Summary -->
+        <aside>
+          <div class="bg-gray-50 p-4 rounded-md">
+            <h4 class="font-semibold mb-2">Reservation summary</h4>
+            <div id="summaryBody" class="text-sm text-muted">
+              No reservation data yet.
+            </div>
+
+            <div class="flex gap-2 mt-3">
+              <button id="confirmBtn" disabled class="bg-(--accent) text-white px-3 py-2 rounded-md opacity-50">
+                Confirm & Save
+              </button>
+
+              <button id="downloadBtn" disabled class="border border-(--accent) text-(--accent) px-3 py-2 rounded-md opacity-50">
+                Download
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white p-4 rounded-md mt-3">
+            <h4 class="font-semibold">Available today</h4>
+            <p class="text-xs text-muted">Sample slots for selected zone</p>
+            <div id="availSpots" class="flex flex-wrap gap-2 mt-2"></div>
+          </div>
+        </aside>
+
+      </div>
+    </main>
+
+    <footer class="text-center text-muted text-sm mt-4">
+      ParkEase • University Parking System — built for demonstration
+    </footer>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="hidden fixed inset-0 bg-black/40 items-center justify-center">
+    <div class="bg-white p-6 rounded-lg w-[90%] max-w-lg">
+      <h3 class="text-lg font-semibold">Confirm Reservation</h3>
+      <div id="modalContent" class="mt-2 text-sm"></div>
+
+      <div class="flex justify-end gap-2 mt-4">
+        <button id="modalCancel" class="border border-(--accent) text-(--accent) px-4 py-2 rounded-md">
+          Cancel
+        </button>
+        <button id="modalConfirm" class="bg-(--accent) text-white px-4 py-2 rounded-md">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./src/reservation.js" type="module">
+    // You can integrate your JS here again
+  </script>
+
+</body>
+</html>
