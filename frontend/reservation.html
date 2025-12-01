@@ -165,21 +165,30 @@
   </div>
 
   <!-- Modal -->
-  <div id="modal" class="hidden fixed inset-0 bg-black/40 items-center justify-center">
-    <div class="bg-white p-6 rounded-lg w-[90%] max-w-lg">
-      <h3 class="text-lg font-semibold">Confirm Reservation</h3>
-      <div id="modalContent" class="mt-2 text-sm"></div>
+<div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 animate-fadeIn">
+    <!-- Header -->
+    <h3 class="text-xl font-bold text-gray-800 mb-4">Confirm Reservation</h3>
 
-      <div class="flex justify-end gap-2 mt-4">
-        <button id="modalCancel" class="border border-(--accent) text-(--accent) px-4 py-2 rounded-md">
-          Cancel
-        </button>
-        <button id="modalConfirm" class="bg-(--accent) text-white px-4 py-2 rounded-md">
-          Confirm
-        </button>
-      </div>
+    <!-- Modal Content -->
+    <div id="modalContent" class="text-gray-600 text-sm space-y-2">
+      <!-- Filled dynamically via JS -->
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex justify-end gap-3 mt-6">
+      <button id="modalCancel" 
+              class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition">
+        Cancel
+      </button>
+      <button id="modalConfirm" 
+              class="px-4 py-2 rounded-lg bg-(--accent) text-white font-semibold hover:bg-amber-600 transition">
+        Confirm
+      </button>
     </div>
   </div>
+</div>
+
 
   <script src="./src/reservation.js" type="module">
     // You can integrate your JS here again
