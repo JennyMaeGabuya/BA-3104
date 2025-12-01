@@ -1,0 +1,209 @@
+/* -------------------------
+   FindIt@BatStateU — Login
+   ------------------------- */
+:root{
+  --red: #C8102E;
+  --bg: #F7F8FA;
+  --muted: #6B7280;
+  --card-shadow: 0 18px 40px rgba(15,23,42,0.06);
+  --radius: 14px;
+  --max-card-width: 420px;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+*{box-sizing: border-box}
+html,body{height:100%;margin:0;background:var(--bg);font-family:var(--font);color:#111}
+a{color:var(--red);text-decoration:none}
+.page{display:flex;height:100vh;width:100vw;overflow:hidden}
+
+/* ---------- LEFT HERO ---------- */
+.hero{
+  width:50%;
+  min-width:420px;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+}
+
+/* background image container (fixed, blurred) */
+.hero-bg{
+  position:absolute;inset:0;
+  background-image: url('campus.jpg');
+  background-position:center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  filter: blur(2px) saturate(90%);
+  transform: scale(1.02);
+  background-attachment: fixed;
+  z-index:0;
+}
+
+/* red overlay */
+.hero-overlay{
+  position:absolute; inset:0; z-index:1;
+  background: rgba(200,16,46,0.82);
+}
+
+/* content stack */
+.hero-content{
+  position:relative; z-index:2;
+  text-align:center;
+  padding: 48px;
+  width:100%;
+  max-width:520px;
+}
+
+/* rounded logo box */
+.hero-icon{
+  width:64px; height:64px; margin: 0 auto 18px;
+  display:grid; place-items:center;
+  background: rgba(255,255,255,0.08);
+  border-radius:12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.hero-title{
+  font-size:44px; margin:6px 0 8px; font-weight:600; letter-spacing:-0.02em;
+}
+
+.hero-sub{
+  font-size:15px; margin:6px 0 18px; opacity:0.95; font-weight:500;
+}
+
+.hero-desc{
+  font-size:14px; max-width:46ch; margin:16px auto 0; opacity:0.95; line-height:1.6;
+}
+
+/* ---------- RIGHT PANEL ---------- */
+.panel{
+  width:50%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding: 40px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+}
+
+/* card */
+.card{
+  width:100%;
+  max-width: var(--max-card-width);
+  background: #fff;
+  border-radius: var(--radius);
+  padding:28px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(15,23,42,0.04);
+}
+
+/* tabs (pill) */
+.tabs{
+  display:flex;
+  gap:6px;
+  background: #f3f4f6;
+  padding:6px;
+  border-radius:999px;
+  width:100%;
+  margin-bottom:18px;
+}
+
+.tab{
+  flex:1;
+  border: none;
+  background: transparent;
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:600;
+  cursor:pointer;
+  color:#111827;
+  font-size:14px;
+  transition: all .18s ease;
+  box-shadow: none;
+  outline: none;
+}
+
+.tab.active{
+  background: #fff;
+  color: #111;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.06);
+  position:relative;
+}
+
+/* title and subtitle */
+.card-title{ font-size:20px; margin:6px 0; font-weight:600; color:#111827 }
+.card-sub{ color:var(--muted); margin-bottom:16px; font-size:14px }
+
+/* form */
+.form{ display:block; margin-top:6px }
+.label{ display:block; font-weight:600; margin:12px 0 6px; font-size:13px; color:#111827 }
+.input{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid #ECEEF0;
+  background:#f8fafb;
+  font-size:14px;
+  outline:none;
+  transition:box-shadow .12s, border-color .12s;
+}
+.input:focus{ border-color: rgba(200,16,46,0.22); box-shadow: 0 6px 18px rgba(200,16,46,0.06); background:white }
+.input.invalid{ border-color:#e11d48; box-shadow: 0 4px 8px rgba(225,29,72,0.06) }
+
+/* row helpers */
+.row{ display:flex; gap:12px; align-items:center; }
+.between-xs{ justify-content:space-between; margin-top:8px; margin-bottom:8px; }
+
+.checkbox{ display:flex; align-items:center; gap:10px; font-size:14px; color:#374151 }
+.checkbox input{ width:16px; height:16px; accent-color:var(--red) }
+
+/* forgot link */
+.forgot{ font-size:14px; color:var(--red); text-decoration:none; font-weight:600 }
+
+/* primary button */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border:none;
+  width:100%;
+  padding:12px 16px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+  margin-top:12px;
+  font-size:15px;
+}
+
+.btn.primary{
+  background:var(--red);
+  color:white;
+  box-shadow: 0 8px 20px rgba(200,16,46,0.12);
+}
+.btn.primary:hover{ transform: translateY(-2px) }
+
+.btn-arrow{ opacity:0.95 }
+
+/* register and back */
+.register{ text-align:center; margin-top:14px; color:var(--muted) }
+.register a{ font-weight:700 }
+
+.back-link{ display:block; margin-top:22px; color:var(--red); text-decoration:none; font-weight:600; text-align:center }
+
+/* Responsive: stack on smaller screens */
+@media (max-width:980px){
+  .page{flex-direction:column}
+  .hero{ width:100%; min-width:unset; height:48vh; order:1 }
+  .hero-bg{ background-attachment: scroll } /* mobile */
+  .panel{ width:100%; height:52vh; order:2; padding:24px }
+  .card{ transform: translateY(-34px); box-shadow: 0 30px 60px rgba(15,23,42,0.07) }
+  .hero-title{ font-size:28px }
+}
+
+@media (max-width:480px){
+  .hero{ height:40vh }
+  .hero-title{ font-size:22px }
+  .card{ padding:18px; max-width:92% }
+}

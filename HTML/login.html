@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FindIt@BatStateU — Login</title>
+
+  <!-- Google font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+  
+  <div class="page">
+    <aside class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-overlay"></div>
+
+      <div class="hero-content" role="document" aria-label="Welcome panel">
+        <div class="hero-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+               <path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+               <path d="M12 3v18"></path>
+          </svg>
+        </div>
+
+        <h1 class="hero-title">FindIt@BatStateU</h1>
+        <p class="hero-sub">Lost and Found Management System</p>
+
+        <p class="hero-desc">
+          Welcome to Batangas State University - Malvar Campus’s centralized platform for reporting and recovering lost items.
+        </p>
+      </div>
+    </aside>
+
+    <!-- RIGHT: login card -->
+    <main class="panel" aria-label="Sign in panel">
+      <div class="card" role="form" aria-labelledby="loginTitle">
+        <div class="tabs" role="tablist" aria-label="User type">
+          <button class="tab active" data-target="student" role="tab" aria-selected="true">Student/Faculty</button>
+          <button class="tab" data-target="admin" role="tab" aria-selected="false">Admin</button>
+        </div>
+
+        <h2 id="loginTitle" class="card-title">Welcome Back</h2>
+        <p class="card-sub">Sign in to access your dashboard</p>
+
+        <form id="signinForm" class="form" novalidate>
+          <label class="label" for="email">Email Address</label>
+          <input id="email" name="email" type="email" class="input" placeholder="Your.email@batstate-u.edu.ph" required>
+
+          <label class="label" for="password">Password</label>
+          <input id="password" name="password" type="password" class="input" placeholder="••••••••" required>
+
+          <div class="row between-xs">
+            <label class="checkbox">
+              <input type="checkbox" id="remember">
+              <span>Remember me</span>
+            </label>
+
+            <a href="#" class="forgot">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn primary">
+            <span>Sign In</span>
+            <svg class="btn-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 5l7 7-7 7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </form>
+
+        <p class="register">Don't have an account? <a href="register.html">Register here</a></p>
+      </div>
+
+      <a class="back-link" href="sia.html">← Back to Home</a>
+    </main>
+  </div>
+
+  <script>
+    // Toggle tabs (student / admin)
+    document.querySelectorAll('.tab').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        document.querySelectorAll('.tab').forEach(t=>{
+          t.classList.remove('active');
+          t.setAttribute('aria-selected','false');
+        });
+        e.currentTarget.classList.add('active');
+        e.currentTarget.setAttribute('aria-selected','true');
+
+        // (Optional) switch placeholders or form action based on target
+        const target = e.currentTarget.dataset.target;
+        const email = document.getElementById('email');
+        if(target === 'admin'){
+          email.placeholder = 'admin@batstate-u.edu.ph';
+        } else {
+          email.placeholder = 'your.email@batstate-u.edu.ph';
+        }
+      });
+    });
+
+    // Prevent default form submit for demo
+    document.getElementById('signinForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      // Basic validation visual feedback
+      const email = document.getElementById('email');
+      const pass = document.getElementById('password');
+      if(!email.value || !pass.value){
+        email.classList.toggle('invalid', !email.value);
+        pass.classList.toggle('invalid', !pass.value);
+        return;
+      }
+      // simulate success (replace with real auth)
+      alert('Signing in — replace with real authentication.');
+    });
+  </script>
+</body>
+</html>

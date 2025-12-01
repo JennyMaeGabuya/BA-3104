@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FindIt@BatStateU — Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="user_home.css">
+</head>
+<body>
+
+  <!-- Header -->
+<header class="site-header">
+  <div class="header-inner">
+
+    <!-- LEFT: Logo + Text -->
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <path d="M12 3v18"></path>
+        </svg>
+      </div>
+
+      <div class="brand-text">
+        <div class="site-title">FindIt@BatStateU</div>
+        <div class="site-sub">Malvar Campus</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: NAVIGATION + BELL + PROFILE -->
+    <div class="header-right">
+
+      <nav class="nav" role="navigation" aria-label="Main">
+        <a href="user_home.php">Home</a>
+        <a href="user_report.html">Report Lost Item</a>
+        <a href="user_found.html" class="active">Found Items</a>
+        <a href="user_about.html">About</a>
+        <a class="btn-dashboard" href="">Dashboard</a>
+      </nav>
+
+      <!-- Notification Icon -->
+      <div class="notif">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" fill="none"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2z"></path>
+          <path d="M18 16v-5a6 6 0 1 0-12 0v5l-2 2v1h16v-1z"></path>
+        </svg>
+        <span class="notif-dot"></span>
+      </div>
+
+      <!-- Profile Avatar -->
+      <div class="profile-avatar">JD</div>
+
+    </div>
+
+  </div>
+</header>
+
+ 
+ <!-- PAGE TITLE -->
+    <header class="page-header">
+        <h2>Report Lost Item</h2>
+        <p>Fill in the details below to submit a lost item report. Our team will verify and help you recover your item.</p>
+    </header>
+
+    <!-- MAIN FORM CARD -->
+    <div class="form-card">
+
+        <!-- ITEM INFO SECTION -->
+        <h3 class="section-title">Item Information</h3>
+        <div class="underline"></div>
+
+        <div class="form-group">
+            <label>Item Name</label>
+            <input type="text" placeholder="Enter item name">
+        </div>
+
+        <div class="form-group">
+            <label>Category</label>
+            <select>
+                <option>Select category</option>
+                <option>ID / Card</option>
+                <option>Electronics</option>
+                <option>Clothing</option>
+                <option>Bags</option>
+                <option>Others</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea placeholder="Describe the item..."></textarea>
+        </div>
+
+        <div class="upload-box">
+            <div class="upload-content">
+                <span class="upload-icon">📁</span>
+                <p>Click to upload or drag and drop</p>
+            </div>
+        </div>
+
+        <!-- LAST SEEN SECTION -->
+        <h3 class="section-title">Last Seen Location & Time</h3>
+        <div class="underline"></div>
+
+        <div class="two-columns">
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" placeholder="Where was it last seen?">
+            </div>
+
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date">
+            </div>
+
+            <div class="form-group">
+                <label>Time</label>
+                <input type="time">
+            </div>
+        </div>
+
+        <!-- CONTACT SECTION -->
+        <h3 class="section-title">Contact Information</h3>
+        <div class="underline"></div>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" placeholder="Enter your email">
+        </div>
+
+        <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" placeholder="Enter your phone number">
+        </div>
+
+        <div class="note-box">
+            Please ensure your contact details are correct. Our team may reach out for verification.
+        </div>
+
+        <!-- BUTTONS -->
+        <div class="button-row">
+            <button class="cancel-btn">Cancel</button>
+            <button class="submit-btn">Submit Report →</button>
+        </div>
+    </div>
+
+    <!-- WHAT HAPPENS NEXT BOX -->
+    <div class="info-card">
+        <h3><span class="pin">📍</span> What happens next?</h3>
+        <ol>
+            <li>Your report is submitted to the admin team.</li>
+            <li>The report will be reviewed for accuracy.</li>
+            <li>If your item is found, you will be contacted immediately.</li>
+            <li>You may monitor updates through your Dashboard.</li>
+        </ol>
+    </div>
+
+</body>
+</html>

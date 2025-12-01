@@ -1,0 +1,427 @@
+/* admin-dashboard.css
+   Admin Dashboard UI for FindIt@BatStateU
+   Light theme, soft shadows, rounded corners
+*/
+
+/* === Theme vars === */
+:root{
+  --red-600:#b80f25;
+  --red-500:#c8102e;
+  --red-400:#d94b56;
+  --bg:#f7f8f9;
+  --muted:#6b6f76;
+  --card-shadow: 0 8px 20px rgba(0,0,0,0.06);
+  --radius:12px;
+  --gap:24px;
+  --max-width:1180px;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+* { box-sizing: border-box; }
+html,body{ height:100%; margin:0; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; color:#222;}
+a{ color:inherit; text-decoration:none; }
+
+/* Header */
+.site-header{
+  position:sticky; top:0; z-index:30;
+  background:#fff; border-bottom:1px solid rgba(0,0,0,0.06);
+  backdrop-filter: blur(4px);
+}
+.header-inner{
+  max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:14px 22px;  
+}
+.brand{ display:flex; align-items:center; gap:12px; }
+.logo{
+  background:var(--red-500); width:48px; height:48px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 3px 8px rgba(200,0,0,0.12);
+}
+.logo svg{ width:22px; height:22px; color:#fff; }
+.brand h1{ font-size:16px; margin:0; color:var(--red-500); font-weight:600; }
+.brand p{ margin:0; font-size:12px; color:var(--muted); }
+
+/* === App layout === */
+.app{display:flex;min-height:100vh;align-items:stretch}
+.sidebar{
+  width:260px;
+  background:#fff;
+  border-right:1px solid rgba(15,23,42,0.04);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:22px 18px;
+}
+.brand{display:flex;gap:12px;align-items:center}
+.brand-icon{
+  width:44px;height:44px;border-radius:10px;background:var(--red-500);display:grid;place-items:center;box-shadow:0 4px 10px rgba(200,0,0,0.08);
+}
+.brand-text{line-height:1}
+.brand-title{font-weight:700;color:var(--red-500)}
+.brand-sub{font-size:12px;color:var(--muted)}
+
+/* nav */
+.nav{margin-top:22px;display:flex;flex-direction:column;gap:8px}
+.nav-item{
+  display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;border:none;background:transparent;cursor:pointer;font-weight:600;color:#374151;
+}
+.nav-item:hover{background:rgba(15,23,42,0.02)}
+.nav-item--active{background:rgba(200,16,46,0.06);color:var(--red-500)}
+.nav-badge{
+  margin-left:auto;background:var(--red-500);color:white;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700;
+}
+
+/* sidebar bottom */
+.sidebar-bottom{margin-top:20px}
+.logout{
+  display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;border:1px solid rgb(185 56 67 / 41%);background:transparent;color:var(--muted);cursor:pointer;font-weight:480
+}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{height:72px;background:#fff;border-bottom:1px solid rgba(15,23,42,0.04);display:flex;align-items:center;justify-content:space-between;padding:0 26px}
+.topbar-left{display:flex;align-items:center;gap:18px}
+.menu-toggle{display:none;background:transparent;border:none;font-size:18px;cursor:pointer}
+.page-titles{display:flex;flex-direction:column}
+.page-title{font-size:18px;margin:0;font-weight:700}
+.page-sub{margin:0;color:var(--muted);font-size:13px}
+
+.topbar-right{display:flex;align-items:center;gap:14px}
+.icon-btn{position:relative;border:none;background:transparent;padding:8px;border-radius:8px;cursor:pointer}
+.topbar-badge{position:absolute;top:6px;right:6px;background:var(--red-500);color:white;border-radius:999px;padding:2px 6px;font-size:12px}
+.avatar{width:40px;height:40px;border-radius:999px;background:var(--red-500);color:white;display:grid;place-items:center;font-weight:700}
+
+/* Avatar dropdown */
+.avatar-dropdown{position:absolute;right:26px;top:74px;min-width:200px;background:#fff;border:1px solid rgba(15,23,42,0.06);box-shadow:0 12px 30px rgba(0,0,0,0.08);border-radius:10px;padding:12px;display:none;z-index:80}
+.avatar-dropdown[aria-hidden="false"]{display:block}
+.avatar-fullname{font-weight:700;margin-bottom:8px}
+.avatar-actions{display:flex;flex-direction:column;gap:8px}
+.avatar-actions .btn{background:transparent;border:1px solid rgba(15,23,42,0.04);padding:8px;border-radius:8px;cursor:pointer;text-align:left}
+
+/* Dark mode simple styles */
+.dark-mode{background:#0b1220;color:#e6eef8}
+.dark-mode{
+  background:#0b1220;
+  color:#e6eef8;
+  /* dark-mode red accent variables (fine-tune these to taste) */
+  --red-500: #ff4d6d;
+  --red-400: #ff6b81;
+  --red-300: #ffc7d0;
+  --red-rgb: 255,77,109;
+}
+.dark-mode .sidebar{background:#071023}
+.dark-mode .main{background:#071023}
+.dark-mode .card, .dark-mode .metric-card, .dark-mode .table-card{background:#071a2a;border-color:rgba(255,255,255,0.03)}
+
+/* Make topbar and its contents dark too */
+.dark-mode .topbar{background:#071226;border-bottom-color:rgba(255,255,255,0.03)}
+.dark-mode .page-title, .dark-mode .page-sub{color:#e6eef8}
+.dark-mode .topbar .menu-toggle{color:#e6eef8}
+
+/* Sidebar / nav adjustments for contrast */
+.dark-mode .sidebar{border-right-color:rgba(255,255,255,0.02)}
+.dark-mode .brand-title{color:var(--red-400)}
+.dark-mode .brand-sub{color:#9aa9bb}
+.dark-mode .nav-item{color:#b7c6d3}
+.dark-mode .nav-item:hover{background:rgba(255,255,255,0.02)}
+.dark-mode .nav-item--active{background:rgba(var(--red-rgb),0.08);color:var(--red-300)}
+
+/* Tables and text */
+.dark-mode .reports-table thead th{color:#9fb0c1;border-bottom-color:rgba(255,255,255,0.03)}
+.dark-mode .reports-table tbody td{color:#c3d3df;border-bottom-color:rgba(255,255,255,0.02)}
+.dark-mode .td-user, .dark-mode .metric-label, .dark-mode .muted, .dark-mode .small{color:#9fb0c1}
+
+/* Improve Recent Reports title visibility in dark mode */
+.dark-mode .table-header .table-title,
+.dark-mode .table-title {
+  color: #cfe8ff;
+  font-weight: 700;
+  text-shadow: 0 1px 0 rgba(2,6,10,0.25);
+}
+.dark-mode .table-card { background:#071721; border-color: rgba(255,255,255,0.02); }
+
+/* Report card / pending styles */
+.dark-mode .report-card, .dark-mode .card.report-card {
+  background: #071922;
+  border-color: rgba(255,255,255,0.03);
+}
+.dark-mode .report-details .item-title {
+  color: #e6eef8;
+}
+.dark-mode .report-details .meta-value,
+.dark-mode .report-details .meta-label {
+  color: #bcd3e6;
+}
+
+/* Pills/badges in dark mode - keep their distinct colors */
+.dark-mode .pill{border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.01);color:#cfe8ff}
+.dark-mode .pill-lost{
+  background: rgba(var(--red-rgb,255,77,109), 0.12);
+  color: var(--red-300, #ffc7d0);
+  border: 1px solid rgba(var(--red-rgb,255,77,109), 0.12);
+}
+.dark-mode .pill-requires{
+  background: rgba(245,158,11,0.08);
+  color: #ffd9a8;
+  border: 1px solid rgba(245,158,11,0.06);
+}
+
+/* Admin note in dark mode */
+.dark-mode .admin-note{
+  background: linear-gradient(180deg, rgba(255,250,240,0.02), rgba(255,250,240,0.01));
+  border:1px solid rgba(255,255,255,0.02);
+  color: #ffdca8;
+}
+
+/* Action buttons contrast */
+.dark-mode .btn-approve{background:#16a34a !important;color:white !important}
+.dark-mode .btn-reject{background:#ef4444 !important;color:white !important}
+
+/* Improve section headings and image visibility in dark mode */
+.dark-mode .section-header h2,
+.dark-mode .section-header .muted,
+.dark-mode .section-header h2 + .muted,
+.dark-mode .item-title {
+  color: #e6eef8;
+}
+
+/* Ensure report image stands out on dark background */
+.dark-mode .report-image img{
+  background: rgba(255,255,255,0.02);
+  border-radius:8px;
+  padding:6px;
+  border:1px solid rgba(255,255,255,0.03);
+}
+
+/* Buttons in Users page: ensure .btn has contrast (but not approve/reject) */
+.dark-mode .btn:not(.btn-approve):not(.btn-reject){
+  background: #d42f2f62;
+  color: #e6eef8;
+  border: 1px solid rgba(246, 103, 103, 0.564);
+}
+
+/* Settings page headings and legends */
+.dark-mode .page-heading,
+.dark-mode .legend,
+.dark-mode .label,
+.dark-mode .fieldset .legend{
+  color: #e6eef8;
+}
+
+
+.dark-mode .checkbox span,
+.dark-mode .settings-card .label,
+.dark-mode .settings-card .input{
+  color: #cfe8ff;
+}
+
+/* Checkbox labels/spans for notification toggles */
+.dark-mode .checkbox span{
+  color: #cfe8ff;
+}
+
+/* Avatar dropdown in dark mode */
+.dark-mode .avatar-dropdown{background:#122032;border-color:rgb(255 255 255 / 13%);color:#e6eef8;}
+.dark-mode .avatar-actions .btn{background:#d83b3b2a;border-color:rgb(255 198 198 / 30%);color:#e6eef8;}
+.dark-mode .avatar{background:var(--red-500);color:white}
+
+/* Ensure badges remain visible */
+.dark-mode .badge-lost{background:rgba(200,16,46,0.06);color:var(--red-300)}
+.dark-mode .badge-found{background:rgba(59,130,246,0.06);color:#93c5fd}
+.dark-mode .status{color:#0b1220}
+
+/* Metric values and labels in dark */
+.dark-mode .metric-value{color:#e6eef8}
+.dark-mode .metric-label{color:#9fb0c1}
+
+/* Make links and buttons readable */
+.dark-mode a, .dark-mode .btn:not(.btn-approve):not(.btn-reject), .dark-mode .logout{color:#cfe8ff}
+
+
+/* PAGE BODY */
+.page-body{padding:28px;max-width:var(--container);margin:0 auto;display:flex;flex-direction:column;gap:28px}
+
+/* METRICS GRID */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.metric-card{background:#fff;border-radius:12px;padding:18px;border:1px solid rgba(15,23,42,0.04);box-shadow:var(--card-shadow);display:flex;gap:14px;align-items:flex-start}
+.metric-icon{width:56px;height:56px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
+.metric-icon--doc{background:rgba(37,99,235,0.08)}
+.metric-icon--check{background:rgba(16,185,129,0.08)}
+.metric-icon--cube{background:rgba(167,139,250,0.08)}
+.metric-icon--warn{background:rgba(245,158,11,0.08)}
+.metric-body{display:flex;flex-direction:column;gap:6px}
+.metric-value{font-size:28px;font-weight:700}
+.metric-label{color:var(--muted)}
+.metric-foot{color:#10B981;font-size:13px}
+.metric-foot.warning{color:#D97706}
+
+/* TABLE CARD */
+.table-card{background:#fff;border-radius:var(--radius);box-shadow:var(--card-shadow);border:1px solid rgba(15,23,42,0.04);padding:18px}
+.table-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.table-title{font-weight:700}
+.view-all{color:var(--red-500);font-weight:700}
+
+.table-wrap{overflow:auto;border-radius:8px}
+.reports-table{width:100%;border-collapse:collapse;min-width:900px}
+.reports-table thead th{font-weight:700;padding:12px;text-align:left;color:var(--muted);font-size:13px;border-bottom:1px solid rgba(15,23,42,0.04)}
+.reports-table tbody td{padding:16px 12px;border-bottom:1px solid rgba(15,23,42,0.03);vertical-align:middle}
+.td-thumb img{width:56px;height:56px;border-radius:10px;object-fit:cover}
+
+/* badges and statuses */
+.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
+.badge-lost{border:1px solid rgba(200,16,46,0.12);color:var(--red-500);background:rgba(200,16,46,0.03)}
+.badge-found{border:1px solid rgba(59,130,246,0.12);color:#2563EB;background:rgba(59,130,246,0.03)}
+.status{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
+.status-pending{background:#fff1e6;color:#b45309}
+.status-pending-light{background:#fffbeb;color:#b45309;border:1px solid rgba(180,120,20,0.06)}
+.status-verified{background:#ecfdf5;color:#059669}
+.status-claimed{background:#eef2ff;color:#4f46e5}
+.muted{color:var(--muted);font-size:13px}
+.small{font-size:12px;color:var(--muted)}
+
+/* responsive */
+@media (max-width:1100px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .lists-grid{grid-template-columns:1fr}
+  .menu-toggle{display:inline-block}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(0);z-index:40}
+  .app{padding-left:260px}
+}
+@media (max-width:800px){
+  .stats-grid{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .app{padding-left:0}
+  .menu-toggle{display:inline-block}
+  .page-body{padding:18px}
+  .metric-card{padding:14px}
+  .metric-value{font-size:22px}
+}
+
+/* Main column */
+.main{flex:1;display:flex;flex-direction:column}
+.topbar{height:72px;background:#fff;border-bottom:1px solid rgba(15,23,42,0.04);display:flex;align-items:center;padding:0 26px;justify-content:space-between}
+.topbar .titles{display:flex;flex-direction:column}
+.topbar h1{margin:0;font-size:18px;font-weight:700}
+.topbar p{margin:0;color:var(--muted);font-size:13px}
+.avatar{width:40px;height:40px;border-radius:999px;background:var(--red-500);display:grid;place-items:center;color:white;font-weight:700}
+
+
+.page{padding:28px;max-width:var(--container);margin:0 auto;display:flex;flex-direction:column;gap:20px}
+
+
+/* content area */
+.content{max-width:var(--max-width);margin:20px auto;padding:0 18px;display:flex;flex-direction:column;gap:18px}
+
+/* section header */
+.section-header h2{margin:0;font-size:18px}
+.muted{color:var(--muted);margin-top:6px}
+
+/* tabs */
+.tabs-wrap{padding:6px 0}
+.tabs{display:flex;gap:12px}
+.tab{background:#fff;border:1px solid rgba(15,23,42,0.04);padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer}
+.tab--active{background:linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95));box-shadow:0 6px 18px rgba(15,23,42,0.04);border-color:rgba(15,23,42,0.06)}
+
+/* report card */
+.card{background:#fff;border-radius:12px;box-shadow:var(--card-shadow);border:1px solid rgba(15,23,42,0.03)}
+.report-card{padding:18px}
+.card-inner{display:flex;gap:20px;align-items:flex-start}
+.report-image img{width:220px;height:170px;object-fit:cover;border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,0.03)}
+.report-details{flex:1;display:flex;flex-direction:column;gap:12px}
+
+/* header row inside card */
+.report-head{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.item-title{margin:0;font-size:18px}
+.badges{display:flex;gap:8px}
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:13px}
+.pill-lost{background:rgba(200,16,46,0.06);color:var(--red);border:1px solid rgba(200,16,46,0.06)}
+.pill-requires{background:#fff6e6;color:#b45309;border:1px solid rgba(180,115,13,0.06)}
+
+/* meta grid */
+.meta-grid{display:grid;grid-template-columns:repeat(2, minmax(140px, 1fr));gap:12px 28px}
+.meta{display:flex;flex-direction:column}
+.meta-label{font-size:13px;color:var(--muted)}
+.meta-value{font-weight:700;margin-top:6px}
+.meta-id{color:var(--red);font-weight:700}
+
+/* admin note */
+.admin-note{background:linear-gradient(180deg, #fffaf0, #fff9f0);border:1px solid rgba(218,165,32,0.12);padding:12px;border-radius:8px;color:#6b4b08;font-size:14px}
+
+/* actions */
+.actions{display:flex;gap:12px;align-items:center;margin-top:6px}
+.btn{padding:10px 14px;border-radius:8px;border:0;font-weight:700;cursor:pointer}
+.btn-approve{background:#16a34a !important;color:white !important;box-shadow:0 8px 18px rgba(16,163,79,0.12)}
+.btn-reject{background:#ef4444 !important;color:white !important;box-shadow:0 8px 18px rgba(239,68,68,0.12)}
+
+/* after action message */
+.after-action{padding:12px;border-radius:8px;background:#f0fff4;border:1px solid rgba(16,163,79,0.08);color:#065f46;font-weight:700;margin-top:12px}
+
+/* responsive */
+@media (max-width:1000px){
+  .card-inner{flex-direction:column}
+  .report-image img{width:100%;height:auto}
+  .meta-grid{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .content{padding:12px}
+}
+
+/* content */
+.content{max-width:var(--max-width);margin:20px;padding:0 18px;}
+
+/* Settings page: place settings card to the side (not centered) and set width to 980px
+   This only applies on wider screens to preserve mobile responsiveness. */
+@media (min-width:1000px){
+  .content--side{
+    /* move the content area over to the right of the sidebar (sidebar = 260px) */
+    /* reduced gap so content sits closer to the sidebar */
+    margin:20px 20px 20px 20px;
+    max-width:none;
+    padding:0 18px;
+  }
+
+  /* Make the settings card a fixed width and align it to the start (left) of the content area */
+  .content--side .settings-card{
+    width:980px;
+    margin-left:0;
+    margin-right:0;
+  }
+}
+
+/* headings */
+.page-heading{margin:0 0 18px 0;font-size:18px;font-weight:700}
+
+/* settings card */
+.card{background:#fff;border-radius:var(--radius);padding:22px;box-shadow:var(--card-shadow);border:1px solid rgba(15,23,42,0.03)}
+.settings-card{width:100%}
+
+/* fieldset styles */
+.fieldset{border:none;padding:0;margin:0 0 18px 0}
+.legend{font-weight:700;color:#111;margin-bottom:12px;font-size:14px}
+.label{display:block;color:var(--muted);margin-bottom:6px;font-size:13px}
+.input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(15,23,42,0.04);background:#64769c73;margin-bottom:12px;font-size:14px;outline:none}
+
+/* Small screens: slightly reduce weight/size of avatar dropdown buttons and sidebar logout for better fit */
+@media (max-width:500px){
+  .avatar-actions .btn{font-weight:500; font-size:13px; padding:8px 10px}
+  .sidebar-bottom .logout{font-weight:500; font-size:13px; padding:6px 8px}
+}
+.input:focus{box-shadow:0 8px 18px rgba(200,16,46,0.06);border-color:rgba(200,16,46,0.12);background:#fff}
+
+/* checkboxes */
+.checkbox{display:flex;align-items:center;gap:10px;margin-bottom:10px;color:#222}
+.checkbox input{width:16px;height:16px;accent-color:var(--red-500)}
+
+/* actions */
+.actions{margin-top:10px}
+.btn-primary{background:var(--red-500);color:white;box-shadow:0 8px 18px rgba(200,16,46,0.12)}
+
+/* Approve and Reject button colors - must be last to override other .btn styles */
+.btn-approve{background:#16a34a !important;color:white !important;box-shadow:0 8px 18px rgba(16,163,79,0.12)}
+.btn-reject{background:#ef4444 !important;color:white !important;box-shadow:0 8px 18px rgba(239,68,68,0.12)}
+
+/* responsive */
+@media (max-width:980px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;height:auto;flex-direction:row;align-items:center;padding:12px}
+  .main{width:100%}
+  .content{padding:16px}
+}

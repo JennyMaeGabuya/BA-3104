@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account | FindIt@BatStateU</title>
+  <link rel="stylesheet" href="register.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <section class="left">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+      <path d="M12 3v18"></path>
+    </svg>
+  </div>
+
+  <h1>Join FindIt@BatStateU</h1>
+  <h2>Create your account today</h2>
+  <p>
+    Register now to report lost items, browse found items, and get notified when your belongings are recovered.
+  </p>
+</section>
+
+  <!-- RIGHT SIDE -->
+  <section class="right">
+    <div class="register-card">
+      <h2>Create Account</h2>
+      <p>Fill in your details to register</p>
+
+      <form>
+        <div class="input-row">
+          <input type="text" placeholder="First Name" required>
+          <input type="text" placeholder="Last Name" required>
+        </div>
+
+        <select required>
+          <option value="" disabled selected>Select user type</option>
+          <option>Student</option>
+          <option>Faculty</option>
+          <option>Staff</option>
+          <option>Admin</option>
+        </select>
+
+        <input type="text" placeholder="Employee/Student ID" required>
+        <input type="text" placeholder="Department / Office" required>
+        <input type="email" placeholder="Your.email@batstate-u.edu.ph" required>
+        <input type="tel" placeholder="+63 912 345 6789" required>
+        <input type="password" placeholder="Password" required>
+        <input type="password" placeholder="Confirm Password" required>
+
+        <label class="checkbox-label">
+          <input type="checkbox" required>
+          I agree to the Terms of Service and Privacy Policy.
+        </label>
+
+        <a href="login.php" class="btn-primary">Create Account</a>
+
+        <div class="links">
+          Already have an account? <a href="login.php">Sign in here</a>
+        </div>
+        <div class="back-link">
+          ← <a href="sia.html">Back to Home</a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+</body>
+</html>

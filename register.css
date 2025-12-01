@@ -1,0 +1,273 @@
+:root {
+  --red-500: #c8102e;
+  --muted: #666;
+  --light-bg: #f8f9fa;
+  --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  --radius: 14px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  min-height: 100vh;
+  background: var(--light-bg);
+}
+
+/* Page wrapper */
+.container {
+  display: flex;
+  min-height: 100vh; /* makes both sides full height */
+}
+
+/* LEFT PANEL */
+.left {
+  flex: 1; /* take up half width */
+  background: linear-gradient(rgba(200, 16, 46, 0.85), rgba(200, 16, 46, 0.85)),
+    url('campus.jpg') center/cover no-repeat; 
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0 60px;
+}
+
+/* LOGO BOX */
+.logo {
+  width: 90px;
+  height: 90px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.logo svg {
+  width: 48px;
+  height: 48px;
+  color: #fff;
+}
+
+/* TEXT STYLING */
+.left h1 {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.left h2 {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.left p {
+  max-width: 420px;
+  font-size: 15px;
+  line-height: 1.6;
+  opacity: 0.95;
+}
+
+/* RIGHT PANEL */
+.right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fafafa;
+  padding: 60px;
+}
+
+
+/* RIGHT SIDE */
+.right {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+}
+
+.register-card {
+  background: #fff;
+  padding: 48px 56px;
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  width: 100%;
+  max-width: 460px;
+}
+
+.register-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.register-card p {
+  color: var(--muted);
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+/* FORM */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  background: #f9f9f9;
+  transition: border 0.2s ease;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--red-500);
+  outline: none;
+  background: #fff;
+}
+
+/* CHECKBOX */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.checkbox-label input {
+  accent-color: var(--red-500);
+  transform: scale(1.1);
+}
+
+.checkbox-label a {
+  color: var(--red-500);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.checkbox-label a:hover {
+  text-decoration: underline;
+}/* --- FIX CHECKBOX ALIGNMENT --- */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #333;
+}
+
+/* move the checkbox before text visually */
+.checkbox-label input {
+  accent-color: var(--red-500);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.checkbox-label a {
+  color: var(--red-500);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.checkbox-label a:hover {
+  text-decoration: underline;
+}
+
+.btn-primary {
+  display: block;
+  text-align: center;
+  background: var(--red-500);
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 6px;
+  text-decoration: none;
+  transition: 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #a30c24;
+}
+
+/* LINKS */
+.links {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 18px;
+}
+
+.links a {
+  color: var(--red-500);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+.back-link {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.back-link a {
+  color: var(--red-500);
+  text-decoration: none;
+}
+
+.back-link a:hover {
+  text-decoration: underline;
+}
+
+/* RESPONSIVE */
+@media (max-width: 960px) {
+  body {
+    grid-template-columns: 1fr;
+  }
+
+  .left {
+    padding: 60px 40px;
+    text-align: center;
+    align-items: center;
+  }
+
+  .left p {
+    margin: 0 auto;
+  }
+
+  .right {
+    padding: 40px 20px;
+  }
+}
