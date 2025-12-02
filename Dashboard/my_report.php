@@ -6,6 +6,26 @@
 
 require_once '../auth_check.php';
 require_once '../db_config.php';
+
+function resolveReportPhoto(?string $path): string {
+  $placeholder = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect width='100%' height='100%' fill='%23FFF9F2'/><circle cx='40' cy='40' r='28' fill='%23FFDCE0'/></svg>";
+  if (!$path) {
+    return $placeholder;
+  }
+  $trim = trim($path);
+  if ($trim === '') {
+    return $placeholder;
+  }
+  if (str_starts_with($trim, 'Image/')) {
+    $trim = 'Dashboard/' . $trim;
+  }
+  if (preg_match('/^https?:\/\//', $trim) || str_starts_with($trim, '/')) {
+    return $trim;
+  }
+  return '/BA-3104/' . ltrim($trim, '/');
+}
+
+$reports = [];
 ?>
 <!doctype html>
 <html lang="en">
@@ -168,40 +188,28 @@ require_once '../db_config.php';
                 <?php
                 // Fetch user's lost and found item reports from database
                 try {
-                  $stmt = $pdo->prepare("
-                      SELECT 'Lost' AS type, report_id, item_name, category, location AS location, date_lost AS date_event, status, photo_path, created_at
-                    FROM lost_reports 
-                    WHERE user_id = :user_id
-                    UNION ALL
-                    SELECT 'Found' AS type, report_id, item_name, category, location_found AS location, date_found AS date_event, status, photo_path, created_at
-                    FROM found_reports
-                    WHERE user_id = :user_id
-                    ORDER BY created_at DESC
-                  ");
+                      $stmt = $pdo->prepare("
+                     SELECT 'Lost' AS type, report_id, item_name, category, description, location AS location, date_lost AS date_event,
+                       time_lost AS time_event, status, photo_path, contact_email, contact_phone, NULL AS pickup_location, created_at
+                     FROM lost_reports 
+                     WHERE user_id = :user_id
+                     UNION ALL
+                     SELECT 'Found' AS type, report_id, item_name, category, description, location_found AS location, date_found AS date_event,
+                       time_found AS time_event, status, photo_path, contact_email, contact_phone, pickup_location, created_at
+                     FROM found_reports
+                     WHERE user_id = :user_id
+                     ORDER BY created_at DESC
+                      ");
                   $stmt->execute([':user_id' => $_SESSION['user_id']]);
                   $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                  
+                  foreach ($reports as &$rep) {
+                    $rep['photo_url'] = resolveReportPhoto($rep['photo_path'] ?? '');
+                  }
+                  unset($rep);
                   if (count($reports) > 0):
                     foreach ($reports as $report):
-                      // Determine image source (prefix with app base when relative)
-                      if (!empty($report['photo_path'])) {
-                        $path = trim($report['photo_path']);
-                        // Normalize legacy paths saved as 'Image/...'
-                        if (str_starts_with($path, 'Image/')) {
-                          $path = 'Dashboard/' . $path;
-                        }
-                        // If already absolute, keep as is; else prefix with /BA-3104/
-                        if (preg_match('/^https?:\\/\\//', $path) || str_starts_with($path, '/')) {
-                          $img_src = htmlspecialchars($path);
-                        } else {
-                          $img_src = '/BA-3104/' . ltrim($path, '/');
-                          $img_src = htmlspecialchars($img_src);
-                        }
-                      } else {
-                        // Default placeholder SVG
-                        $img_src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect width='100%' height='100%' fill='%23FFF9F2'/><circle cx='40' cy='40' r='28' fill='%23FFDCE0'/></svg>";
-                      }
-                      
+                      $img_src = htmlspecialchars($report['photo_url'] ?? '');
+
                       // Determine status class
                       $status_class = 'status-pending';
                       $status_text = htmlspecialchars($report['status']);
@@ -228,7 +236,11 @@ require_once '../db_config.php';
                   <td><span class="status <?= $status_class ?>"><?= $status_text ?></span></td>
                   <td>
                     <div class="actions-col">
-                      <a class="action-btn edit" href="edit_report.php?id=<?= urlencode($report['report_id']) ?>">Edit</a>
+                      <?php if (strtolower($report['status']) === 'pending'): ?>
+                        <button type="button" class="action-btn edit" data-report-id="<?= htmlspecialchars($report['report_id']) ?>">Edit</button>
+                      <?php else: ?>
+                        <button type="button" class="action-btn view" disabled>View</button>
+                      <?php endif; ?>
                       <a class="action-btn delete" href="delete_report.php?id=<?= urlencode($report['report_id']) ?>" onclick="return confirm('Are you sure you want to delete this report?')">Delete</a>
                     </div>
                   </td>
@@ -254,10 +266,261 @@ require_once '../db_config.php';
           </div>
         </section>
 
+        <!-- Edit Modal -->
+        <div id="editModal" class="edit-modal" aria-hidden="true">
+          <div class="edit-modal__panel" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+            <button type="button" class="edit-modal__close" data-close-modal>&times;</button>
+            <form id="editReportForm" class="edit-modal__form">
+              <input type="hidden" name="report_id" id="editReportIdField">
+              <input type="hidden" name="report_type" id="editReportTypeField">
+
+              <header class="edit-modal__header">
+                <p class="modal-label">Edit Report</p>
+                <h2 id="editModalTitle">Report</h2>
+                <div class="modal-tags">
+                  <span class="modal-chip" id="editModalReportType">Lost</span>
+                  <span class="modal-chip modal-chip--status" id="editModalStatus">Pending</span>
+                </div>
+                <div class="modal-id-line">
+                  <span class="modal-id-label">Report ID:</span>
+                  <span class="modal-id-value" id="editModalReportId">—</span>
+                </div>
+                <p class="modal-subtext">Update the details of your report. Changes will be reviewed by an administrator.</p>
+              </header>
+
+              <div class="edit-modal__scroll">
+                <div class="modal-grid">
+                  <label class="modal-field">
+                    <span class="field-label">Item Name *</span>
+                    <input type="text" name="item_name" id="editItemName" required>
+                  </label>
+                  <label class="modal-field">
+                    <span class="field-label">Category *</span>
+                    <input type="text" name="category" id="editCategory" required>
+                  </label>
+                  <label class="modal-field" id="locationLabel">
+                    <span class="field-label" id="locationLabelText">Location *</span>
+                    <input type="text" name="location" id="editLocation" required>
+                  </label>
+                  <label class="modal-field">
+                    <span class="field-label">Date *</span>
+                    <input type="date" name="date_event" id="editDate" required>
+                  </label>
+                  <label class="modal-field">
+                    <span class="field-label">Time</span>
+                    <input type="time" name="time_event" id="editTime">
+                  </label>
+                  <label class="modal-field" data-found-only>
+                    <span class="field-label">Pickup Location</span>
+                    <input type="text" name="pickup_location" id="editPickup">
+                  </label>
+                  <label class="modal-field modal-field--full">
+                    <span class="field-label">Description *</span>
+                    <textarea name="description" id="editDescription" rows="4" required></textarea>
+                  </label>
+                  <label class="modal-field">
+                    <span class="field-label">Contact Email *</span>
+                    <input type="email" name="contact_email" id="editEmail" required>
+                  </label>
+                  <label class="modal-field">
+                    <span class="field-label">Contact Phone *</span>
+                    <input type="tel" name="contact_phone" id="editPhone" required>
+                  </label>
+                </div>
+
+                <div class="modal-image">
+                  <span class="field-label">Current Image</span>
+                  <img id="editModalImage" alt="Current item image" src="" loading="lazy">
+                  <p class="modal-image__hint">To replace the image, please contact support or submit a new report.</p>
+                </div>
+              </div>
+
+              <div class="modal-alert" id="editModalAlert" hidden></div>
+
+              <div class="edit-modal__actions">
+                <button type="button" class="btn btn-outline" data-close-modal>Cancel</button>
+                <button type="submit" class="btn btn-cta" data-save-btn>Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
 
+  <script>
+    (function(){
+      const reportsData = <?php echo json_encode($reports ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+      const reportMap = {};
+      reportsData.forEach(rep => {
+        if (rep && rep.report_id) {
+          reportMap[rep.report_id] = rep;
+        }
+      });
+
+      const modal = document.getElementById('editModal');
+      const form = document.getElementById('editReportForm');
+      if (!modal || !form) {
+        return;
+      }
+
+      const fields = {
+        id: document.getElementById('editReportIdField'),
+        type: document.getElementById('editReportTypeField'),
+        item: document.getElementById('editItemName'),
+        category: document.getElementById('editCategory'),
+        location: document.getElementById('editLocation'),
+        date: document.getElementById('editDate'),
+        time: document.getElementById('editTime'),
+        description: document.getElementById('editDescription'),
+        email: document.getElementById('editEmail'),
+        phone: document.getElementById('editPhone'),
+        pickup: document.getElementById('editPickup')
+      };
+
+      const headerEls = {
+        title: document.getElementById('editModalTitle'),
+        idValue: document.getElementById('editModalReportId'),
+        typeChip: document.getElementById('editModalReportType'),
+        statusChip: document.getElementById('editModalStatus'),
+        image: document.getElementById('editModalImage'),
+        locationLabel: document.getElementById('locationLabelText')
+      };
+
+      const pickupField = form.querySelector('[data-found-only]');
+      const alertBox = document.getElementById('editModalAlert');
+      const saveBtn = form.querySelector('[data-save-btn]');
+
+      function setAlert(message) {
+        if (!alertBox) return;
+        if (!message) {
+          alertBox.hidden = true;
+          alertBox.textContent = '';
+        } else {
+          alertBox.hidden = false;
+          alertBox.textContent = message;
+        }
+      }
+
+      function openModal(report) {
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+        modal.classList.add('is-visible');
+        form.scrollTop = 0;
+      }
+
+      function closeModal() {
+        modal.setAttribute('aria-hidden', 'true');
+        modal.classList.remove('is-visible');
+        document.body.classList.remove('modal-open');
+        setAlert('');
+        form.reset();
+      }
+
+      function populateForm(report) {
+        const type = report.type || 'Lost';
+        fields.id.value = report.report_id || '';
+        fields.type.value = type;
+        fields.item.value = report.item_name || '';
+        fields.category.value = report.category || '';
+        fields.location.value = report.location || '';
+        fields.date.value = report.date_event || '';
+        fields.time.value = report.time_event || '';
+        fields.description.value = report.description || '';
+        fields.email.value = report.contact_email || '';
+        fields.phone.value = report.contact_phone || '';
+        if (fields.pickup) {
+          fields.pickup.value = report.pickup_location || '';
+        }
+
+        headerEls.title.textContent = report.item_name || 'Edit Report';
+        headerEls.idValue.textContent = report.report_id || '—';
+        headerEls.typeChip.textContent = type;
+        headerEls.typeChip.dataset.type = type.toLowerCase();
+        headerEls.statusChip.textContent = report.status || 'Pending';
+        headerEls.statusChip.dataset.status = (report.status || 'Pending').toLowerCase();
+        headerEls.locationLabel.textContent = type === 'Found' ? 'Location Found *' : 'Location Lost *';
+
+        const showPickup = type === 'Found';
+        if (pickupField) {
+          pickupField.hidden = !showPickup;
+          pickupField.style.display = showPickup ? '' : 'none';
+          if (fields.pickup) {
+            fields.pickup.disabled = !showPickup;
+            if (!showPickup) {
+              fields.pickup.value = '';
+            }
+          }
+        }
+
+        const imgSrc = report.photo_url || '';
+        if (headerEls.image) {
+          headerEls.image.src = imgSrc;
+          headerEls.image.alt = 'Photo for ' + (report.item_name || 'item');
+        }
+      }
+
+      document.querySelectorAll('.action-btn.edit').forEach(btn => {
+        btn.addEventListener('click', event => {
+          event.preventDefault();
+          const reportId = btn.getAttribute('data-report-id');
+          const data = reportMap[reportId];
+          if (!data) {
+            setAlert('Unable to load report details.');
+            return;
+          }
+          populateForm(data);
+          openModal(data);
+        });
+      });
+
+      modal.addEventListener('click', event => {
+        if (event.target === modal) {
+          closeModal();
+        }
+      });
+
+      modal.querySelectorAll('[data-close-modal]').forEach(el => {
+        el.addEventListener('click', closeModal);
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') {
+          closeModal();
+        }
+      });
+
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const formData = new FormData(form);
+        setAlert('');
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.textContent = 'Saving...';
+        }
+        try {
+          const response = await fetch('update_report.php', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json().catch(() => ({ success: false, error: 'Unexpected response from server.' }));
+          if (!response.ok || !result.success) {
+            throw new Error(result.error || 'Failed to update report.');
+          }
+          closeModal();
+          window.location.reload();
+        } catch (err) {
+          setAlert(err.message || 'Unable to save changes.');
+        } finally {
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Changes';
+          }
+        }
+      });
+    })();
+  </script>
   <script src="../avatar_dropdown.js"></script>
   <script src="dashboard.js"></script>
 </body>
