@@ -291,6 +291,7 @@ $firstName = $nameParts[0] ?? 'User';
               No verified or rejected reports yet.
             </div>
 
+            <div class="results-scroll <?= ($hasVerified || $hasRejected) ? '' : 'hidden' ?>">
             <div id="statusList" class="status-list <?= ($hasVerified || $hasRejected) ? '' : 'hidden' ?>">
               <?php
                 $defaultTab = $initialTab;
@@ -362,6 +363,7 @@ $firstName = $nameParts[0] ?? 'User';
                   </div>
                 </div>
               <?php endforeach; ?>
+            </div>
             </div>
           </div>
         </section>

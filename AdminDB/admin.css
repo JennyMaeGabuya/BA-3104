@@ -261,11 +261,14 @@ a{ color:inherit; text-decoration:none; }
 .table-title{font-weight:700}
 .view-all{color:var(--red-500);font-weight:700}
 
-.table-wrap{overflow:auto;border-radius:8px}
+.table-wrap{overflow:auto;border-radius:8px;max-height:560px}
 .reports-table{width:100%;border-collapse:collapse;min-width:900px}
-.reports-table thead th{font-weight:700;padding:12px;text-align:left;color:var(--muted);font-size:13px;border-bottom:1px solid rgba(15,23,42,0.04)}
+.reports-table thead th{position:sticky;top:0;background:#fff;font-weight:700;padding:12px;text-align:left;color:var(--muted);font-size:13px;border-bottom:1px solid rgba(15,23,42,0.04);z-index:1}
 .reports-table tbody td{padding:16px 12px;border-bottom:1px solid rgba(15,23,42,0.03);vertical-align:middle}
+.reports-table .empty-row{padding:30px 12px;text-align:center;font-style:italic;color:var(--muted)}
 .td-thumb img{width:56px;height:56px;border-radius:10px;object-fit:cover}
+
+.dark-mode .reports-table thead th{background:#071721}
 
 /* badges and statuses */
 .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
@@ -276,6 +279,7 @@ a{ color:inherit; text-decoration:none; }
 .status-pending-light{background:#fffbeb;color:#b45309;border:1px solid rgba(180,120,20,0.06)}
 .status-verified{background:#ecfdf5;color:#059669}
 .status-claimed{background:#eef2ff;color:#4f46e5}
+.status-rejected{background:#fef2f2;color:#b91c1c}
 .muted{color:var(--muted);font-size:13px}
 .small{font-size:12px;color:var(--muted)}
 
@@ -347,6 +351,10 @@ a{ color:inherit; text-decoration:none; }
 .pill-status--rejected{background:#fef2f2;color:#b91c1c;border-color:rgba(185,28,28,0.1)}
 
 .report-list{display:flex;flex-direction:column;gap:20px}
+.status-scroll{max-height:70vh;overflow-y:auto;padding-right:8px;margin-top:12px}
+.status-scroll::-webkit-scrollbar{width:6px}
+.status-scroll::-webkit-scrollbar-thumb{background:rgba(15,23,42,0.15);border-radius:999px}
+.dark-mode .status-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.14)}
 .admin-empty{padding:40px;border-radius:12px;border:1px dashed rgba(15,23,42,0.15);text-align:center;color:var(--muted);background:rgba(15,23,42,0.01)}
 
 /* meta grid */

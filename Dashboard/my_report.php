@@ -147,7 +147,8 @@ require_once '../db_config.php';
         <section class="card reports-card">
           <h3 class="card-title">My Reports</h3>
 
-          <div class="table-wrap">
+          <div class="table-scroll">
+            <div class="table-wrap">
             <table class="reports-table" aria-label="My reports">
               <thead>
                 <tr>
@@ -248,7 +249,8 @@ require_once '../db_config.php';
                 }
                 ?>
               </tbody>
-            </table>
+              </table>
+            </div>
           </div>
         </section>
 

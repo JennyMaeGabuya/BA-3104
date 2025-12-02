@@ -75,18 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
     alert('Notifications cleared (demo).');
   });
 
-  // Example: dynamically update metrics from a fake API (simulate)
-  setTimeout(() => {
-    const activeReports = document.getElementById('activeReports');
-    const verifiedItems = document.getElementById('verifiedItems');
-    const resolvedCases = document.getElementById('resolvedCases');
-    const pendingVerification = document.getElementById('pendingVerification');
-    if (activeReports) activeReports.textContent = 6;
-    if (verifiedItems) verifiedItems.textContent = 6;
-    if (resolvedCases) resolvedCases.textContent = 0;
-    if (pendingVerification) pendingVerification.textContent = 4;
-  }, 200);
-
   // Pending-page status filtering
   const statusList = document.getElementById('adminStatusList');
   const emptyState = document.getElementById('adminEmptyState');

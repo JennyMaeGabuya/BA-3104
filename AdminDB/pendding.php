@@ -204,6 +204,7 @@ function normalizeImagePath(?string $path): string {
           No reports to review yet.
         </div>
 
+        <div class="status-scroll <?= $hasReports ? '' : 'hidden' ?>">
         <div id="adminStatusList" class="report-list <?= $hasReports ? '' : 'hidden' ?>" data-default-tab="<?= htmlspecialchars($initialTab) ?>">
           <?php foreach ($reports as $rep):
             $imgPath = normalizeImagePath($rep['photo_path'] ?? '');
@@ -272,6 +273,7 @@ function normalizeImagePath(?string $path): string {
             </div>
           </section>
           <?php endforeach; ?>
+        </div>
         </div>
 
         <!-- placeholder for multiple cards / empty states -->
