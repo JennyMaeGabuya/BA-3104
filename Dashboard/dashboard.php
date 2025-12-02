@@ -65,6 +65,20 @@ $hasVerified = count($verifiedReports) > 0;
 $hasRejected = count($rejectedReports) > 0;
 $initialTab = $hasVerified ? 'verified' : ($hasRejected ? 'rejected' : 'verified');
 
+$filterReports = array_merge($verifiedReports, $rejectedReports);
+$filterLocations = [];
+foreach ($filterReports as $entry) {
+  $loc = trim($entry['location'] ?? '');
+  if ($loc !== '' && !in_array($loc, $filterLocations, true)) {
+    $filterLocations[] = $loc;
+  }
+}
+if ($filterLocations) {
+  sort($filterLocations, SORT_NATURAL | SORT_FLAG_CASE);
+}
+
+$lowercaseFn = function_exists('mb_strtolower') ? 'mb_strtolower' : 'strtolower';
+
 // Normalize image path similarly to my_report.php
 function normalizeImagePath($path) {
   if (!$path) return "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect width='100%' height='100%' fill='%23FFF9F2'/><circle cx='40' cy='40' r='28' fill='%23FFDCE0'/></svg>";
@@ -267,16 +281,16 @@ $firstName = $nameParts[0] ?? 'User';
             </div>
 
             <select id="filterLocation" class="select">
-              <option>All</option>
-              <option>Library</option>
-              <option>Gym</option>
-              <option>Main Building</option>
+              <option value="all">All locations</option>
+              <?php foreach ($filterLocations as $loc): $value = $lowercaseFn($loc); ?>
+                <option value="<?= htmlspecialchars($value) ?>"><?= htmlspecialchars($loc) ?></option>
+              <?php endforeach; ?>
             </select>
 
             <select id="filterType" class="select">
-              <option>All types</option>
-              <option>Lost</option>
-              <option>Found</option>
+              <option value="all">All types</option>
+              <option value="lost">Lost</option>
+              <option value="found">Found</option>
             </select>
 
             <button id="applyBtn" class="btn primary">Apply</button>
@@ -306,8 +320,27 @@ $firstName = $nameParts[0] ?? 'User';
                 foreach ($verifiedReports as $r):
                   $img = normalizeImagePath($r['photo_path'] ?? '');
                   $visibleClass = ($defaultTab === 'verified') ? '' : ' hidden';
+                  $typeSlug = trim($r['type'] ?? '');
+                  $typeSlug = $typeSlug !== '' ? $lowercaseFn($typeSlug) : 'unknown';
+                  $locationValue = trim($r['location'] ?? '');
+                  $locationSlug = $locationValue !== '' ? $lowercaseFn($locationValue) : 'unknown';
+                  $searchPieces = array_filter([
+                    $r['item_name'] ?? '',
+                    $r['category'] ?? '',
+                    $r['description'] ?? '',
+                    $r['location'] ?? '',
+                    $r['report_id'] ?? '',
+                    $r['user_email'] ?? ''
+                  ], function ($part) {
+                    return $part !== null && trim((string)$part) !== '';
+                  });
+                  $searchIndex = '';
+                  if (!empty($searchPieces)) {
+                    $searchIndex = preg_replace('/\s+/', ' ', implode(' ', $searchPieces));
+                    $searchIndex = $lowercaseFn($searchIndex);
+                  }
               ?>
-                <div class="item-card<?= $visibleClass ?>" data-status-card data-status="verified">
+                <div class="item-card<?= $visibleClass ?>" data-status-card data-status="verified" data-type="<?= htmlspecialchars($typeSlug) ?>" data-location="<?= htmlspecialchars($locationSlug) ?>" data-search="<?= htmlspecialchars($searchIndex) ?>">
                   <div class="thumb"><img src="<?= $img ?>" alt="<?= htmlspecialchars($r['item_name']) ?>" /></div>
                   <div class="meta">
                     <h3 class="title"><?= htmlspecialchars($r['item_name']) ?></h3>
@@ -346,8 +379,27 @@ $firstName = $nameParts[0] ?? 'User';
                 foreach ($rejectedReports as $r):
                   $img = normalizeImagePath($r['photo_path'] ?? '');
                   $visibleClass = ($defaultTab === 'rejected') ? '' : ' hidden';
+                  $typeSlug = trim($r['type'] ?? '');
+                  $typeSlug = $typeSlug !== '' ? $lowercaseFn($typeSlug) : 'unknown';
+                  $locationValue = trim($r['location'] ?? '');
+                  $locationSlug = $locationValue !== '' ? $lowercaseFn($locationValue) : 'unknown';
+                  $searchPieces = array_filter([
+                    $r['item_name'] ?? '',
+                    $r['category'] ?? '',
+                    $r['description'] ?? '',
+                    $r['location'] ?? '',
+                    $r['report_id'] ?? '',
+                    $r['user_email'] ?? ''
+                  ], function ($part) {
+                    return $part !== null && trim((string)$part) !== '';
+                  });
+                  $searchIndex = '';
+                  if (!empty($searchPieces)) {
+                    $searchIndex = preg_replace('/\s+/', ' ', implode(' ', $searchPieces));
+                    $searchIndex = $lowercaseFn($searchIndex);
+                  }
               ?>
-                <div class="item-card<?= $visibleClass ?>" data-status-card data-status="rejected">
+                <div class="item-card<?= $visibleClass ?>" data-status-card data-status="rejected" data-type="<?= htmlspecialchars($typeSlug) ?>" data-location="<?= htmlspecialchars($locationSlug) ?>" data-search="<?= htmlspecialchars($searchIndex) ?>">
                   <div class="thumb"><img src="<?= $img ?>" alt="<?= htmlspecialchars($r['item_name']) ?>" /></div>
                   <div class="meta">
                     <h3 class="title"><?= htmlspecialchars($r['item_name']) ?></h3>

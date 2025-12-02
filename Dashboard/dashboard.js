@@ -259,6 +259,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const emptyState = document.getElementById('emptyState');
   const statusList = document.getElementById('statusList');
   const cards = Array.from(document.querySelectorAll('[data-status-card]'));
+  const searchInput = document.getElementById('searchInput');
+  const filterLocation = document.getElementById('filterLocation');
+  const filterType = document.getElementById('filterType');
+  const applyBtn = document.getElementById('applyBtn');
 
   const EMPTY_MESSAGES = {
     verified: 'No verified reports yet.',
@@ -267,18 +271,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const hasCardsFor = (status) => cards.some(card => card.dataset.status === status);
 
-  function setActiveTab(name) {
-    tabs.forEach(tab => {
-      const isActive = tab.dataset.tab === name;
-      tab.classList.toggle('active', isActive);
-      tab.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-    });
+  let activeTab = resultsInner.dataset.defaultTab || 'verified';
+
+  function getSearchTerm() {
+    const raw = searchInput?.value || '';
+    return raw.trim().toLowerCase();
   }
 
-  function updateVisibility(active) {
+  function refreshList() {
+    const searchTerm = getSearchTerm();
+    const locationValue = filterLocation?.value || 'all';
+    const typeValue = filterType?.value || 'all';
+    const filtersApplied = searchTerm !== '' || locationValue !== 'all' || typeValue !== 'all';
+
     let visibleCount = 0;
     cards.forEach(card => {
-      const isVisible = card.dataset.status === active;
+      const matchesStatus = card.dataset.status === activeTab;
+      const matchesSearch = !searchTerm || (card.dataset.search || '').includes(searchTerm);
+      const matchesLocation = locationValue === 'all' || (card.dataset.location || '') === locationValue;
+      const matchesType = typeValue === 'all' || (card.dataset.type || '') === typeValue;
+
+      const isVisible = matchesStatus && matchesSearch && matchesLocation && matchesType;
       card.classList.toggle('hidden', !isVisible);
       if (isVisible) visibleCount += 1;
     });
@@ -290,20 +303,32 @@ document.addEventListener('DOMContentLoaded', () => {
     if (emptyState) {
       emptyState.classList.toggle('hidden', visibleCount > 0);
       if (visibleCount === 0) {
-        emptyState.textContent = EMPTY_MESSAGES[active] || 'No reports to show yet.';
+        const message = filtersApplied
+          ? `No ${activeTab} reports match your filters yet.`
+          : EMPTY_MESSAGES[activeTab] || 'No reports to show yet.';
+        emptyState.textContent = message;
       }
     }
+  }
+
+  function setActiveTab(name) {
+    activeTab = name;
+    tabs.forEach(tab => {
+      const isActive = tab.dataset.tab === name;
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+    refreshList();
   }
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const target = tab.dataset.tab || 'verified';
       setActiveTab(target);
-      updateVisibility(target);
     });
   });
 
-  let initialTab = resultsInner.dataset.defaultTab || 'verified';
+  let initialTab = activeTab;
   if (!hasCardsFor(initialTab)) {
     if (initialTab === 'verified' && hasCardsFor('rejected')) {
       initialTab = 'rejected';
@@ -313,15 +338,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   setActiveTab(initialTab);
-  updateVisibility(initialTab);
 
-  // Filters Apply button (currently only triggers a simple animation)
-  const applyBtn = document.getElementById('applyBtn');
   if (applyBtn) {
     applyBtn.addEventListener('click', () => {
       applyBtn.classList.add('pressed');
       setTimeout(() => applyBtn.classList.remove('pressed'), 200);
-      // Future: apply search/filter logic to visible list
+      refreshList();
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        refreshList();
+      }
     });
   }
 });
