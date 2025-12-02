@@ -26,69 +26,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// sample dataset (replace with real data / API)
-const ITEMS = [
-  {
-    id: 1,
-    title: "Black Backpack",
-    category: "Bag",
-    location: "Cafeteria",
-    date: "2025-11-11",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1520975913949-2f6d60c3f0d6?q=80&w=1400&auto=format&fit=crop",
-    description: "Black Nike backpack with laptop compartment. Contains some textbooks."
-  },
-  {
-    id: 2,
-    title: "iPhone 13 Pro",
-    category: "Electronics",
-    location: "Library - 2nd Floor",
-    date: "2025-11-10",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1603791440384-56cd371ee9a7?q=80&w=1400&auto=format&fit=crop",
-    description: "Blue iPhone 13 Pro with cracked screen protector. Found near the benches."
-  },
-  {
-    id: 3,
-    title: "Brown Leather Wallet",
-    category: "Wallet",
-    location: "Gymnasium",
-    date: "2025-11-09",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1585238341976-1f8a1f3c6c3b?q=80&w=1400&auto=format&fit=crop",
-    description: "Brown leather wallet with student ID inside. Owner can identify by providing ID number."
-  },
-  {
-    id: 4,
-    title: "Student ID Card",
-    category: "ID",
-    location: "Computer Laboratory",
-    date: "2025-11-08",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1532012197267-da84d127e765?q=80&w=1400&auto=format&fit=crop",
-    description: "Student ID card from CICS department. Name withheld for security."
-  },
-  {
-    id: 5,
-    title: "Red Umbrella",
-    category: "Others",
-    location: "Administration Building",
-    date: "2025-11-08",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1522770179533-24471fcdba45?q=80&w=1400&auto=format&fit=crop",
-    description: "Red folding umbrella found near the entrance."
-  },
-  {
-    id: 6,
-    title: "Wireless Earbuds",
-    category: "Electronics",
-    location: "Cafeteria",
-    date: "2025-11-07",
-    status: "Available",
-    image: "https://images.unsplash.com/photo-1580894908360-8b62e4d7b8b6?q=80&w=1400&auto=format&fit=crop",
-    description: "White wireless earbuds with charging case. Brand: Generic."
-  }
-];
+// dataset populated by PHP
+const ITEMS = Array.isArray(window.FOUND_ITEMS)
+  ? window.FOUND_ITEMS.map((item, idx) => ({
+      id: item.report_id || idx,
+      title: item.item_name || 'Found Item',
+      category: item.category || 'Others',
+      location: item.location_found || 'Unknown Location',
+      date: item.date_found || '—',
+      status: item.status || 'Verified',
+      image: item.photo_url || '',
+      description: item.description || '',
+      time: item.time_found || ''
+    }))
+  : [];
 
 // DOM refs
 const cardsGrid = document.getElementById('cardsGrid');
@@ -98,6 +49,10 @@ const clearFiltersBtn = document.getElementById('clearFilters');
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 const galleryCount = document.getElementById('gallery-count');
+const idUploadInput = document.getElementById('claimIdUpload');
+const idUploadFeedback = document.getElementById('idUploadFeedback');
+const defaultIdMessage = 'Upload a clear BatStateU ID photo (portrait with the red banner).';
+let idUploadIsValid = false;
 
 const claimModal = document.getElementById('claimModal');
 const modalClose = document.getElementById('modalClose');
@@ -114,6 +69,7 @@ function init(){
   populateFilterOptions();
   renderCards(ITEMS);
   attachEvents();
+  setupIdUploadValidation();
 }
 
 function populateFilterOptions(){
@@ -136,43 +92,41 @@ function populateFilterOptions(){
 
 function renderCards(dataset){
   cardsGrid.innerHTML = '';
+  const total = ITEMS.length;
   if(!dataset.length){
-    cardsGrid.innerHTML = '<p style="grid-column:1/-1;color:var(--muted)">No items found.</p>';
-    galleryCount.textContent = `Showing 0 of ${ITEMS.length} items`;
+    cardsGrid.innerHTML = '<div class="empty-state">No verified found items yet.</div>';
+    galleryCount.textContent = `Showing 0 of ${total} items`;
     return;
   }
-  galleryCount.textContent = `Showing ${dataset.length} of ${ITEMS.length} items`;
+  galleryCount.textContent = `Showing ${dataset.length} of ${total} items`;
 
+  const fragment = document.createDocumentFragment();
   for(const item of dataset){
+    const statusText = statusLabel(item.status);
+    const statusClass = statusClassName(item.status);
     const card = document.createElement('article');
-    card.className = 'card';
+    card.className = 'found-card';
     card.innerHTML = `
-      <img class="card-media" src="${item.image}" alt="${escapeHtml(item.title)}">
-      <div class="card-body">
-        <div class="card-title">
-          <div>${escapeHtml(item.title)}</div>
-          <div class="status-badge">${escapeHtml(item.status)}</div>
+      <div class="found-thumb">
+        <img src="${item.image}" alt="${escapeHtml(item.title)}">
+      </div>
+      <div class="found-body">
+        <div class="found-title-row">
+          <h3 class="found-title">${escapeHtml(item.title)}</h3>
+          <span class="status-pill ${statusClass}">${statusText}</span>
         </div>
-
-        <div>
-          <div class="tag">${escapeHtml(item.category)}</div>
+        <div class="category-chip">${escapeHtml(item.category)}</div>
+        <p class="found-desc">${escapeHtml(truncate(item.description, 160))}</p>
+        <div class="found-meta">
+          <div class="found-meta-item">📍 <span>${escapeHtml(item.location)}</span></div>
+          <div class="found-meta-item">📅 <span>${escapeHtml(item.date)}</span></div>
         </div>
-
-        <div class="card-desc">${escapeHtml(truncate(item.description, 160))}</div>
-
-        <div class="meta-row">
-          <div class="meta">📍 <span>${escapeHtml(item.location)}</span></div>
-          <div class="meta">📅 <span>${escapeHtml(item.date)}</span></div>
-        </div>
-
-        <div class="card-cta">
-          <button class="btn-claim" data-id="${item.id}">Claim This Item</button>
-        </div>
+        <button class="btn-claim" data-id="${item.id}">Claim This Item</button>
       </div>
     `;
-    cardsGrid.appendChild(card);
+    fragment.appendChild(card);
   }
-  // attach claim click listeners
+  cardsGrid.appendChild(fragment);
   document.querySelectorAll('.btn-claim').forEach(btn => btn.addEventListener('click', openClaimModal));
 }
 
@@ -236,22 +190,65 @@ function attachEvents(){
   });
 }
 
+function setupIdUploadValidation(){
+  if(!idUploadInput) return;
+  setIdUploadFeedback(defaultIdMessage, 'note');
+  idUploadInput.addEventListener('change', handleIdUploadChange);
+}
+
+async function handleIdUploadChange(ev){
+  idUploadIsValid = false;
+  const file = ev.target.files && ev.target.files[0];
+  if(!file){
+    setIdUploadFeedback(defaultIdMessage, 'note');
+    return;
+  }
+  if(!file.type.startsWith('image/')){
+    setIdUploadFeedback('Please upload an image file (JPG or PNG).', 'error');
+    ev.target.value = '';
+    return;
+  }
+  if(file.size > 10 * 1024 * 1024){
+    setIdUploadFeedback('File is too large. Maximum allowed size is 10MB.', 'error');
+    ev.target.value = '';
+    return;
+  }
+
+  setIdUploadFeedback('Validating ID photo…', 'note');
+  try {
+    const analysis = await analyzeIdImage(file);
+    if(!analysis.isPortrait){
+      setIdUploadFeedback('Photo must be portrait orientation like the sample BatStateU ID.', 'error');
+      return;
+    }
+    if(!analysis.hasRedHeader){
+      setIdUploadFeedback('Top area must include the BatStateU red header. Please retake the photo.', 'error');
+      return;
+    }
+    idUploadIsValid = true;
+    setIdUploadFeedback('ID photo looks good!', 'success');
+  } catch (err) {
+    console.error(err);
+    setIdUploadFeedback('Unable to read the image. Please try another photo.', 'error');
+  }
+}
+
 function openClaimModal(ev) {
   const id = ev.currentTarget.getAttribute("data-id");
   const item = ITEMS.find(x => String(x.id) === String(id));
   if (!item) return;
 
   const claimBox = document.getElementById("claimItemBox");
+  claimModal.dataset.reportId = item.id;
 
-  // Fill item preview
   claimBox.innerHTML = `
     <div class="item-preview">
-      <img src="${item.image}" class="preview-img">
+      <img src="${item.image}" class="preview-img" alt="${escapeHtml(item.title)}">
       <div class="preview-info">
-        <h4>${item.title}</h4>
-        <div class="tag">${item.category}</div>
-        <div class="meta">📍 ${item.location}</div>
-        <div class="meta">📅 Found on ${item.date}</div>
+        <h4>${escapeHtml(item.title)}</h4>
+        <div class="tag">${escapeHtml(item.category)}</div>
+        <div class="meta">📍 ${escapeHtml(item.location)}</div>
+        <div class="meta">📅 Found on ${escapeHtml(item.date)}</div>
       </div>
     </div>
   `;
@@ -262,6 +259,19 @@ function openClaimModal(ev) {
 // close modal
 function closeModal(){
   claimModal.setAttribute('aria-hidden', 'true');
+  resetClaimForm();
+}
+
+function resetClaimForm(){
+  const details = document.getElementById('claimDetails');
+  const contact = document.getElementById('claimContact');
+  const upload = document.getElementById('claimIdUpload');
+  if(details) details.value = '';
+  if(contact) contact.value = '';
+  if(upload) upload.value = '';
+  idUploadIsValid = false;
+  setIdUploadFeedback(defaultIdMessage, 'note');
+  delete claimModal.dataset.reportId;
 }
 
 // small utilities
@@ -274,22 +284,141 @@ function truncate(s, n){
   return s.length > n ? s.slice(0,n-1) + '…' : s;
 }
 
+function setIdUploadFeedback(message, state){
+  if(!idUploadFeedback) return;
+  idUploadFeedback.textContent = message;
+  idUploadFeedback.classList.remove('helper-error','helper-success','helper-note');
+  switch(state){
+    case 'error':
+      idUploadFeedback.classList.add('helper-error');
+      break;
+    case 'success':
+      idUploadFeedback.classList.add('helper-success');
+      break;
+    default:
+      idUploadFeedback.classList.add('helper-note');
+  }
+}
+
+function analyzeIdImage(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      try {
+        const isPortrait = img.height >= img.width * 1.2;
+        const canvas = document.createElement('canvas');
+        const targetWidth = 220;
+        const targetHeight = Math.max(220, Math.round(targetWidth * (img.height / img.width)));
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+        const sampleHeight = Math.max(12, Math.floor(targetHeight * 0.18));
+        const data = ctx.getImageData(0, 0, targetWidth, sampleHeight).data;
+        let r = 0, g = 0, b = 0;
+        const totalPixels = sampleHeight * targetWidth;
+        for(let i = 0; i < data.length; i += 4){
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+        }
+        r /= totalPixels;
+        g /= totalPixels;
+        b /= totalPixels;
+        const hasRedHeader = r > 150 && (r - g) > 25 && (r - b) > 25;
+        resolve({ isPortrait, hasRedHeader });
+      } catch (err) {
+        reject(err);
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Unable to load image'));
+    };
+    img.src = url;
+  });
+}
+
+function statusLabel(status){
+  switch((status || '').toLowerCase()){
+    case 'claimed': return 'Claimed';
+    case 'rejected': return 'Rejected';
+    case 'pending': return 'Pending Review';
+    default: return 'Available';
+  }
+}
+
+function statusClassName(status){
+  switch((status || '').toLowerCase()){
+    case 'claimed': return 'status-pill--claimed';
+    case 'rejected': return 'status-pill--rejected';
+    case 'pending': return 'status-pill--pending';
+    default: return 'status-pill--available';
+  }
+}
+
 // init
 init();
 
 document.getElementById("cancelClaim").addEventListener("click", closeModal);
 
-document.getElementById("submitClaim").addEventListener("click", () => {
-  const details = document.getElementById("claimDetails").value.trim();
-  const contact = document.getElementById("claimContact").value.trim();
+document.getElementById("submitClaim").addEventListener("click", async () => {
+  const detailsEl = document.getElementById("claimDetails");
+  const contactEl = document.getElementById("claimContact");
+  const details = detailsEl.value.trim();
+  const contact = contactEl.value.trim();
+  const idFile = idUploadInput && idUploadInput.files ? idUploadInput.files[0] : null;
 
   if (!details || !contact) {
     alert("Please fill out all required fields before submitting.");
+    if(!details) detailsEl.focus(); else contactEl.focus();
     return;
   }
 
-  alert("Your claim request has been submitted! Admin will contact you soon.");
-  closeModal();
+  if (!idFile) {
+    setIdUploadFeedback('Student ID upload is required to submit a claim.', 'error');
+    if (idUploadInput) idUploadInput.focus();
+    return;
+  }
+
+  if (!idUploadIsValid) {
+    setIdUploadFeedback('Please upload a BatStateU ID that matches the template before submitting.', 'error');
+    if (idUploadInput) idUploadInput.focus();
+    return;
+  }
+
+  const activeBtn = document.getElementById('submitClaim');
+  activeBtn.disabled = true;
+  activeBtn.textContent = 'Submitting…';
+
+  try {
+    const data = new FormData();
+    data.append('report_id', claimModal.dataset.reportId || '');
+    data.append('details', details);
+    data.append('contact', contact);
+    data.append('school_id', idFile);
+
+    const response = await fetch('submit_claim_request.php', {
+      method: 'POST',
+      body: data
+    });
+    const payload = await response.json();
+
+    if (!payload.success) {
+      throw new Error(payload.error || 'Failed to submit claim request.');
+    }
+
+    alert('Your claim request has been submitted! Admin will contact you soon. Reference: ' + (payload.requestCode || '—'));
+    closeModal();
+  } catch (err) {
+    alert(err.message || 'Something went wrong while submitting your claim request.');
+  } finally {
+    activeBtn.disabled = false;
+    activeBtn.textContent = 'Submit Claim Request';
+  }
 });
 
 // report-found.js

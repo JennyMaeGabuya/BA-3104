@@ -5,6 +5,82 @@
  */
 
 require_once 'auth_check.php';
+require_once __DIR__ . '/db_config.php';
+
+$foundItems = [];
+$loadError = false;
+$placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='420'><rect width='100%' height='100%' fill='%23f1f5f9'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-family='Inter,Arial' font-size='20'>No Photo</text></svg>";
+
+function normalizePhotoPath(?string $path): string {
+  if (!$path) {
+    return '';
+  }
+  $trim = trim($path);
+  if ($trim === '') {
+    return '';
+  }
+  if (str_starts_with($trim, 'Image/')) {
+    $trim = 'Dashboard/' . $trim;
+  }
+  if (preg_match('/^https?:\/\//', $trim) || str_starts_with($trim, '/')) {
+    return $trim;
+  }
+  return '/BA-3104/' . ltrim($trim, '/');
+}
+
+function statusLabel(string $status): string {
+  return match ($status) {
+    'Verified' => 'Available',
+    'Claimed' => 'Claimed',
+    'Pending' => 'Pending Review',
+    'Rejected' => 'Rejected',
+    default => ucfirst(strtolower($status)),
+  };
+}
+
+function statusClass(string $status): string {
+  return match ($status) {
+    'Verified' => 'status-pill--available',
+    'Claimed' => 'status-pill--claimed',
+    'Rejected' => 'status-pill--rejected',
+    default => 'status-pill--pending',
+  };
+}
+
+function excerpt(string $text, int $limit = 160): string {
+  $trim = trim($text);
+  if ($trim === '') {
+    return $trim;
+  }
+  $lenFn = function_exists('mb_strlen') ? 'mb_strlen' : 'strlen';
+  $subFn = function_exists('mb_substr') ? 'mb_substr' : 'substr';
+  if ($lenFn($trim) <= $limit) {
+    return $trim;
+  }
+  return rtrim($subFn($trim, 0, $limit - 1)) . '…';
+}
+
+try {
+  $stmt = $pdo->prepare("SELECT report_id, item_name, category, description, location_found, date_found, time_found, photo_path, status FROM found_reports WHERE status = 'Verified' ORDER BY COALESCE(date_found, created_at) DESC, created_at DESC");
+  $stmt->execute();
+  while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $photoUrl = normalizePhotoPath($row['photo_path'] ?? '') ?: $placeholderImg;
+    $foundItems[] = [
+      'report_id' => $row['report_id'] ?? '',
+      'item_name' => $row['item_name'] ?? 'Unnamed Item',
+      'category' => $row['category'] ?? 'Others',
+      'description' => $row['description'] ?? '',
+      'location_found' => $row['location_found'] ?? 'Unknown Location',
+      'date_found' => $row['date_found'] ?? '',
+      'time_found' => $row['time_found'] ?? '',
+      'photo_url' => $photoUrl,
+      'status' => $row['status'] ?? 'Pending',
+    ];
+  }
+} catch (Throwable $e) {
+  $loadError = true;
+}
+$itemsCount = count($foundItems);
 ?>
 <!doctype html>
 <html lang="en">
@@ -159,48 +235,48 @@ require_once 'auth_check.php';
         <div class="gallery-header">
           <div>
             <h2 id="gallery-heading">Found Items</h2>
-            <p id="gallery-count" class="muted">Showing 0 of 0 items</p>
+            <p id="gallery-count" class="muted">
+              <?php echo $itemsCount ? 'Showing ' . $itemsCount . ' of ' . $itemsCount . ' items' : 'Showing 0 of 0 items'; ?>
+            </p>
           </div>
         </div>
 
-        <div id="cardsGrid" class="cards-grid" aria-live="polite">
-          <?php
-          require_once __DIR__ . '/db_config.php';
-          try {
-            $stmt = $pdo->prepare("SELECT report_id, item_name, category, description, location_found, date_found, photo_path FROM found_reports WHERE status = 'Verified' ORDER BY created_at DESC");
-            $stmt->execute();
-            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if (!$items) {
-              echo '<div class="empty-state">No verified found items yet.</div>';
-            } else {
-              foreach ($items as $it) {
-                $path = trim($it['photo_path'] ?? '');
-                if ($path !== '') {
-                  if (str_starts_with($path, 'Image/')) { $path = 'Dashboard/' . $path; }
-                  if (!str_starts_with($path, '/')) { $path = '/BA-3104/' . ltrim($path, '/'); }
-                }
-                $img = $path !== '' ? '<img src="' . htmlspecialchars($path) . '" alt="Item photo">' : "<div class='no-photo'>No Photo</div>";
-                echo '<article class="card-item">';
-                echo '<div class="card-thumb">' . $img . '</div>';
-                echo '<div class="card-body">';
-                echo '<div class="card-title">' . htmlspecialchars($it['item_name']) . '</div>';
-                echo '<div class="card-meta">'
-                   . '<span class="pill pill-found">Found</span>'
-                   . '<span class="meta-cat">' . htmlspecialchars($it['category']) . '</span>'
-                   . '</div>';
-                echo '<div class="card-desc">' . nl2br(htmlspecialchars($it['description'])) . '</div>';
-                echo '<div class="card-event">'
-                   . '<span class="meta-loc">' . htmlspecialchars($it['location_found']) . '</span>'
-                   . '<span class="meta-date">' . htmlspecialchars($it['date_found']) . '</span>'
-                   . '</div>';
-                echo '</div>';
-                echo '</article>';
-              }
-            }
-          } catch (Throwable $e) {
-            echo '<div class="error-state" style="color:#ef4444">Failed to load found items.</div>';
-          }
-          ?>
+        <div id="cardsGrid" class="cards-grid cards-grid--found" aria-live="polite">
+          <?php if ($loadError): ?>
+            <div class="error-state" style="color:#ef4444">Failed to load found items.</div>
+          <?php elseif (!$itemsCount): ?>
+            <div class="empty-state">No verified found items yet.</div>
+          <?php else: ?>
+            <?php foreach ($foundItems as $item):
+              $name = htmlspecialchars($item['item_name']);
+              $category = htmlspecialchars($item['category']);
+              $desc = htmlspecialchars(excerpt($item['description']));
+              $location = htmlspecialchars($item['location_found']);
+              $date = htmlspecialchars($item['date_found']);
+              $statusText = statusLabel($item['status']);
+              $statusCls = statusClass($item['status']);
+              $photo = htmlspecialchars($item['photo_url']);
+            ?>
+              <article class="found-card" data-report="<?php echo htmlspecialchars($item['report_id']); ?>">
+                <div class="found-thumb">
+                  <img src="<?php echo $photo; ?>" alt="Photo of <?php echo $name; ?>" loading="lazy">
+                </div>
+                <div class="found-body">
+                  <div class="found-title-row">
+                    <h3 class="found-title"><?php echo $name; ?></h3>
+                    <span class="status-pill <?php echo $statusCls; ?>"><?php echo htmlspecialchars($statusText); ?></span>
+                  </div>
+                  <div class="category-chip"><?php echo $category; ?></div>
+                  <p class="found-desc"><?php echo $desc; ?></p>
+                  <div class="found-meta">
+                    <div class="found-meta-item">📍 <span><?php echo $location; ?></span></div>
+                    <div class="found-meta-item">📅 <span><?php echo $date; ?></span></div>
+                  </div>
+                  <button class="btn-claim" data-id="<?php echo htmlspecialchars($item['report_id']); ?>">Claim This Item</button>
+                </div>
+              </article>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </div>
       </section>
     </div>
@@ -238,6 +314,12 @@ require_once 'auth_check.php';
       <input id="claimContact" class="input"
         placeholder="Phone number or email for verification">
 
+      <label class="label" for="claimIdUpload">Upload School ID *</label>
+      <div class="file-upload">
+        <input id="claimIdUpload" name="school_id" type="file" class="input file-input" required
+          accept="image/*">
+      </div>
+
       <div class="claim-info-box">
         <strong>Important:</strong> After submitting your claim request, an admin will review
         your information and contact you for verification. Be prepared to provide additional
@@ -255,6 +337,9 @@ require_once 'auth_check.php';
 </div>
 
   <!-- Include JavaScript files -->
+  <script>
+    window.FOUND_ITEMS = <?php echo json_encode($foundItems, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
+  </script>
   <script src="avatar_dropdown.js"></script>
   <script src="user_script.js"></script>
 </body>

@@ -65,7 +65,7 @@ $fullname = trim(($first ?: '') . ' ' . ($last ?: ''));
         </a>
         <a href="verified.php" class="nav-item" data-section="verified">
           <span class="nav-ico"></span>
-          <span class="nav-label">Verified Reports</span>
+          <span class="nav-label">Manage Items</span>
         </a>
         <a href="users.php" class="nav-item nav-item--active" data-section="users">
           <span class="nav-ico"></span>

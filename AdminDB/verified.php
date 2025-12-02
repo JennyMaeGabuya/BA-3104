@@ -28,13 +28,39 @@ $first = $_SESSION['first_name'] ?? '';
 $last = $_SESSION['last_name'] ?? '';
 $initials = strtoupper((strlen($first) ? $first[0] : '') . (strlen($last) ? $last[0] : ''));
 $fullname = trim(($first ?: '') . ' ' . ($last ?: ''));
+
+$claims = [];
+$placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='100%' height='100%' fill='%23FFF9F2'/><circle cx='32' cy='32' r='20' fill='%23FFDCE0'/></svg>";
+
+function normalizeImage(?string $path): string {
+  if (!$path) return '';
+  $trim = trim($path);
+  if (str_starts_with($trim, '/')) return $trim;
+  return '/BA-3104/' . ltrim($trim, '/');
+}
+
+try {
+  $sql = "SELECT cr.request_code, cr.report_id, cr.item_type, cr.contact_info, cr.details, cr.status,
+                  cr.created_at,
+                  fr.item_name AS found_item, fr.location_found AS found_location, fr.date_found AS found_date,
+                  fr.photo_path AS found_photo,
+                  CONCAT(u.first_name, ' ', u.last_name) AS requester_name
+            FROM claim_requests cr
+            LEFT JOIN found_reports fr ON cr.report_id = fr.report_id
+            LEFT JOIN users u ON cr.user_id = u.id
+            ORDER BY cr.created_at DESC";
+  $stmt = $pdo->query($sql);
+  $claims = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+} catch (Throwable $e) {
+  $claims = [];
+}
 ?>
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FindIt Admin — Verified Reports</title>
+  <title>FindIt Admin — Manage Items</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/BA-3104/AdminDB/admin.css">
 </head>
@@ -65,7 +91,7 @@ $fullname = trim(($first ?: '') . ' ' . ($last ?: ''));
         </a>
         <a href="verified.php" class="nav-item nav-item--active" data-section="verified">
           <span class="nav-ico"></span>
-          <span class="nav-label">Verified Reports</span>
+          <span class="nav-label">Manage Items</span>
         </a>
         <a href="users.php" class="nav-item" data-section="users">
           <span class="nav-ico"></span>
@@ -100,20 +126,41 @@ $fullname = trim(($first ?: '') . ' ' . ($last ?: ''));
       </header>
       <main class="page-body">
         <section class="table-card">
-          <div class="table-header"><div class="table-title">Verified Reports</div></div>
+          <div class="table-header"><div class="table-title">Manage Items</div></div>
           <div class="table-wrap">
-            <table class="reports-table" aria-label="Verified reports">
-              <thead><tr><th>Image</th><th>User</th><th>Type</th><th>Item</th><th>Location</th><th>Date</th><th>Status</th></tr></thead>
+            <table class="reports-table" aria-label="Manage items">
+              <thead><tr><th>Image</th><th>User</th><th>Type</th><th>Item</th><th>Location</th><th>Date</th><th>Actions</th></tr></thead>
               <tbody id="reportsTbody">
-                <tr>
-                  <td class="td-thumb"><img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect width='100%' height='100%' fill='%23FFF9F2'/><circle cx='32' cy='32' r='20' fill='%23FFDCE0'/></svg>" alt="Photo"></td>
-                  <td class="td-user">Maria Clara</td>
-                  <td><span class="badge badge-lost">Lost</span></td>
-                  <td>Student ID</td>
-                  <td>Library</td>
-                  <td>2025-11-10</td>
-                  <td><span class="status status-verified">Verified</span></td>
-                </tr>
+                <?php if (empty($claims)): ?>
+                  <tr>
+                    <td colspan="7" class="empty-row">No claim requests submitted yet.</td>
+                  </tr>
+                <?php else: ?>
+                  <?php foreach ($claims as $claim):
+                    $itemName = $claim['found_item'] ?? 'Item';
+                    $location = $claim['found_location'] ?? '—';
+                    $date = $claim['found_date'] ?? '—';
+                    $userName = $claim['requester_name'] ?? 'Unknown User';
+                    $badgeClass = strtolower($claim['item_type'] ?? '') === 'lost' ? 'badge-lost' : 'badge-found';
+                    $imgPath = normalizeImage($claim['found_photo'] ?? '') ?: $placeholderImg;
+                    $statusLabel = $claim['status'] ?? 'Pending';
+                  ?>
+                  <tr>
+                    <td class="td-thumb"><img src="<?= htmlspecialchars($imgPath) ?>" alt="Photo of <?= htmlspecialchars($itemName) ?>"></td>
+                    <td class="td-user"><?= htmlspecialchars($userName) ?></td>
+                    <td><span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($claim['item_type'] ?? 'Found') ?></span></td>
+                    <td><?= htmlspecialchars($itemName) ?></td>
+                    <td><?= htmlspecialchars($location) ?></td>
+                    <td><?= htmlspecialchars($date) ?></td>
+                    <td>
+                      <div class="actions-col" data-request="<?= htmlspecialchars($claim['request_code']) ?>">
+                        <button type="button" class="action-btn view" data-claim='<?= json_encode($claim, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES) ?>'>View</button>
+                        <button type="button" class="action-btn claim" data-action="claimed">Mark as Claim</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <?php endforeach; ?>
+                <?php endif; ?>
               </tbody>
             </table>
           </div>
@@ -121,6 +168,9 @@ $fullname = trim(($first ?: '') . ' ' . ($last ?: ''));
       </main>
     </div>
   </div>
+  <script>
+    window.CLAIM_UPDATE_ENDPOINT = '/BA-3104/AdminDB/update_claim_status.php';
+  </script>
   <script src="admin.js"></script>
 </body>
 </html>

@@ -147,7 +147,7 @@ $placeholderImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/sv
 
         <a href="verified.php" class="nav-item" data-section="verified">
           <span class="nav-ico"></span>
-          <span class="nav-label">Verified Reports</span>
+          <span class="nav-label">Manage Items</span>
         </a>
 
         <a href="users.php" class="nav-item" data-section="users">

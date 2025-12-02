@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const emptyState = document.getElementById('adminEmptyState');
   const tabButtons = document.querySelectorAll('.tabs .tab[data-tab]');
   const statusCards = Array.from(document.querySelectorAll('[data-status-card]'));
+  const claimTable = document.getElementById('reportsTbody');
 
   if (statusList && tabButtons.length) {
     const messages = {
@@ -133,6 +134,80 @@ document.addEventListener('DOMContentLoaded', () => {
         showStatus(target);
       });
     });
+  }
+
+  if (claimTable) {
+    claimTable.addEventListener('click', async (event) => {
+      const target = event.target;
+      if (!target.closest('.action-btn')) return;
+      const rowActions = target.closest('.actions-col');
+      const requestCode = rowActions ? rowActions.getAttribute('data-request') : '';
+      if (!requestCode) return;
+
+      if (target.classList.contains('view')) {
+        const claimData = target.getAttribute('data-claim');
+        if (claimData) {
+          try {
+            const parsed = JSON.parse(claimData);
+            showClaimModal(parsed);
+          } catch (error) {
+            alert('Unable to open claim details.');
+          }
+        }
+      }
+
+      if (target.classList.contains('claim')) {
+        await handleClaimStatus(requestCode, target);
+      }
+    });
+  }
+
+  async function handleClaimStatus(requestCode, button) {
+    if (!window.CLAIM_UPDATE_ENDPOINT) {
+      alert('Claim API not configured.');
+      return;
+    }
+    button.disabled = true;
+    const formData = new FormData();
+    formData.append('request_code', requestCode);
+    formData.append('status', 'Claimed');
+    try {
+      const response = await fetch(window.CLAIM_UPDATE_ENDPOINT, { method: 'POST', body: formData });
+      const payload = await response.json();
+      if (!payload.success) throw new Error(payload.error || 'Update failed');
+      button.textContent = 'Claimed';
+      button.classList.add('is-disabled');
+      showToast('Claim request marked as resolved');
+    } catch (error) {
+      alert(error.message || 'Unable to update claim request');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  function showClaimModal(data) {
+    const modal = document.createElement('dialog');
+    modal.className = 'claim-dialog';
+    const photo = data.found_photo ? `/BA-3104/${data.found_photo}` : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="240" height="180"><rect width="100%" height="100%" fill="%23f8fafc"/></svg>';
+    modal.innerHTML = `
+      <form method="dialog" class="claim-dialog__panel">
+        <h3>Claim Request ${data.request_code || ''}</h3>
+        <p><strong>Reporter:</strong> ${data.requester_name || 'Unknown'}</p>
+        <p><strong>Item:</strong> ${data.found_item || 'Item'} (${data.item_type || 'Found'})</p>
+        <p><strong>Location:</strong> ${data.found_location || '—'}</p>
+        <p><strong>Contact:</strong> ${data.contact_info || '—'}</p>
+        <p><strong>Details:</strong></p>
+        <div class="claim-dialog__details">${(data.details || '').replace(/\n/g, '<br>')}</div>
+        <div class="claim-dialog__photo">
+          <img src="${photo}" alt="Item photo">
+        </div>
+        <div class="claim-dialog__foot">
+          <button type="submit" class="btn">Close</button>
+        </div>
+      </form>`;
+    document.body.appendChild(modal);
+    modal.showModal();
+    modal.addEventListener('close', () => modal.remove());
   }
 });
 
