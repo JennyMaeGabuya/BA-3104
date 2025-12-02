@@ -288,7 +288,7 @@ a{ color:inherit; text-decoration:none; }
 .tab.active{border-color:transparent;}
 
 /* Approved tab - green when active */
-.tab[data-tab="approved"].active{background:rgba(16, 185, 129, 0.15);color:#10b981;border-color:#10b981;}
+.tab[data-tab="verified"].active{background:rgba(16, 185, 129, 0.15);color:#10b981;border-color:#10b981;}
 
 /* Rejected tab - red when active */
 .tab[data-tab="rejected"].active{background:rgba(239, 68, 68, 0.15);color:#ef4444;border-color:#ef4444;}
@@ -377,6 +377,25 @@ a{ color:inherit; text-decoration:none; }
 .status-pending{background:rgba(180, 83, 9, 0.15);color:#f59e0b}
 .status-verified{background:rgba(5, 150, 105, 0.15);color:#10b981}
 .status-claimed{background:rgba(79, 70, 229, 0.15);color:#818cf8}
+.status-rejected{background:rgba(239, 68, 68, 0.15);color:#ef4444}
+
+/* Status list + item card (verified/rejected lists) */
+.status-list{display:flex;flex-direction:column;gap:16px}
+.item-card{position:relative;display:flex;gap:28px;align-items:flex-start;background:var(--card-bg);border:1px solid var(--border-color);border-radius:16px;padding:22px;box-shadow:var(--card-shadow)}
+.item-card.hidden{display:none}
+.item-card .thumb img{width:360px;height:240px;object-fit:cover;border-radius:14px;display:block}
+.item-card .meta{flex:1;min-width:0}
+.item-card .title{margin:0 0 10px;font-size:24px;font-weight:800;color:var(--text-primary)}
+.item-card .grid{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:20px}
+.item-card .label{font-size:13px;color:var(--text-muted);margin-top:6px}
+.item-card .value{font-size:15px;color:var(--text-secondary);font-weight:600}
+.item-card .item-badges{position:absolute;top:16px;right:16px;display:flex;gap:10px;align-items:center}
+
+@media (max-width:900px){
+  .item-card{flex-direction:column}
+  .item-card .thumb img{width:100%;height:220px}
+  .item-card .item-badges{position:static;justify-content:flex-end}
+}
 
 /* view link */
 .view-link{color:var(--red-500);font-weight:700}

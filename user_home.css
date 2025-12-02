@@ -374,6 +374,11 @@ a{ color:inherit; text-decoration:none; }
 .section-title{ color:var(--red-500); margin:0; font-size:20px; font-weight:600; }
 .sub{ margin-top:8px; color:var(--muted); }
 
+/* Pills (shared lightweight styles for home/found pages) */
+.pill{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600;font-size:13px;line-height:1;}
+.pill-found{background:rgba(59,130,246,0.10);color:#2563EB;border:1px solid rgba(59,130,246,0.18);}
+.pill-lost{background:rgba(200,16,46,0.10);color:var(--red-500);border:1px solid rgba(200,16,46,0.20);}
+
 /* responsive */
 @media (max-width:1080px){
   .hero-inner{ grid-template-columns: 1fr 360px; }

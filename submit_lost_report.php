@@ -147,10 +147,21 @@ try {
         }
     }
     
-    // Generate report ID
-    $stmt = $pdo->query("SELECT COUNT(*) FROM lost_reports");
-    $count = $stmt->fetchColumn();
-    $report_id = 'LR-' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+    // Generate a sequential report ID (LR-001, LR-002, ...)
+    // Use MAX across existing 3-digit IDs to avoid duplicates if rows were deleted or concurrent submissions happen.
+    $maxStmt = $pdo->query("SELECT MAX(CAST(SUBSTRING(report_id,4) AS UNSIGNED)) AS max_id FROM lost_reports WHERE report_id REGEXP '^LR-[0-9]{3}$'");
+    $maxRow = $maxStmt ? $maxStmt->fetch(PDO::FETCH_ASSOC) : null;
+    $nextNum = isset($maxRow['max_id']) && $maxRow['max_id'] !== null ? ((int)$maxRow['max_id'] + 1) : 1;
+    $candidate = 'LR-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+    // Safety loop in rare race (very unlikely in XAMPP dev) - recheck existence
+    $existsStmt = $pdo->prepare('SELECT 1 FROM lost_reports WHERE report_id = ? LIMIT 1');
+    while (true) {
+        $existsStmt->execute([$candidate]);
+        if (!$existsStmt->fetch()) { break; }
+        $nextNum++;
+        $candidate = 'LR-' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+    }
+    $report_id = $candidate;
     
     // Determine status
     $status = $requires_approval ? 'Pending' : 'Verified';

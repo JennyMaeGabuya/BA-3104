@@ -1,4 +1,4 @@
-<?php
+  <?php
 // Ensure admin pages use a dedicated session name to avoid collisions with regular user sessions
 session_name('ADMINSESSID');
 if (session_status() !== PHP_SESSION_ACTIVE) {

@@ -164,7 +164,43 @@ require_once 'auth_check.php';
         </div>
 
         <div id="cardsGrid" class="cards-grid" aria-live="polite">
-          <!-- JS will render cards here -->
+          <?php
+          require_once __DIR__ . '/db_config.php';
+          try {
+            $stmt = $pdo->prepare("SELECT report_id, item_name, category, description, location_found, date_found, photo_path FROM found_reports WHERE status = 'Verified' ORDER BY created_at DESC");
+            $stmt->execute();
+            $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (!$items) {
+              echo '<div class="empty-state">No verified found items yet.</div>';
+            } else {
+              foreach ($items as $it) {
+                $path = trim($it['photo_path'] ?? '');
+                if ($path !== '') {
+                  if (str_starts_with($path, 'Image/')) { $path = 'Dashboard/' . $path; }
+                  if (!str_starts_with($path, '/')) { $path = '/BA-3104/' . ltrim($path, '/'); }
+                }
+                $img = $path !== '' ? '<img src="' . htmlspecialchars($path) . '" alt="Item photo">' : "<div class='no-photo'>No Photo</div>";
+                echo '<article class="card-item">';
+                echo '<div class="card-thumb">' . $img . '</div>';
+                echo '<div class="card-body">';
+                echo '<div class="card-title">' . htmlspecialchars($it['item_name']) . '</div>';
+                echo '<div class="card-meta">'
+                   . '<span class="pill pill-found">Found</span>'
+                   . '<span class="meta-cat">' . htmlspecialchars($it['category']) . '</span>'
+                   . '</div>';
+                echo '<div class="card-desc">' . nl2br(htmlspecialchars($it['description'])) . '</div>';
+                echo '<div class="card-event">'
+                   . '<span class="meta-loc">' . htmlspecialchars($it['location_found']) . '</span>'
+                   . '<span class="meta-date">' . htmlspecialchars($it['date_found']) . '</span>'
+                   . '</div>';
+                echo '</div>';
+                echo '</article>';
+              }
+            }
+          } catch (Throwable $e) {
+            echo '<div class="error-state" style="color:#ef4444">Failed to load found items.</div>';
+          }
+          ?>
         </div>
       </section>
     </div>

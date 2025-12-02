@@ -5,6 +5,70 @@
  */
 
 require_once '../auth_check.php';
+require_once '../db_config.php';
+
+// Helper: count rows for user across both tables (optionally by status)
+function countReports(PDO $pdo, $userId, $status = null) {
+  if ($status) {
+    $sql = "SELECT (
+              SELECT COUNT(*) FROM lost_reports WHERE user_id = :uid AND status = :status
+            ) + (
+              SELECT COUNT(*) FROM found_reports WHERE user_id = :uid AND status = :status
+            ) AS total";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':uid' => $userId, ':status' => $status]);
+  } else {
+    $sql = "SELECT (
+              SELECT COUNT(*) FROM lost_reports WHERE user_id = :uid
+            ) + (
+              SELECT COUNT(*) FROM found_reports WHERE user_id = :uid
+            ) AS total";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':uid' => $userId]);
+  }
+  return (int)($stmt->fetchColumn() ?: 0);
+}
+
+// Fetch counts
+$userId = $_SESSION['user_id'] ?? null;
+$totalReports   = $userId ? countReports($pdo, $userId) : 0;
+$verifiedCount  = $userId ? countReports($pdo, $userId, 'Verified') : 0;
+$pendingCount   = $userId ? countReports($pdo, $userId, 'Pending') : 0;
+$claimedCount   = $userId ? countReports($pdo, $userId, 'Claimed') : 0; // may be zero if not used yet
+$rejectedCount  = $userId ? countReports($pdo, $userId, 'Rejected') : 0;
+
+// Helper: fetch list (Verified / Rejected)
+function fetchStatusList(PDO $pdo, $userId, $status) {
+  $sql = "SELECT report_id, item_name, category, location, date_event, status, photo_path, type FROM (
+            SELECT report_id, item_name, category, location AS location, date_lost AS date_event, status, photo_path, 'Lost' AS type, created_at
+            FROM lost_reports WHERE user_id = :uid AND status = :status
+            UNION ALL
+            SELECT report_id, item_name, category, location_found AS location, date_found AS date_event, status, photo_path, 'Found' AS type, created_at
+            FROM found_reports WHERE user_id = :uid AND status = :status
+          ) t ORDER BY created_at DESC";
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([':uid' => $userId, ':status' => $status]);
+  return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+$verifiedReports = $userId ? fetchStatusList($pdo, $userId, 'Verified') : [];
+$rejectedReports = $userId ? fetchStatusList($pdo, $userId, 'Rejected') : [];
+$hasVerified = count($verifiedReports) > 0;
+$hasRejected = count($rejectedReports) > 0;
+$initialTab = $hasVerified ? 'verified' : ($hasRejected ? 'rejected' : 'verified');
+
+// Normalize image path similarly to my_report.php
+function normalizeImagePath($path) {
+  if (!$path) return "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect width='100%' height='100%' fill='%23FFF9F2'/><circle cx='40' cy='40' r='28' fill='%23FFDCE0'/></svg>";
+  $trim = trim($path);
+  if (str_starts_with($trim, 'Image/')) {
+    $trim = 'Dashboard/' . $trim;
+  }
+  if (preg_match('/^https?:\/\//', $trim) || str_starts_with($trim, '/')) {
+    return htmlspecialchars($trim);
+  }
+  return htmlspecialchars('/BA-3104/' . ltrim($trim, '/'));
+}
 
 // Get user's first name for welcome message
 $fullname = $_SESSION['fullname'] ?? $_SESSION['user_name'] ?? 'User';
@@ -18,7 +82,7 @@ $firstName = $nameParts[0] ?? 'User';
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FindIt@BatStateU — Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/BA-3104/Dashboard/dashboard.css?v=1">
+  <link rel="stylesheet" href="/BA-3104/Dashboard/dashboard.css?v=2">
 </head>
 <body>
   <div class="app">
@@ -150,7 +214,7 @@ $firstName = $nameParts[0] ?? 'User';
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
             </div>
             <div class="stat-body">
-              <div class="stat-num">5</div>
+              <div class="stat-num"><?= htmlspecialchars($totalReports) ?></div>
               <div class="stat-label">Total Reports</div>
             </div>
           </article>
@@ -160,7 +224,7 @@ $firstName = $nameParts[0] ?? 'User';
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
             </div>
             <div class="stat-body">
-              <div class="stat-num">2</div>
+              <div class="stat-num"><?= htmlspecialchars($verifiedCount) ?></div>
               <div class="stat-label">Verified</div>
             </div>
           </article>
@@ -170,7 +234,7 @@ $firstName = $nameParts[0] ?? 'User';
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5l3 3"></path><path d="M12 22C6 22 2 17.5 2 12.5S6 3 12 3s10 4.5 10 9.5S18 22 12 22z"></path></svg>
             </div>
             <div class="stat-body">
-              <div class="stat-num">2</div>
+              <div class="stat-num"><?= htmlspecialchars($pendingCount) ?></div>
               <div class="stat-label">Pending</div>
             </div>
           </article>
@@ -180,7 +244,7 @@ $firstName = $nameParts[0] ?? 'User';
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
             </div>
             <div class="stat-body">
-              <div class="stat-num">1</div>
+              <div class="stat-num"><?= htmlspecialchars($claimedCount) ?></div>
               <div class="stat-label">Claimed</div>
             </div>
           </article>
@@ -210,22 +274,94 @@ $firstName = $nameParts[0] ?? 'User';
             <button id="applyBtn" class="btn primary">Apply</button>
           </div>
 
-          <div class="tabs">
-            <button class="tab active" data-tab="approved">Approved</button>
-            <button class="tab" data-tab="rejected">Rejected</button>
+          <div class="tabs" role="tablist" aria-label="Report status filter">
+            <button type="button" class="tab <?= $initialTab === 'verified' ? 'active' : '' ?>" data-tab="verified" aria-controls="statusList" aria-pressed="<?= $initialTab === 'verified' ? 'true' : 'false' ?>">
+              Verified (<?= htmlspecialchars($verifiedCount) ?>)
+            </button>
+            <button type="button" class="tab <?= $initialTab === 'rejected' ? 'active' : '' ?>" data-tab="rejected" aria-controls="statusList" aria-pressed="<?= $initialTab === 'rejected' ? 'true' : 'false' ?>">
+              Rejected (<?= htmlspecialchars($rejectedCount) ?>)
+            </button>
           </div>
         </section>
 
         <!-- RESULTS / EMPTY CARD -->
         <section class="results-card">
-          <div class="results-inner" id="resultsInner">
-            <div class="empty-state" id="emptyState">
-              No approved/rejected Lost and Found Items
+          <div class="results-inner" id="resultsInner" data-default-tab="<?= $initialTab ?>">
+            <div id="emptyState" class="empty-state <?= ($hasVerified || $hasRejected) ? 'hidden' : '' ?>">
+              No verified or rejected reports yet.
             </div>
 
-            <!-- Example list area (hidden if empty) -->
-            <div id="listArea" class="list-area hidden">
-              <!-- real items would be injected here -->
+            <div id="statusList" class="status-list <?= ($hasVerified || $hasRejected) ? '' : 'hidden' ?>">
+              <?php
+                $defaultTab = $initialTab;
+                foreach ($verifiedReports as $r):
+                  $img = normalizeImagePath($r['photo_path'] ?? '');
+                  $visibleClass = ($defaultTab === 'verified') ? '' : ' hidden';
+              ?>
+                <div class="item-card<?= $visibleClass ?>" data-status-card data-status="verified">
+                  <div class="thumb"><img src="<?= $img ?>" alt="<?= htmlspecialchars($r['item_name']) ?>" /></div>
+                  <div class="meta">
+                    <h3 class="title"><?= htmlspecialchars($r['item_name']) ?></h3>
+                    <div class="grid">
+                      <div class="col">
+                        <div class="label">Report ID</div>
+                        <div class="value"><strong><?= htmlspecialchars($r['report_id']) ?></strong></div>
+                        <div class="label">Location</div>
+                        <div class="value"><?= htmlspecialchars($r['location']) ?></div>
+                      </div>
+                      <div class="col">
+                        <div class="label">Category</div>
+                        <div class="value"><?= htmlspecialchars($r['category']) ?></div>
+                        <div class="label">Date</div>
+                        <div class="value"><?= htmlspecialchars($r['date_event']) ?></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="item-badges">
+                    <?php if ($r['type']==='Found'): ?>
+                      <span class="pill pill-found">Found</span>
+                    <?php else: ?>
+                      <span class="pill pill-lost">Lost</span>
+                    <?php endif; ?>
+                    <span class="status status-verified">Verified</span>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+
+              <?php
+                foreach ($rejectedReports as $r):
+                  $img = normalizeImagePath($r['photo_path'] ?? '');
+                  $visibleClass = ($defaultTab === 'rejected') ? '' : ' hidden';
+              ?>
+                <div class="item-card<?= $visibleClass ?>" data-status-card data-status="rejected">
+                  <div class="thumb"><img src="<?= $img ?>" alt="<?= htmlspecialchars($r['item_name']) ?>" /></div>
+                  <div class="meta">
+                    <h3 class="title"><?= htmlspecialchars($r['item_name']) ?></h3>
+                    <div class="grid">
+                      <div class="col">
+                        <div class="label">Report ID</div>
+                        <div class="value"><strong><?= htmlspecialchars($r['report_id']) ?></strong></div>
+                        <div class="label">Location</div>
+                        <div class="value"><?= htmlspecialchars($r['location']) ?></div>
+                      </div>
+                      <div class="col">
+                        <div class="label">Category</div>
+                        <div class="value"><?= htmlspecialchars($r['category']) ?></div>
+                        <div class="label">Date</div>
+                        <div class="value"><?= htmlspecialchars($r['date_event']) ?></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="item-badges">
+                    <?php if ($r['type']==='Found'): ?>
+                      <span class="pill pill-found">Found</span>
+                    <?php else: ?>
+                      <span class="pill pill-lost">Lost</span>
+                    <?php endif; ?>
+                    <span class="status status-rejected">Rejected</span>
+                  </div>
+                </div>
+              <?php endforeach; ?>
             </div>
           </div>
         </section>
@@ -237,7 +373,7 @@ $firstName = $nameParts[0] ?? 'User';
 
   <!-- JS -->
   <script src="../avatar_dropdown.js"></script>
-  <script src="dashboard.js"></script>
+  <script src="dashboard.js?v=2"></script>
 </body>
 </html>
 

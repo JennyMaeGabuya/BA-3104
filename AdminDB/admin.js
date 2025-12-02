@@ -77,69 +77,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Example: dynamically update metrics from a fake API (simulate)
   setTimeout(() => {
-    // these would normally come from API
-    document.getElementById('activeReports').textContent = 6;
-    document.getElementById('verifiedItems').textContent = 6;
-    document.getElementById('resolvedCases').textContent = 0;
-    document.getElementById('pendingVerification').textContent = 4;
+    const activeReports = document.getElementById('activeReports');
+    const verifiedItems = document.getElementById('verifiedItems');
+    const resolvedCases = document.getElementById('resolvedCases');
+    const pendingVerification = document.getElementById('pendingVerification');
+    if (activeReports) activeReports.textContent = 6;
+    if (verifiedItems) verifiedItems.textContent = 6;
+    if (resolvedCases) resolvedCases.textContent = 0;
+    if (pendingVerification) pendingVerification.textContent = 4;
   }, 200);
-});
 
-function changeTab(tabName) {
-    document.querySelectorAll(".tab-btn").forEach(btn =>
-        btn.classList.remove("active")
-    );
+  // Pending-page status filtering
+  const statusList = document.getElementById('adminStatusList');
+  const emptyState = document.getElementById('adminEmptyState');
+  const tabButtons = document.querySelectorAll('.tabs .tab[data-tab]');
+  const statusCards = Array.from(document.querySelectorAll('[data-status-card]'));
 
-    document.querySelector(`[data-tab="${tabName}"]`).classList.add("active");
+  if (statusList && tabButtons.length) {
+    const messages = {
+      pending: 'No pending reports to review.',
+      verified: 'No verified reports found.',
+      rejected: 'No rejected reports found.'
+    };
 
-    document.querySelectorAll(".tab-content").forEach(tab =>
-        tab.classList.remove("active")
-    );
+    const hasCardsFor = (key) => statusCards.some(card => card.dataset.status === key);
 
-    document.getElementById(tabName).classList.add("active");
-}
+    function setActiveTab(name) {
+      tabButtons.forEach(btn => {
+        const isActive = btn.dataset.tab === name;
+        btn.classList.toggle('tab--active', isActive);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    }
 
-document.querySelectorAll(".tab-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-        changeTab(btn.dataset.tab);
+    function showStatus(name) {
+      let visible = 0;
+      statusCards.forEach(card => {
+        const match = card.dataset.status === name;
+        card.classList.toggle('hidden', !match);
+        if (match) visible += 1;
+      });
+
+      const hasVisible = visible > 0;
+      statusList.classList.toggle('hidden', !hasVisible);
+      if (emptyState) {
+        emptyState.classList.toggle('hidden', hasVisible);
+        if (!hasVisible) {
+          emptyState.textContent = messages[name] || 'No reports to display.';
+        }
+      }
+    }
+
+    let initial = statusList.dataset.defaultTab || 'pending';
+    if (!hasCardsFor(initial)) {
+      const fallbacks = ['pending', 'verified', 'rejected'];
+      const replacement = fallbacks.find(key => hasCardsFor(key));
+      if (replacement) initial = replacement;
+    }
+
+    setActiveTab(initial);
+    showStatus(initial);
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.tab || 'pending';
+        setActiveTab(target);
+        showStatus(target);
+      });
     });
+  }
 });
-
-// Handle Approve / Reject
-document.addEventListener("click", (e) => {
-
-    if (e.target.classList.contains("approve-btn")) {
-        let card = e.target.closest(".item-card");
-        moveItem(card, "approved");
-    }
-
-    if (e.target.classList.contains("reject-btn")) {
-        let card = e.target.closest(".item-card");
-        moveItem(card, "rejected");
-    }
-});
-
-function moveItem(card, target) {
-    let targetSection = document.getElementById(target);
-
-    let newCard = card.cloneNode(true);
-
-    // Remove action buttons after moving
-    let actions = newCard.querySelector(".action-buttons");
-    if (actions) actions.remove();
-
-    // Add status label
-    let label = document.createElement("p");
-    label.style.fontWeight = "bold";
-    label.style.color = target === "approved" ? "#27ae60" : "#c0392b";
-    label.textContent = target === "approved" ? "Approved" : "Rejected";
-    newCard.querySelector(".info").appendChild(label);
-
-    targetSection.appendChild(newCard);
-
-    // Remove original from Pending
-    card.remove();
-}
 
 // script.js - Settings form behaviour (demo only)
 // Uses the HTML structure in index.html
@@ -147,6 +154,10 @@ function moveItem(card, target) {
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('settingsForm');
   const notifBtn = document.getElementById('notifBtn');
+
+  if (!form) {
+    return;
+  }
 
   // Keep nav active highlight (visual only)
   document.querySelectorAll('.nav-item').forEach(item => {

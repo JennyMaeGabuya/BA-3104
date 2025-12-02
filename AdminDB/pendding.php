@@ -28,6 +28,19 @@ $first = $_SESSION['first_name'] ?? '';
 $last = $_SESSION['last_name'] ?? '';
 $initials = strtoupper((strlen($first) ? $first[0] : '') . (strlen($last) ? $last[0] : ''));
 $fullname = trim(($first ?: '') . ' ' . ($last ?: ''));
+
+function normalizeImagePath(?string $path): string {
+  if (!$path) return '';
+  $trim = trim($path);
+  if ($trim === '') return '';
+  if (str_starts_with($trim, 'Image/')) {
+    $trim = 'Dashboard/' . $trim;
+  }
+  if (preg_match('/^https?:\/\//', $trim) || str_starts_with($trim, '/')) {
+    return $trim;
+  }
+  return '/BA-3104/' . ltrim($trim, '/');
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -119,78 +132,147 @@ $fullname = trim(($first ?: '') . ' ' . ($last ?: ''));
         <section class="section-header">
           <div>
             <h2>Pending Approval</h2>
-            <p class="muted">Review and approve reports with photos before posting</p>
+            <p class="muted">Review and verify reports with photos before posting</p>
           </div>
         </section>
+
+        <?php
+        // CSRF token setup and report aggregation for tabs
+        if (empty($_SESSION['admin_csrf'])) {
+          $_SESSION['admin_csrf'] = bin2hex(random_bytes(16));
+        }
+        $csrf = $_SESSION['admin_csrf'];
+
+        $statusLabels = [
+          'pending' => 'Pending',
+          'verified' => 'Verified',
+          'rejected' => 'Rejected',
+        ];
+        $statusCounts = array_fill_keys(array_keys($statusLabels), 0);
+        $reports = [];
+
+        try {
+          $placeholders = implode(',', array_fill(0, count($statusLabels), '?'));
+          $sql = "SELECT 'Lost' AS type, report_id, item_name, category, description, location AS location, date_lost AS date_event, photo_path, created_at, status
+                    FROM lost_reports WHERE status IN ($placeholders)
+                  UNION ALL
+                  SELECT 'Found' AS type, report_id, item_name, category, description, location_found AS location, date_found AS date_event, photo_path, created_at, status
+                    FROM found_reports WHERE status IN ($placeholders)
+                  ORDER BY created_at DESC";
+          $params = array_merge(array_values($statusLabels), array_values($statusLabels));
+          $stmt = $pdo->prepare($sql);
+          $stmt->execute($params);
+          while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $key = strtolower($row['status'] ?? 'pending');
+            if (!isset($statusCounts[$key])) {
+              $statusCounts[$key] = 0;
+            }
+            $statusCounts[$key] += 1;
+            $row['status_key'] = $key;
+            $reports[] = $row;
+          }
+        } catch (Throwable $e) {
+          echo '<div class="card"><div class="card-inner" style="color:#ef4444">Failed to load reports.</div></div>';
+        }
+
+        $initialTab = 'pending';
+        foreach (array_keys($statusLabels) as $candidate) {
+          if (($statusCounts[$candidate] ?? 0) > 0) {
+            $initialTab = $candidate;
+            break;
+          }
+        }
+        $hasReports = count($reports) > 0;
+        ?>
 
         <!-- tabs -->
         <div class="tabs-wrap">
           <div class="tabs" role="tablist" aria-label="Report states">
-            <button class="tab tab--active" data-tab="pending">Pending</button>
-            <button class="tab" data-tab="approved">Approved</button>
-            <button class="tab" data-tab="rejected">Rejected</button>
+            <button type="button" class="tab <?= $initialTab === 'pending' ? 'tab--active' : '' ?>" data-tab="pending" aria-controls="adminStatusList" aria-pressed="<?= $initialTab === 'pending' ? 'true' : 'false' ?>">
+              Pending (<?= htmlspecialchars($statusCounts['pending'] ?? 0) ?>)
+            </button>
+            <button type="button" class="tab <?= $initialTab === 'verified' ? 'tab--active' : '' ?>" data-tab="verified" aria-controls="adminStatusList" aria-pressed="<?= $initialTab === 'verified' ? 'true' : 'false' ?>">
+              Verified (<?= htmlspecialchars($statusCounts['verified'] ?? 0) ?>)
+            </button>
+            <button type="button" class="tab <?= $initialTab === 'rejected' ? 'tab--active' : '' ?>" data-tab="rejected" aria-controls="adminStatusList" aria-pressed="<?= $initialTab === 'rejected' ? 'true' : 'false' ?>">
+              Rejected (<?= htmlspecialchars($statusCounts['rejected'] ?? 0) ?>)
+            </button>
           </div>
         </div>
 
-        <!-- Report card -->
-        <section class="card report-card" id="reportCard">
-          <div class="card-inner">
-            <!-- left: image -->
-            <div class="report-image">
-              <!-- use uploaded image path as report photo -->
-              <img src="/mnt/data/a90fc6b1-3e9b-450c-aaa7-48408adf3698.png" alt="Black backpack">
+        <div id="adminEmptyState" class="admin-empty <?= $hasReports ? 'hidden' : '' ?>">
+          No reports to review yet.
+        </div>
+
+        <div id="adminStatusList" class="report-list <?= $hasReports ? '' : 'hidden' ?>" data-default-tab="<?= htmlspecialchars($initialTab) ?>">
+          <?php foreach ($reports as $rep):
+            $imgPath = normalizeImagePath($rep['photo_path'] ?? '');
+            $statusKey = $rep['status_key'] ?? 'pending';
+            $visibleClass = ($statusKey === $initialTab) ? '' : ' hidden';
+            $pillClass = ($rep['type'] === 'Found') ? 'pill-found' : 'pill-lost';
+            $statusPill = 'pill-status pill-status--' . $statusKey;
+            $description = trim($rep['description'] ?? '') ?: 'No description provided.';
+          ?>
+          <section class="card report-card<?= $visibleClass ?>" data-status-card data-status="<?= htmlspecialchars($statusKey) ?>">
+            <div class="card-inner">
+              <div class="report-image">
+                <?php if ($imgPath): ?>
+                  <img src="<?= htmlspecialchars($imgPath) ?>" alt="Photo of <?= htmlspecialchars($rep['item_name']) ?>" />
+                <?php else: ?>
+                  <div class="no-photo">No Photo</div>
+                <?php endif; ?>
+              </div>
+              <div class="report-details">
+                <div class="report-head">
+                  <h3 class="item-title"><?= htmlspecialchars($rep['item_name']) ?></h3>
+                  <div class="badges">
+                    <span class="pill <?= $pillClass ?>"><?= htmlspecialchars($rep['type']) ?></span>
+                    <span class="pill <?= $statusPill ?>"><?= htmlspecialchars($statusLabels[$statusKey] ?? ucfirst($statusKey)) ?></span>
+                  </div>
+                </div>
+
+                <div class="meta-grid">
+                  <div class="meta">
+                    <div class="meta-label">Report ID</div>
+                    <div class="meta-value meta-id"><?= htmlspecialchars($rep['report_id']) ?></div>
+                  </div>
+                  <div class="meta">
+                    <div class="meta-label">Category</div>
+                    <div class="meta-value"><?= htmlspecialchars($rep['category']) ?></div>
+                  </div>
+                  <div class="meta">
+                    <div class="meta-label">Location</div>
+                    <div class="meta-value"><?= htmlspecialchars($rep['location']) ?></div>
+                  </div>
+                  <div class="meta">
+                    <div class="meta-label">Date</div>
+                    <div class="meta-value"><?= htmlspecialchars($rep['date_event']) ?></div>
+                  </div>
+                </div>
+
+                <p class="desc"><?= nl2br(htmlspecialchars($description)) ?></p>
+
+                <?php if ($statusKey === 'pending'): ?>
+                  <div class="actions">
+                    <form method="post" action="update_report_status.php" style="display:inline-block">
+                      <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrf) ?>">
+                      <input type="hidden" name="report_id" value="<?= htmlspecialchars($rep['report_id']) ?>">
+                      <input type="hidden" name="action" value="approve">
+                      <button class="btn btn-approve" onclick="return confirm('Verify this report?')">Verify</button>
+                    </form>
+                    <form method="post" action="update_report_status.php" style="display:inline-block">
+                      <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrf) ?>">
+                      <input type="hidden" name="report_id" value="<?= htmlspecialchars($rep['report_id']) ?>">
+                      <input type="hidden" name="action" value="reject">
+                      <button class="btn btn-reject" onclick="return confirm('Reject this report?')">Reject</button>
+                    </form>
+                  </div>
+                <?php endif; ?>
+              </div>
             </div>
-
-            <!-- right: details -->
-            <div class="report-details">
-              <div class="report-head">
-                <h3 class="item-title">Black Backpack with Laptop</h3>
-                <div class="badges">
-                  <span class="pill pill-lost">Lost</span>
-                  <span class="pill pill-requires">Requires Approval</span>
-                </div>
-              </div>
-
-              <div class="meta-grid">
-                <div class="meta">
-                  <div class="meta-label">Report ID</div>
-                  <div class="meta-value meta-id">LR-006</div>
-                </div>
-
-                <div class="meta">
-                  <div class="meta-label">Category</div>
-                  <div class="meta-value">Bag</div>
-                </div>
-
-                <div class="meta">
-                  <div class="meta-label">Reported by</div>
-                  <div class="meta-value">Anna Reyes</div>
-                </div>
-
-                <div class="meta">
-                  <div class="meta-label">Date</div>
-                  <div class="meta-value">2025-11-13</div>
-                </div>
-
-                <div class="meta">
-                  <div class="meta-label">Location</div>
-                  <div class="meta-value">Cafeteria</div>
-                </div>
-              </div>
-
-              <!-- admin notice -->
-              <div class="admin-note" role="status">
-                <strong>Admin Action Required:</strong> This report includes a photo and requires your approval before it can be posted publicly.
-              </div>
-
-              <!-- actions -->
-              <div class="actions">
-                <button class="btn btn-approve" id="approveBtn">Approve</button>
-                <button class="btn btn-reject" id="rejectBtn">Reject</button>
-              </div>
-            </div>
-          </div>
-        </section>
+          </section>
+          <?php endforeach; ?>
+        </div>
 
         <!-- placeholder for multiple cards / empty states -->
         <div id="afterActionMsg" class="after-action hidden" aria-live="polite"></div>

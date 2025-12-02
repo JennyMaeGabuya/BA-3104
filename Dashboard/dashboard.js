@@ -141,6 +141,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('profileForm');
   const btnSave = document.getElementById('btnSave');
 
+  if (!form || !btnSave) {
+    return; // Only run settings logic on the settings page
+  }
+
   const inputs = {
     firstName: document.getElementById('firstName'),
     lastName: document.getElementById('lastName'),
@@ -246,79 +250,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // tabs + filters behavior: safe init after DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-  // tabs switching (if any tabs exist)
-  document.querySelectorAll('.tab').forEach(tab => {
+  const resultsInner = document.getElementById('resultsInner');
+  if (!resultsInner) {
+    return; // Nothing to filter on pages without the status list
+  }
+
+  const tabs = document.querySelectorAll('.tabs .tab[data-tab]');
+  const emptyState = document.getElementById('emptyState');
+  const statusList = document.getElementById('statusList');
+  const cards = Array.from(document.querySelectorAll('[data-status-card]'));
+
+  const EMPTY_MESSAGES = {
+    verified: 'No verified reports yet.',
+    rejected: 'No rejected reports yet.'
+  };
+
+  const hasCardsFor = (status) => cards.some(card => card.dataset.status === status);
+
+  function setActiveTab(name) {
+    tabs.forEach(tab => {
+      const isActive = tab.dataset.tab === name;
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+  }
+
+  function updateVisibility(active) {
+    let visibleCount = 0;
+    cards.forEach(card => {
+      const isVisible = card.dataset.status === active;
+      card.classList.toggle('hidden', !isVisible);
+      if (isVisible) visibleCount += 1;
+    });
+
+    if (statusList) {
+      statusList.classList.toggle('hidden', visibleCount === 0);
+    }
+
+    if (emptyState) {
+      emptyState.classList.toggle('hidden', visibleCount > 0);
+      if (visibleCount === 0) {
+        emptyState.textContent = EMPTY_MESSAGES[active] || 'No reports to show yet.';
+      }
+    }
+  }
+
+  tabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      // for demo: keep empty state always; in real app you'd load approved/rejected lists
-      showEmptyState();
+      const target = tab.dataset.tab || 'verified';
+      setActiveTab(target);
+      updateVisibility(target);
     });
   });
 
-  // Apply button demo (filters not wired to real data)
+  let initialTab = resultsInner.dataset.defaultTab || 'verified';
+  if (!hasCardsFor(initialTab)) {
+    if (initialTab === 'verified' && hasCardsFor('rejected')) {
+      initialTab = 'rejected';
+    } else if (initialTab === 'rejected' && hasCardsFor('verified')) {
+      initialTab = 'verified';
+    }
+  }
+
+  setActiveTab(initialTab);
+  updateVisibility(initialTab);
+
+  // Filters Apply button (currently only triggers a simple animation)
   const applyBtn = document.getElementById('applyBtn');
   if (applyBtn) {
     applyBtn.addEventListener('click', () => {
-      // small animation to show button press
       applyBtn.classList.add('pressed');
       setTimeout(() => applyBtn.classList.remove('pressed'), 200);
-      // demo: toggle empty vs list (keeps empty per screenshot)
-      showEmptyState();
+      // Future: apply search/filter logic to visible list
     });
   }
-});
-
-function showEmptyState() {
-  const empty = document.getElementById('emptyState');
-  const list = document.getElementById('listArea');
-  if (empty) empty.classList.remove('hidden');
-  if (list) list.classList.add('hidden');
-}
-
-// Approve/Reject behaviour (generic, works with any `.item-card` markup)
-document.addEventListener('DOMContentLoaded', () => {
-  const listRoot = document.getElementById('listArea') || document.getElementById('resultsInner');
-  if (!listRoot) return;
-
-  // ensure sub-containers for approved/rejected (non-destructive)
-  let approvedContainer = listRoot.querySelector('.approved-list');
-  let rejectedContainer = listRoot.querySelector('.rejected-list');
-  if (!approvedContainer) {
-    approvedContainer = document.createElement('div');
-    approvedContainer.className = 'approved-list';
-    listRoot.appendChild(approvedContainer);
-  }
-  if (!rejectedContainer) {
-    rejectedContainer = document.createElement('div');
-    rejectedContainer.className = 'rejected-list hidden';
-    listRoot.appendChild(rejectedContainer);
-  }
-
-  // Event delegation for approve/reject buttons
-  listRoot.addEventListener('click', (ev) => {
-    const btn = ev.target.closest('[data-action="approve"], [data-action="reject"]');
-    if (!btn) return;
-    const card = btn.closest('.item-card');
-    if (!card) return;
-
-    const action = btn.dataset.action;
-    if (action === 'approve') {
-      card.dataset.state = 'approved';
-      card.classList.remove('rejected');
-      card.classList.add('approved');
-      approvedContainer.appendChild(card);
-    } else if (action === 'reject') {
-      card.dataset.state = 'rejected';
-      card.classList.remove('approved');
-      card.classList.add('rejected');
-      rejectedContainer.appendChild(card);
-    }
-
-    // show list area and hide empty state when there is at least one card
-    const empty = document.getElementById('emptyState');
-    if (empty) empty.classList.add('hidden');
-    const listArea = document.getElementById('listArea');
-    if (listArea) listArea.classList.remove('hidden');
-  });
 });
