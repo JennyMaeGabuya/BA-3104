@@ -13,7 +13,7 @@ require_once 'auth_check.php';
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FindIt@BatStateU — Report Lost Item</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="user_home.css">
+  <link rel="stylesheet" href="/BA-3104/user_home.css">
 </head>
 <body>
 
@@ -113,7 +113,7 @@ require_once 'auth_check.php';
       <p class="subtitle">Fill in the details below to submit a lost item report. Our team will verify and help you recover your item.</p>
     </header>
 
-    <form id="foundForm" class="form-card" action="test_submit.php" method="POST" enctype="multipart/form-data" novalidate>
+    <form id="foundForm" class="form-card" action="test_submit.php" method="POST" enctype="multipart/form-data" novalidate data-report-type="lost">
       <!-- ITEM INFORMATION -->
       <section class="form-section">
         <h2 class="section-title">Item Information</h2>

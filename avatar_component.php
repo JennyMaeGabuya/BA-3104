@@ -74,7 +74,7 @@ $isDashboardPage = strpos($_SERVER['REQUEST_URI'], '/Dashboard/') !== false;
     </button>
     <?php endif; ?>
     
-    <a href="/SIA.html/Dashboard/settings.php" class="dropdown-item" role="menuitem">
+    <a href="/BA-3104/Dashboard/settings.php" class="dropdown-item" role="menuitem">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="3"></circle>
         <path d="M12 1v6m0 6v6M5.64 5.64l4.24 4.24m4.24 4.24l4.24 4.24M1 12h6m6 0h6M5.64 18.36l4.24-4.24m4.24-4.24l4.24-4.24"></path>
@@ -82,7 +82,7 @@ $isDashboardPage = strpos($_SERVER['REQUEST_URI'], '/Dashboard/') !== false;
       <span>Settings</span>
     </a>
     
-    <a href="/SIA.html/logout.php" class="dropdown-item dropdown-item-logout" role="menuitem">
+    <a href="/BA-3104/logout.php" class="dropdown-item dropdown-item-logout" role="menuitem">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
         <polyline points="16 17 21 12 16 7"></polyline>

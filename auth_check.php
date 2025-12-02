@@ -14,8 +14,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    // User is not logged in, redirect to login page
-    header('Location: login.php');
+    // User is not logged in, redirect to the site login page (use absolute path)
+    header('Location: /BA-3104/login.php');
     exit; // Stop script execution
 }
 

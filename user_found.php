@@ -14,7 +14,7 @@ require_once 'auth_check.php';
   <title>FindIt@BatStateU — Found Items</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="user_home.css">
+  <link rel="stylesheet" href="/BA-3104/user_home.css">
 </head>
 <body>
 

@@ -18,7 +18,7 @@ $firstName = $nameParts[0] ?? 'User';
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FindIt@BatStateU — Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/SIA.html/Dashboard/dashboard.css?v=1">
+  <link rel="stylesheet" href="/BA-3104/Dashboard/dashboard.css?v=1">
 </head>
 <body>
   <div class="app">

@@ -114,7 +114,7 @@ require_once 'auth_check.php';
       <p class="subtitle">Thank you for helping! Fill in the details below to report an item you found on campus.</p>
     </header>
 
-    <form id="foundForm" class="form-card" novalidate>
+    <form id="foundForm" class="form-card" novalidate data-report-type="found">
       <!-- ITEM INFORMATION -->
       <section class="form-section">
         <h2 class="section-title">Item Information</h2>

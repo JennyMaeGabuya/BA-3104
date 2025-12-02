@@ -14,7 +14,7 @@ require_once '../db_config.php';
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FindIt@BatStateU — My Reports</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/SIA.html/Dashboard/dashboard.css?v=1">
+  <link rel="stylesheet" href="/BA-3104/Dashboard/dashboard.css?v=1">
 </head>
 <body>
   <div class="app">
@@ -165,22 +165,37 @@ require_once '../db_config.php';
 
               <tbody>
                 <?php
-                // Fetch user's lost item reports from database
+                // Fetch user's lost and found item reports from database
                 try {
                   $stmt = $pdo->prepare("
-                    SELECT report_id, item_name, category, location, date_lost, status, photo_path
+                      SELECT 'Lost' AS type, report_id, item_name, category, location AS location, date_lost AS date_event, status, photo_path, created_at
                     FROM lost_reports 
-                    WHERE user_id = :user_id 
+                    WHERE user_id = :user_id
+                    UNION ALL
+                    SELECT 'Found' AS type, report_id, item_name, category, location_found AS location, date_found AS date_event, status, photo_path, created_at
+                    FROM found_reports
+                    WHERE user_id = :user_id
                     ORDER BY created_at DESC
                   ");
                   $stmt->execute([':user_id' => $_SESSION['user_id']]);
-                  $reports = $stmt->fetchAll();
+                  $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                   
                   if (count($reports) > 0):
                     foreach ($reports as $report):
-                      // Determine image source
+                      // Determine image source (prefix with app base when relative)
                       if (!empty($report['photo_path'])) {
-                        $img_src = htmlspecialchars($report['photo_path']);
+                        $path = trim($report['photo_path']);
+                        // Normalize legacy paths saved as 'Image/...'
+                        if (str_starts_with($path, 'Image/')) {
+                          $path = 'Dashboard/' . $path;
+                        }
+                        // If already absolute, keep as is; else prefix with /BA-3104/
+                        if (preg_match('/^https?:\\/\\//', $path) || str_starts_with($path, '/')) {
+                          $img_src = htmlspecialchars($path);
+                        } else {
+                          $img_src = '/BA-3104/' . ltrim($path, '/');
+                          $img_src = htmlspecialchars($img_src);
+                        }
                       } else {
                         // Default placeholder SVG
                         $img_src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect width='100%' height='100%' fill='%23FFF9F2'/><circle cx='40' cy='40' r='28' fill='%23FFDCE0'/></svg>";
@@ -198,11 +213,17 @@ require_once '../db_config.php';
                 <tr>
                   <td class="td-thumb"><img src="<?= $img_src ?>" alt="<?= htmlspecialchars($report['item_name']) ?>"></td>
                   <td class="td-id"><a class="id-link" href="#"><?= htmlspecialchars($report['report_id']) ?></a></td>
-                  <td><span class="pill pill-lost">Lost</span></td>
+                  <td>
+                    <?php if ($report['type'] === 'Found'): ?>
+                      <span class="pill pill-found">Found</span>
+                    <?php else: ?>
+                      <span class="pill pill-lost">Lost</span>
+                    <?php endif; ?>
+                  </td>
                   <td><?= htmlspecialchars($report['item_name']) ?></td>
                   <td><?= htmlspecialchars($report['category']) ?></td>
                   <td><?= htmlspecialchars($report['location']) ?></td>
-                  <td><?= htmlspecialchars($report['date_lost']) ?></td>
+                  <td><?= htmlspecialchars($report['date_event']) ?></td>
                   <td><span class="status <?= $status_class ?>"><?= $status_text ?></span></td>
                   <td>
                     <div class="actions-col">

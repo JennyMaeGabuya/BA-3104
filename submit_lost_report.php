@@ -5,12 +5,14 @@
  * Saves photos to Dashboard/Image/ and stores report in database
  */
 
-// Enable error logging
+// Enable error logging (log only) and prevent raw notices from corrupting JSON
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('display_errors', 0);
 
 session_start();
 require_once 'db_config.php';
+header('Content-Type: application/json');
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -51,41 +53,97 @@ try {
     $photo_path = null;
     $requires_approval = false;
     
-    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-        $requires_approval = true; // Photos require admin approval
-        
-        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png'];
-        $max_size = 10 * 1024 * 1024; // 10MB
-        
-        $file = $_FILES['photo'];
-        
-        // Validate file type
-        if (!in_array($file['type'], $allowed_types)) {
-            throw new Exception('Invalid file type. Only JPG and PNG allowed.');
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $fileErr = $_FILES['photo']['error'];
+        if ($fileErr !== UPLOAD_ERR_OK) {
+            $errMap = [
+                UPLOAD_ERR_INI_SIZE => 'Uploaded file exceeds server limit.',
+                UPLOAD_ERR_FORM_SIZE => 'Uploaded file exceeds form limit.',
+                UPLOAD_ERR_PARTIAL => 'File only partially uploaded.',
+                UPLOAD_ERR_NO_FILE => 'No file uploaded.',
+                UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder on server.',
+                UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk.',
+                UPLOAD_ERR_EXTENSION => 'File upload stopped by extension.'
+            ];
+            $detail = $errMap[$fileErr] ?? ('Upload error code: ' . $fileErr);
+            throw new Exception('Upload failed: ' . $detail);
         }
-        
-        // Validate file size
+
+        $requires_approval = true; // Photos require admin approval
+        $file = $_FILES['photo'];
+
+        // Validate size
+        $max_size = 10 * 1024 * 1024; // 10MB
         if ($file['size'] > $max_size) {
             throw new Exception('File too large. Maximum size is 10MB.');
         }
-        
-        // Generate unique filename
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'lost_' . time() . '_' . uniqid() . '.' . $extension;
-        $upload_dir = __DIR__ . '/Dashboard/Image/';
-        
-        // Create directory if it doesn't exist
-        if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0755, true);
+
+        // Robust MIME validation using finfo
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($file['tmp_name']);
+        $allowed_mime = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
+        if (!array_key_exists($mime, $allowed_mime)) {
+            throw new Exception('Invalid file type. Only JPG and PNG allowed.');
         }
-        
-        $destination = $upload_dir . $filename;
-        
-        // Move uploaded file
-        if (move_uploaded_file($file['tmp_name'], $destination)) {
-            $photo_path = 'Image/' . $filename; // Relative path for database
+
+        // Normalize extension based on MIME
+        $extension = $allowed_mime[$mime];
+        $filename = 'lost_' . date('Ymd_His') . '_' . bin2hex(random_bytes(6)) . '.' . $extension;
+        $upload_dir = __DIR__ . '/Dashboard/Image/';
+        $fallback_dir = __DIR__ . '/ImageUploads/'; // fallback if primary not writable
+
+        // Ensure directory exists and writable
+        // Ensure directory exists and writable (trying primary then fallback)
+        $target_dir = $upload_dir;
+        if (!is_dir($target_dir)) {
+            @mkdir($target_dir, 0775, true);
+        }
+        if (!is_writable($target_dir)) {
+            @chmod($target_dir, 0775);
+        }
+        // Final escalation attempt (development only) to world-writable if still failing
+        if (!is_writable($target_dir)) {
+            @chmod($target_dir, 0777);
+        }
+        if (!is_writable($target_dir)) {
+            // Try fallback
+            if (!is_dir($fallback_dir)) {
+                @mkdir($fallback_dir, 0775, true);
+            }
+            if (!is_writable($fallback_dir)) {
+                @chmod($fallback_dir, 0775);
+            }
+            if (!is_writable($fallback_dir)) {
+                @chmod($fallback_dir, 0777); // escalate fallback
+            }
+            if (is_writable($fallback_dir)) {
+                $target_dir = $fallback_dir;
+            } else {
+                error_log('Upload dir permission failure: primary=' . $upload_dir . ' fallback=' . $fallback_dir);
+                throw new Exception('Upload directory not writable.');
+            }
+        }
+
+        $destination = $target_dir . $filename;
+
+        // Double-check tmp file
+        if (!is_uploaded_file($file['tmp_name'])) {
+            throw new Exception('Security check failed on uploaded file.');
+        }
+
+        if (!move_uploaded_file($file['tmp_name'], $destination)) {
+            // Attempt fallback rename (rare cases)
+            if (!@rename($file['tmp_name'], $destination)) {
+                error_log('Upload move failed: tmp=' . $file['tmp_name'] . ' dest=' . $destination);
+                throw new Exception('Failed to save uploaded file');
+            }
+        }
+
+        // Set relative path depending on which directory used
+        if ($target_dir === $upload_dir) {
+            $photo_path = 'Dashboard/Image/' . $filename; // correct relative to app root
         } else {
-            throw new Exception('Failed to save uploaded file');
+            $photo_path = 'ImageUploads/' . $filename; // fallback directory
         }
     }
     

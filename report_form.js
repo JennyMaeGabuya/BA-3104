@@ -291,8 +291,12 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
 
+    // Choose endpoint based on explicit data attribute to avoid heuristics
+    const reportType = (form.getAttribute('data-report-type') || '').toLowerCase();
+    const endpoint = reportType === 'found' ? '/BA-3104/submit_found_report.php' : '/BA-3104/submit_lost_report.php';
+
     // Send to backend via fetch API
-    fetch('submit_lost_report.php', {
+    fetch(endpoint, {
       method: 'POST',
       body: formData
     })
@@ -316,8 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
           window.location.href = 'Dashboard/my_report.php';
         }, 2000);
       } else {
-        // Show error message
-        alert('Error: ' + (data.message || 'Failed to submit report'));
+        // Show error message (support both 'error' and 'message' keys)
+        alert('Error: ' + (data.error || data.message || 'Failed to submit report'));
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalHTML;
       }

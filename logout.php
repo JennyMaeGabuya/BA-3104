@@ -56,8 +56,8 @@ if ($scope === 'admin') {
     session_destroy();
 }
 
-// Redirect to login page
-header('Location: login.php');
+// Redirect to login page (use absolute path)
+header('Location: /BA-3104/login.php');
 exit;
 ?>
 

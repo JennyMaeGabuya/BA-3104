@@ -34,7 +34,7 @@ $pref_weekly = !empty($_SESSION['pref_weekly']) ? true : false;
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FindIt@BatStateU — Settings</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="/BA-3104/Dashboard/dashboard.css">
 </head>
 <body>
   <div class="app">

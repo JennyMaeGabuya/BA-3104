@@ -41,7 +41,7 @@ $fullname = trim(($first ?: '') . ' ' . ($last ?: ''));
 
   <!-- Inter font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="admin.css">
+  <link rel="stylesheet" href="/BA-3104/AdminDB/admin.css">
 </head>
 <body>
 
