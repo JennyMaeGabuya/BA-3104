@@ -217,6 +217,8 @@ $reports = [];
                         $status_class = 'status-verified';
                       } elseif (strtolower($report['status']) === 'claimed') {
                         $status_class = 'status-claimed';
+                      } elseif (strtolower($report['status']) === 'rejected') {
+                        $status_class = 'status-rejected';
                       }
                 ?>
                 <tr>
@@ -239,7 +241,7 @@ $reports = [];
                       <?php if (strtolower($report['status']) === 'pending'): ?>
                         <button type="button" class="action-btn edit" data-report-id="<?= htmlspecialchars($report['report_id']) ?>">Edit</button>
                       <?php else: ?>
-                        <button type="button" class="action-btn view" disabled>View</button>
+                        <button type="button" class="action-btn view" data-view-report="<?= htmlspecialchars($report['report_id']) ?>">View</button>
                       <?php endif; ?>
                       <a class="action-btn delete" href="delete_report.php?id=<?= urlencode($report['report_id']) ?>" onclick="return confirm('Are you sure you want to delete this report?')">Delete</a>
                     </div>
@@ -275,21 +277,25 @@ $reports = [];
               <input type="hidden" name="report_type" id="editReportTypeField">
 
               <header class="edit-modal__header">
-                <p class="modal-label">Edit Report</p>
-                <h2 id="editModalTitle">Report</h2>
-                <div class="modal-tags">
-                  <span class="modal-chip" id="editModalReportType">Lost</span>
-                  <span class="modal-chip modal-chip--status" id="editModalStatus">Pending</span>
+                <div class="edit-modal__header-text">
+                  <p class="modal-label">Edit Report</p>
+                  <h2 id="editModalTitle">Report</h2>
+                  <div class="modal-subtext-row">
+                    <p class="modal-subtext">Update the details of your report. Changes will be reviewed by an administrator.</p>
+                    <div class="modal-tags">
+                      <span class="modal-chip" id="editModalReportType">Lost</span>
+                      <span class="modal-chip modal-chip--status" id="editModalStatus">Pending</span>
+                    </div>
+                  </div>
                 </div>
-                <div class="modal-id-line">
-                  <span class="modal-id-label">Report ID:</span>
-                  <span class="modal-id-value" id="editModalReportId">—</span>
-                </div>
-                <p class="modal-subtext">Update the details of your report. Changes will be reviewed by an administrator.</p>
               </header>
 
               <div class="edit-modal__scroll">
                 <div class="modal-grid">
+                  <div class="modal-field modal-field--info">
+                    <span class="field-label">Report ID</span>
+                    <span class="field-static" id="editReportIdDisplay">—</span>
+                  </div>
                   <label class="modal-field">
                     <span class="field-label">Item Name *</span>
                     <input type="text" name="item_name" id="editItemName" required>
@@ -330,7 +336,9 @@ $reports = [];
 
                 <div class="modal-image">
                   <span class="field-label">Current Image</span>
-                  <img id="editModalImage" alt="Current item image" src="" loading="lazy">
+                  <div class="modal-image__preview">
+                    <img id="editModalImage" alt="Current item image" src="" loading="lazy">
+                  </div>
                   <p class="modal-image__hint">To replace the image, please contact support or submit a new report.</p>
                 </div>
               </div>
@@ -342,6 +350,89 @@ $reports = [];
                 <button type="submit" class="btn btn-cta" data-save-btn>Save Changes</button>
               </div>
             </form>
+          </div>
+        </div>
+
+        <!-- View Modal -->
+        <div id="viewModal" class="view-modal" aria-hidden="true">
+          <div class="view-modal__panel" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
+            <button type="button" class="view-modal__close" data-view-close>&times;</button>
+            <header class="view-modal__header">
+              <div class="view-modal__text">
+                <p class="view-modal__eyebrow">Report Details</p>
+                <h2 id="viewModalTitle" class="view-modal__title">Item Report</h2>
+                <div class="view-modal__subtitle-row">
+                  <p class="view-modal__subtitle">Complete information about this report. Scroll to view all details.</p>
+                  <div class="view-modal__tags">
+                    <span class="view-chip" id="viewModalType">Lost</span>
+                    <span class="view-chip view-chip--status" id="viewModalStatus">Pending Approval</span>
+                  </div>
+                </div>
+              </div>
+            </header>
+
+            <div class="view-modal__body">
+              <figure class="view-modal__image">
+                <img id="viewModalImage" src="" alt="Report item image" loading="lazy">
+              </figure>
+
+              <section class="view-modal__section">
+                <header class="view-section__header">
+                  <span class="view-section__label">Report ID</span>
+                  <span class="view-section__value" id="viewModalReportId">—</span>
+                </header>
+
+                <div class="view-grid">
+                  <div class="view-field">
+                    <span class="view-field__label">Item Name</span>
+                    <span class="view-field__value" id="viewModalItem">—</span>
+                  </div>
+                  <div class="view-field">
+                    <span class="view-field__label">Category</span>
+                    <span class="view-field__value" id="viewModalCategory">—</span>
+                  </div>
+                  <div class="view-field">
+                    <span class="view-field__label" id="viewModalLocationLabel">Location</span>
+                    <span class="view-field__value" id="viewModalLocation">—</span>
+                  </div>
+                  <div class="view-field">
+                    <span class="view-field__label">Date</span>
+                    <span class="view-field__value" id="viewModalDate">—</span>
+                  </div>
+                  <div class="view-field" id="viewModalTimeRow">
+                    <span class="view-field__label">Time</span>
+                    <span class="view-field__value" id="viewModalTime">—</span>
+                  </div>
+                  <div class="view-field" id="viewModalPickupRow">
+                    <span class="view-field__label">Pickup Location</span>
+                    <span class="view-field__value" id="viewModalPickup">—</span>
+                  </div>
+                </div>
+
+                <article class="view-description">
+                  <h3>Description</h3>
+                  <div class="view-description__content" id="viewModalDescription">—</div>
+                </article>
+              </section>
+
+              <section class="view-modal__section">
+                <h3 class="view-section__heading">Contact Information</h3>
+                <div class="view-contact">
+                  <div class="view-contact__item">
+                    <span class="view-field__label">Email</span>
+                    <span class="view-field__value" id="viewModalEmail">—</span>
+                  </div>
+                  <div class="view-contact__item">
+                    <span class="view-field__label">Phone</span>
+                    <span class="view-field__value" id="viewModalPhone">—</span>
+                  </div>
+                </div>
+              </section>
+
+              <div class="view-modal__footer">
+                <button type="button" class="btn btn-cta" data-view-close>Close</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -361,12 +452,16 @@ $reports = [];
 
       const modal = document.getElementById('editModal');
       const form = document.getElementById('editReportForm');
+      const viewModal = document.getElementById('viewModal');
       if (!modal || !form) {
         return;
       }
 
+      const PLACEHOLDER_IMAGE = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='400'><rect width='100%' height='100%' fill='%23F1F5F9'/><text x='50%' y='52%' dominant-baseline='middle' text-anchor='middle' fill='%2394A3B8' font-family='Inter, Arial, sans-serif' font-size='32'>No item photo</text></svg>";
+
       const fields = {
         id: document.getElementById('editReportIdField'),
+        idDisplay: document.getElementById('editReportIdDisplay'),
         type: document.getElementById('editReportTypeField'),
         item: document.getElementById('editItemName'),
         category: document.getElementById('editCategory'),
@@ -381,7 +476,6 @@ $reports = [];
 
       const headerEls = {
         title: document.getElementById('editModalTitle'),
-        idValue: document.getElementById('editModalReportId'),
         typeChip: document.getElementById('editModalReportType'),
         statusChip: document.getElementById('editModalStatus'),
         image: document.getElementById('editModalImage'),
@@ -413,7 +507,9 @@ $reports = [];
       function closeModal() {
         modal.setAttribute('aria-hidden', 'true');
         modal.classList.remove('is-visible');
-        document.body.classList.remove('modal-open');
+        if (!viewModal || viewModal.getAttribute('aria-hidden') === 'true') {
+          document.body.classList.remove('modal-open');
+        }
         setAlert('');
         form.reset();
       }
@@ -421,6 +517,9 @@ $reports = [];
       function populateForm(report) {
         const type = report.type || 'Lost';
         fields.id.value = report.report_id || '';
+        if (fields.idDisplay) {
+          fields.idDisplay.textContent = report.report_id || '—';
+        }
         fields.type.value = type;
         fields.item.value = report.item_name || '';
         fields.category.value = report.category || '';
@@ -435,7 +534,6 @@ $reports = [];
         }
 
         headerEls.title.textContent = report.item_name || 'Edit Report';
-        headerEls.idValue.textContent = report.report_id || '—';
         headerEls.typeChip.textContent = type;
         headerEls.typeChip.dataset.type = type.toLowerCase();
         headerEls.statusChip.textContent = report.status || 'Pending';
@@ -484,12 +582,148 @@ $reports = [];
       modal.querySelectorAll('[data-close-modal]').forEach(el => {
         el.addEventListener('click', closeModal);
       });
+      const VIEW_STATUS_LABELS = {
+        pending: 'Pending Approval',
+        verified: 'Verified',
+        rejected: 'Rejected',
+        claimed: 'Claimed'
+      };
 
-      document.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') {
-          closeModal();
+      function sanitizeText(value, fallback = '—') {
+        if (value === null || value === undefined) {
+          return fallback;
         }
-      });
+        const trimmed = String(value).trim();
+        return trimmed === '' ? fallback : trimmed;
+      }
+
+      if (viewModal) {
+        const viewRefs = {
+          image: document.getElementById('viewModalImage'),
+          typeChip: document.getElementById('viewModalType'),
+          statusChip: document.getElementById('viewModalStatus'),
+          reportId: document.getElementById('viewModalReportId'),
+          item: document.getElementById('viewModalItem'),
+          category: document.getElementById('viewModalCategory'),
+          locationLabel: document.getElementById('viewModalLocationLabel'),
+          location: document.getElementById('viewModalLocation'),
+          date: document.getElementById('viewModalDate'),
+          time: document.getElementById('viewModalTime'),
+          timeRow: document.getElementById('viewModalTimeRow'),
+          pickupRow: document.getElementById('viewModalPickupRow'),
+          pickup: document.getElementById('viewModalPickup'),
+          description: document.getElementById('viewModalDescription'),
+          email: document.getElementById('viewModalEmail'),
+          phone: document.getElementById('viewModalPhone')
+        };
+
+        function populateViewModal(report) {
+          const type = sanitizeText(report.type || 'Lost', 'Lost');
+          const statusRaw = sanitizeText(report.status || 'Pending', 'Pending');
+          const statusKey = statusRaw.toLowerCase();
+          const statusLabel = VIEW_STATUS_LABELS[statusKey] || statusRaw;
+
+          if (viewRefs.typeChip) {
+            viewRefs.typeChip.textContent = type;
+            viewRefs.typeChip.dataset.type = type.toLowerCase();
+          }
+          if (viewRefs.statusChip) {
+            viewRefs.statusChip.textContent = statusLabel;
+            viewRefs.statusChip.dataset.status = statusKey;
+          }
+
+          if (viewRefs.image) {
+            const rawPhoto = typeof report.photo_url === 'string' ? report.photo_url.trim() : '';
+            const hasPhoto = rawPhoto !== '';
+            viewRefs.image.src = hasPhoto ? rawPhoto : PLACEHOLDER_IMAGE;
+            if (hasPhoto) {
+              viewRefs.image.removeAttribute('data-placeholder');
+            } else {
+              viewRefs.image.setAttribute('data-placeholder', 'true');
+            }
+            viewRefs.image.alt = `Photo for ${sanitizeText(report.item_name, 'item')}`;
+          }
+
+          if (viewRefs.reportId) viewRefs.reportId.textContent = sanitizeText(report.report_id);
+          if (viewRefs.item) viewRefs.item.textContent = sanitizeText(report.item_name);
+          if (viewRefs.category) viewRefs.category.textContent = sanitizeText(report.category);
+
+          const locationLabel = type.toLowerCase() === 'found' ? 'Location Found' : 'Location Lost';
+          if (viewRefs.locationLabel) viewRefs.locationLabel.textContent = locationLabel;
+          if (viewRefs.location) viewRefs.location.textContent = sanitizeText(report.location);
+
+          if (viewRefs.date) viewRefs.date.textContent = sanitizeText(report.date_event);
+
+          const timeValue = sanitizeText(report.time_event, '');
+          if (viewRefs.timeRow) {
+            const hasTime = timeValue !== '';
+            viewRefs.timeRow.style.display = hasTime ? '' : 'none';
+            if (hasTime && viewRefs.time) {
+              viewRefs.time.textContent = timeValue;
+            }
+          }
+
+          if (viewRefs.pickupRow) {
+            const isFound = type.toLowerCase() === 'found';
+            const pickupValue = sanitizeText(report.pickup_location, '');
+            const showPickup = isFound;
+            viewRefs.pickupRow.style.display = showPickup ? '' : 'none';
+            if (showPickup && viewRefs.pickup) {
+              viewRefs.pickup.textContent = pickupValue || '—';
+            }
+          }
+
+          if (viewRefs.description) {
+            viewRefs.description.textContent = sanitizeText(report.description);
+          }
+
+          if (viewRefs.email) viewRefs.email.textContent = sanitizeText(report.contact_email);
+          if (viewRefs.phone) viewRefs.phone.textContent = sanitizeText(report.contact_phone);
+        }
+
+        function openViewModal(report) {
+          populateViewModal(report);
+          viewModal.setAttribute('aria-hidden', 'false');
+          viewModal.classList.add('is-visible');
+          document.body.classList.add('modal-open');
+        }
+
+        function closeViewModal() {
+          viewModal.setAttribute('aria-hidden', 'true');
+          viewModal.classList.remove('is-visible');
+          if (modal.getAttribute('aria-hidden') === 'true') {
+            document.body.classList.remove('modal-open');
+          }
+        }
+
+        document.querySelectorAll('[data-view-report]').forEach(btn => {
+          btn.addEventListener('click', event => {
+            event.preventDefault();
+            const reportId = btn.getAttribute('data-view-report');
+            const data = reportMap[reportId];
+            if (!data) {
+              return;
+            }
+            openViewModal(data);
+          });
+        });
+
+        viewModal.addEventListener('click', event => {
+          if (event.target === viewModal) {
+            closeViewModal();
+          }
+        });
+
+        viewModal.querySelectorAll('[data-view-close]').forEach(el => {
+          el.addEventListener('click', closeViewModal);
+        });
+
+        document.addEventListener('keydown', event => {
+          if (event.key === 'Escape' && viewModal.getAttribute('aria-hidden') === 'false') {
+            closeViewModal();
+          }
+        });
+      }
 
       form.addEventListener('submit', async event => {
         event.preventDefault();
@@ -517,6 +751,12 @@ $reports = [];
             saveBtn.disabled = false;
             saveBtn.textContent = 'Save Changes';
           }
+        }
+      });
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && modal.getAttribute('aria-hidden') === 'false') {
+          closeModal();
         }
       });
     })();
