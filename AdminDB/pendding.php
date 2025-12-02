@@ -153,11 +153,17 @@ function normalizeImagePath(?string $path): string {
 
         try {
           $placeholders = implode(',', array_fill(0, count($statusLabels), '?'));
-          $sql = "SELECT 'Lost' AS type, report_id, item_name, category, description, location AS location, date_lost AS date_event, photo_path, created_at, status
-                    FROM lost_reports WHERE status IN ($placeholders)
+          $sql = "SELECT 'Lost' AS type, lr.report_id, lr.item_name, lr.category, lr.description, lr.location AS location, lr.date_lost AS date_event,
+                         lr.photo_path, lr.created_at, lr.status, u.email AS reporter_email
+                    FROM lost_reports lr
+                    JOIN users u ON lr.user_id = u.id
+                    WHERE lr.status IN ($placeholders)
                   UNION ALL
-                  SELECT 'Found' AS type, report_id, item_name, category, description, location_found AS location, date_found AS date_event, photo_path, created_at, status
-                    FROM found_reports WHERE status IN ($placeholders)
+                  SELECT 'Found' AS type, fr.report_id, fr.item_name, fr.category, fr.description, fr.location_found AS location, fr.date_found AS date_event,
+                         fr.photo_path, fr.created_at, fr.status, u.email AS reporter_email
+                    FROM found_reports fr
+                    JOIN users u ON fr.user_id = u.id
+                    WHERE fr.status IN ($placeholders)
                   ORDER BY created_at DESC";
           $params = array_merge(array_values($statusLabels), array_values($statusLabels));
           $stmt = $pdo->prepare($sql);
@@ -233,25 +239,33 @@ function normalizeImagePath(?string $path): string {
                 </div>
 
                 <div class="meta-grid">
-                  <div class="meta">
-                    <div class="meta-label">Report ID</div>
-                    <div class="meta-value meta-id"><?= htmlspecialchars($rep['report_id']) ?></div>
+                  <div class="meta-column meta-column--left">
+                    <div class="meta meta-report-id">
+                      <div class="meta-label">Report ID</div>
+                      <div class="meta-value meta-id"><?= htmlspecialchars($rep['report_id']) ?></div>
+                    </div>
+                    <div class="meta meta-email">
+                      <div class="meta-label">User Email</div>
+                      <div class="meta-value"><?= htmlspecialchars($rep['reporter_email'] ?? '—') ?></div>
+                    </div>
+                    <p class="desc"><?= nl2br(htmlspecialchars($description)) ?></p>
                   </div>
-                  <div class="meta">
-                    <div class="meta-label">Category</div>
-                    <div class="meta-value"><?= htmlspecialchars($rep['category']) ?></div>
-                  </div>
-                  <div class="meta">
-                    <div class="meta-label">Location</div>
-                    <div class="meta-value"><?= htmlspecialchars($rep['location']) ?></div>
-                  </div>
-                  <div class="meta">
-                    <div class="meta-label">Date</div>
-                    <div class="meta-value"><?= htmlspecialchars($rep['date_event']) ?></div>
+                  <div class="meta-column meta-column--right">
+                    <div class="meta meta-category">
+                      <div class="meta-label">Category</div>
+                      <div class="meta-value"><?= htmlspecialchars($rep['category']) ?></div>
+                    </div>
+                    <div class="meta meta-location">
+                      <div class="meta-label">Location</div>
+                      <div class="meta-value"><?= htmlspecialchars($rep['location']) ?></div>
+                    </div>
+                    <div class="meta meta-date">
+                      <div class="meta-label">Date</div>
+                      <div class="meta-value"><?= htmlspecialchars($rep['date_event']) ?></div>
+                    </div>
                   </div>
                 </div>
 
-                <p class="desc"><?= nl2br(htmlspecialchars($description)) ?></p>
 
                 <?php if ($statusKey === 'pending'): ?>
                   <div class="actions">

@@ -39,12 +39,20 @@ $rejectedCount  = $userId ? countReports($pdo, $userId, 'Rejected') : 0;
 
 // Helper: fetch list (Verified / Rejected)
 function fetchStatusList(PDO $pdo, $userId, $status) {
-  $sql = "SELECT report_id, item_name, category, location, date_event, status, photo_path, type FROM (
-            SELECT report_id, item_name, category, location AS location, date_lost AS date_event, status, photo_path, 'Lost' AS type, created_at
-            FROM lost_reports WHERE user_id = :uid AND status = :status
+  $sql = "SELECT report_id, item_name, category, location, date_event, status, photo_path, type, description, user_email FROM (
+            SELECT lr.report_id, lr.item_name, lr.category, lr.location AS location, lr.date_lost AS date_event,
+                   lr.status, lr.photo_path, 'Lost' AS type, lr.created_at, lr.description,
+                   u.email AS user_email
+            FROM lost_reports lr
+            JOIN users u ON lr.user_id = u.id
+            WHERE lr.user_id = :uid AND lr.status = :status
             UNION ALL
-            SELECT report_id, item_name, category, location_found AS location, date_found AS date_event, status, photo_path, 'Found' AS type, created_at
-            FROM found_reports WHERE user_id = :uid AND status = :status
+            SELECT fr.report_id, fr.item_name, fr.category, fr.location_found AS location, fr.date_found AS date_event,
+                   fr.status, fr.photo_path, 'Found' AS type, fr.created_at, fr.description,
+                   u.email AS user_email
+            FROM found_reports fr
+            JOIN users u ON fr.user_id = u.id
+            WHERE fr.user_id = :uid AND fr.status = :status
           ) t ORDER BY created_at DESC";
   $stmt = $pdo->prepare($sql);
   $stmt->execute([':uid' => $userId, ':status' => $status]);
@@ -309,6 +317,8 @@ $firstName = $nameParts[0] ?? 'User';
                         <div class="value"><strong><?= htmlspecialchars($r['report_id']) ?></strong></div>
                         <div class="label">Location</div>
                         <div class="value"><?= htmlspecialchars($r['location']) ?></div>
+                        <div class="label">User Email</div>
+                        <div class="value value-email"><?= htmlspecialchars($r['user_email'] ?? '—') ?></div>
                       </div>
                       <div class="col">
                         <div class="label">Category</div>
@@ -317,6 +327,9 @@ $firstName = $nameParts[0] ?? 'User';
                         <div class="value"><?= htmlspecialchars($r['date_event']) ?></div>
                       </div>
                     </div>
+                    <?php if (!empty(trim($r['description'] ?? ''))): ?>
+                      <p class="item-desc"><?= nl2br(htmlspecialchars($r['description'])) ?></p>
+                    <?php endif; ?>
                   </div>
                   <div class="item-badges">
                     <?php if ($r['type']==='Found'): ?>
@@ -344,6 +357,8 @@ $firstName = $nameParts[0] ?? 'User';
                         <div class="value"><strong><?= htmlspecialchars($r['report_id']) ?></strong></div>
                         <div class="label">Location</div>
                         <div class="value"><?= htmlspecialchars($r['location']) ?></div>
+                        <div class="label">User Email</div>
+                        <div class="value value-email"><?= htmlspecialchars($r['user_email'] ?? '—') ?></div>
                       </div>
                       <div class="col">
                         <div class="label">Category</div>
@@ -352,6 +367,9 @@ $firstName = $nameParts[0] ?? 'User';
                         <div class="value"><?= htmlspecialchars($r['date_event']) ?></div>
                       </div>
                     </div>
+                    <?php if (!empty(trim($r['description'] ?? ''))): ?>
+                      <p class="item-desc"><?= nl2br(htmlspecialchars($r['description'])) ?></p>
+                    <?php endif; ?>
                   </div>
                   <div class="item-badges">
                     <?php if ($r['type']==='Found'): ?>

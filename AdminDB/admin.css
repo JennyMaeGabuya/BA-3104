@@ -152,6 +152,7 @@ a{ color:inherit; text-decoration:none; }
 .dark-mode .report-details .meta-label {
   color: #bcd3e6;
 }
+.dark-mode .report-details .desc{color:#d5e4ff}
 
 /* Pills/badges in dark mode - keep their distinct colors */
 .dark-mode .pill{border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.01);color:#cfe8ff}
@@ -341,6 +342,8 @@ a{ color:inherit; text-decoration:none; }
 .report-image img{width:220px;height:170px;object-fit:cover;border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,0.03)}
 .no-photo{width:220px;height:170px;border-radius:10px;display:grid;place-items:center;background:rgba(15,23,42,0.03);color:#6b6f76;font-weight:600}
 .report-details{flex:1;display:flex;flex-direction:column;gap:12px}
+.report-details .desc{color:#4b5563;line-height:1.5}
+.meta-column .desc{margin:4px 0 0}
 
 /* header row inside card */
 .report-head{display:flex;align-items:center;gap:12px;justify-content:space-between}
@@ -364,7 +367,9 @@ a{ color:inherit; text-decoration:none; }
 .admin-empty{padding:40px;border-radius:12px;border:1px dashed rgba(15,23,42,0.15);text-align:center;color:var(--muted);background:rgba(15,23,42,0.01)}
 
 /* meta grid */
-.meta-grid{display:grid;grid-template-columns:repeat(2, minmax(140px, 1fr));gap:12px 28px}
+.meta-grid{display:flex;gap:32px;flex-wrap:wrap}
+.meta-column{display:flex;flex-direction:column;gap:12px;flex:1 1 220px;min-width:220px}
+.meta-column--right{max-width:260px}
 .meta{display:flex;flex-direction:column}
 .meta-label{font-size:13px;color:var(--muted)}
 .meta-value{font-weight:700;margin-top:6px}
@@ -375,6 +380,7 @@ a{ color:inherit; text-decoration:none; }
 
 /* actions */
 .actions{display:flex;gap:12px;align-items:center;margin-top:6px}
+.report-card .actions{justify-content:flex-start}
 .btn{padding:10px 14px;border-radius:8px;border:0;font-weight:700;cursor:pointer}
 .btn-approve{background:#16a34a !important;color:white !important;box-shadow:0 8px 18px rgba(16,163,79,0.12)}
 .btn-reject{background:#ef4444 !important;color:white !important;box-shadow:0 8px 18px rgba(239,68,68,0.12)}
@@ -386,7 +392,7 @@ a{ color:inherit; text-decoration:none; }
 @media (max-width:1000px){
   .card-inner{flex-direction:column}
   .report-image img{width:100%;height:auto}
-  .meta-grid{grid-template-columns:1fr}
+  .meta-grid{flex-direction:column}
   .sidebar{display:none}
   .content{padding:12px}
 }

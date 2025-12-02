@@ -397,6 +397,8 @@ a{ color:inherit; text-decoration:none; }
 .item-card .grid{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:20px}
 .item-card .label{font-size:13px;color:var(--text-muted);margin-top:6px}
 .item-card .value{font-size:15px;color:var(--text-secondary);font-weight:600}
+.item-card .value-email{word-break:break-all}
+.item-card .item-desc{margin-top:14px;font-size:14px;color:var(--text-secondary);line-height:1.5}
 .item-card .item-badges{position:absolute;top:16px;right:16px;display:flex;gap:10px;align-items:center}
 
 @media (max-width:900px){
