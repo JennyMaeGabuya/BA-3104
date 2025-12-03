@@ -25,7 +25,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background-color: #4A90E2;
+    background-color: #8AC24A;
 }
 
 .logo-section {
@@ -34,9 +34,15 @@ body {
     gap: 0.75rem;
 }
 
-.logo {
+img {
+
     width: 40px;
-    height: 40px;
+    border-radius: 50%;
+}
+
+.logo {
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     background: linear-gradient(135deg, #2563eb, #4f46e5);
     display: flex;
@@ -47,15 +53,17 @@ body {
     font-size: 0.875rem;
 }
 
+
+
 .logo-text h1 {
     font-size: 1.25rem;
-    color: #111827;
+    color: #FFFFFF;
     margin-bottom: 0.125rem;
 }
 
 .logo-text p {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: #FFFFFF;
 }
 
 .header-actions {
@@ -74,7 +82,7 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(135deg, #8AC24A, #6FA53E);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -86,12 +94,12 @@ body {
 .user-details p {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #111827;
+    color: #FFFFFF;
 }
 
 .user-details span {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: #FFFFFF;
 }
 
 .btn-icon {
@@ -108,13 +116,13 @@ body {
 }
 
 .btn-icon:hover {
-    background: #f3f4f6;
+    background: #6FA53E;
 }
 
 .btn-icon svg {
     width: 20px;
     height: 20px;
-    color: #6b7280;
+    color: #FFFFFF;
 }
 
 /* Mobile Menu Toggle */
@@ -196,7 +204,7 @@ body {
     border-radius: 0.5rem;
     font-size: 0.875rem;
     font-weight: 500;
-    color: #6b7280;
+    color: #3A3A3A;
     cursor: pointer;
     transition: all 0.2s;
     text-align: left;
@@ -214,12 +222,12 @@ body {
 }
 
 .nav-item.active {
-    background: #eff6ff;
-    color: #2563eb;
+    background: #e44a3f33;
+    color: #E44A3F;
 }
 
 .nav-item.active svg {
-    color: #2563eb;
+    color: #E44A3F;
 }
 
 /* Main Content */
@@ -311,8 +319,8 @@ body {
     background: #f59e0b;
 }
 
-.badge-success {
-    background: #10b981;
+.badge-danger {
+    background: #ef4444;
 }
 
 .table-wrapper {
@@ -463,8 +471,8 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #2563eb, #4f46e5);
-    color: white;
+    background: #CC2C2C;
+    color: #FFFFFF;
     width: 50%;
     display: block;
     margin: 0 auto;
@@ -473,7 +481,8 @@ body {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 12px rgba(255, 115, 115, 0.3);
+    background-color: #E44A3F;
 }
 
 .btn-primary:active {
@@ -613,27 +622,10 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 1024px) {
-    .sidebar {
-        width: 220px;
-    }
 
-    .main-content {
-        padding: 1.5rem;
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-
-    .profile-info-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-}
 
 /* Tablet and Mobile - Sidebar becomes a slide-in menu */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
     .header-content {
         padding: 1rem;
     }
@@ -736,58 +728,6 @@ body {
     }
 }
 
-@media (max-width: 480px) {
-    .logo-text h1 {
-        font-size: 1rem;
-    }
-
-    .logo-text p {
-        display: none;
-    }
-
-    .sidebar {
-        width: 260px;
-    }
-
-    .section-header h2 {
-        font-size: 1.25rem;
-    }
-
-    .appointment-table th,
-    .appointment-table td {
-        padding: 0.5rem 0.25rem;
-        font-size: 0.7rem;
-    }
-
-    .btn-action {
-        width: 28px;
-        height: 28px;
-    }
-
-    .btn-action svg {
-        width: 14px;
-        height: 14px;
-    }
-
-    .edit-profile-form {
-        padding: 1.5rem;
-    }
-
-    .profile-info-item {
-        padding: 1rem;
-    }
-
-    .profile-avatar {
-        width: 60px;
-        height: 60px;
-        font-size: 1.25rem;
-    }
-
-    .profile-user-info h3 {
-        font-size: 1.25rem;
-    }
-}
-
 /* Modal Overlay */
 .modal-overlay {
     position: fixed;
@@ -880,5 +820,108 @@ body {
     to {
         opacity: 1;
         transform: scale(1);
+    }
+}
+
+
+/* New Appointment Card List */
+.appointment-list {
+    max-height: none;
+    overflow: visible;
+}
+
+
+.appointment-item {
+    background: #f8fafc;
+    padding: 1rem 1.25rem;
+    border-radius: 0.6rem;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+.appointment-item:hover {
+    background: #f1f5f9;
+}
+
+.appointment-item-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.appointment-details {
+    display: none;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+    color: #334155;
+}
+
+.appointment-details p {
+    margin-bottom: 0.4rem;
+}
+
+.appointment-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.simple-item {
+    background: #f1f5f9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-top: 10px
+}
+
+/* Container that switches layout based on screen size */
+.appointments-flex {
+    display: flex;
+    gap: 2rem;
+    justify-content: space-between;
+}
+
+/* Two equal halves on desktop */
+.appointments-flex .half {
+    width: 50%;
+}
+
+/* Show More Button */
+.show-more-btn {
+    width: 40%;
+    margin-top: 10px;
+    padding: 10px;
+    background: #E2E8F0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.show-more-btn:hover {
+    background: #cbd5e1;
+}
+
+/* Mobile View: Stack top and bottom */
+@media (max-width: 768px) {
+    .appointments-flex {
+        flex-direction: column;
+    }
+
+    .appointments-flex .half {
+        width: 100%;
     }
 }

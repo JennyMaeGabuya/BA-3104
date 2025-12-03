@@ -271,24 +271,33 @@ async function handleBooking(event) {
    SWITCH SECTION (Overview / Booking / Profile)
 -------------------------------------------------------------- */
 function switchSection(sectionId) {
+    // hide all sections
     document.querySelectorAll(".content-section").forEach(section => {
         section.classList.remove("active");
     });
+
+    // show selected section
     document.getElementById(sectionId).classList.add("active");
 
+    // update sidebar active button
     document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
     document.querySelector(`[onclick="switchSection('${sectionId}')"]`)
         .classList.add("active");
 
+    // load data only when viewing overview
     if (sectionId === "overview") {
         loadBookedAppointments();
         loadCancelledAppointments();
     } else {
-        document.getElementById("pendingTable").innerHTML = "";
-        document.getElementById("approvedTable").innerHTML = "";
-        document.getElementById("cancelledTable").innerHTML = "";
+        // clear new UI cards safely
+        const pendingList = document.getElementById("pendingList");
+        const cancelledList = document.getElementById("cancelledList");
+
+        if (pendingList) pendingList.innerHTML = "";
+        if (cancelledList) cancelledList.innerHTML = "";
     }
 }
+
 
 /* --------------------------------------------------------------
    TOGGLE SIDEBAR
@@ -311,14 +320,8 @@ async function loadBookedAppointments() {
         const pending = appointments.filter(
             (a) => a.status === "pending" || a.status === "rescheduled_pending"
         );
-        const approved = appointments.filter((a) => a.status === "accepted");
-
         document.getElementById("pendingCount").textContent = pending.length;
-        document.getElementById("approvedCount").textContent = approved.length;
-
         updateAppointmentTable("pendingTable", pending, true);
-        updateAppointmentTable("approvedTable", approved, true);
-        updateAppointmentTable("bookedTable", appointments, false);
     } catch (error) {
         console.error("Error loading appointments:", error);
     }
@@ -327,56 +330,73 @@ async function loadBookedAppointments() {
 /* --------------------------------------------------------------
    UPDATE APPOINTMENT TABLES
 -------------------------------------------------------------- */
-function updateAppointmentTable(tableId, appointments, showActions) {
-    const tableBody = document.getElementById(tableId);
-    tableBody.innerHTML = "";
+async function loadBookedAppointments() {
+    const response = await fetch("../../controllers/get_user_appointments.php");
+    const appointments = await response.json();
 
-    if (appointments.length === 0) {
-        tableBody.innerHTML =
-            '<tr><td colspan="10" class="empty-state">No appointments found</td></tr>';
+    const pending = appointments.filter(a => a.status === "pending" || a.status === "rescheduled_pending");
+    renderCardList("pendingList", pending, true);
+
+    document.getElementById("pendingCount").textContent = pending.length;
+}
+
+function renderCardList(containerId, items, withActions = false) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    if (items.length === 0) {
+        container.innerHTML = `<p class="empty-state">No appointments found</p>`;
         return;
     }
 
-    appointments.forEach((app) => {
-        if (tableId === "bookedTable") {
-            tableBody.innerHTML += `
-                <tr>
-                    <td>${formatDate(app.appointment_date)}</td>
-                    <td>${formatTimeFromDB(app.appointment_time)}</td>
-                    <td>${app.reason}</td>
-                    <td>${app.name}</td>
-                    <td>${app.contact_no}</td>
-                    <td>${app.email}</td>
-                    <td>${app.gender}</td>
-                    <td>${app.age}</td>
-                    <td>${formatDate(app.date_of_birth)}</td>
-                    <td>${app.address}</td>
-                </tr>
-            `;
-            return;
-        }
+    items.forEach(app => {
 
-        tableBody.innerHTML += `
-            <tr>
-                <td>${formatDate(app.appointment_date)}</td>
-                <td>${formatTimeFromDB(app.appointment_time)}</td>
-                <td>${app.reason}</td>
-                <td>${app.name}</td>
-                <td>${app.contact_no}</td>
-                <td>${app.email}</td>
-                <td>${app.age}</td>
-                <td>${formatDate(app.date_of_birth)}</td>
-                ${showActions
-                ? `
-                    <td class="action-buttons">
-                        <button class="btn-action btn-reschedule" onclick="openRescheduleModal('${app.appointment_id}')">⟳</button>
-                        <button class="btn-action btn-cancel" onclick="cancelAppointment('${app.appointment_id}')">✖</button>
-                    </td>`
-                : "<td>-</td>"
-            }
-            </tr>
+        const card = document.createElement("div");
+        card.classList.add("appointment-item");
+
+        card.innerHTML = `
+            <div class="appointment-summary-row">
+                <div class="appointment-title">Your Appointment</div>
+                <div class="appointment-date-time">
+                    <strong>${formatDate(app.appointment_date)}</strong>
+                    <span>${formatTimeFromDB(app.appointment_time)}</span>
+                </div>
+            </div>
+
+            <div class="appointment-details" style="display: none;">
+                <p><strong>Reason:</strong> ${app.reason}</p>
+                <p><strong>Name:</strong> ${app.name}</p>
+                <p><strong>Contact:</strong> ${app.contact_no}</p>
+                <p><strong>Email:</strong> ${app.email}</p>
+                <p><strong>Age:</strong> ${app.age}</p>
+                <p><strong>DOB:</strong> ${formatDate(app.date_of_birth)}</p>
+
+                ${withActions ? `
+                <div class="appointment-actions">
+                    <button class="btn-action btn-reschedule"
+                        onclick="openRescheduleModal('${app.appointment_id}')">⟳</button>
+                    <button class="btn-action btn-cancel"
+                        onclick="cancelAppointment('${app.appointment_id}')">✖</button>
+                </div>` : ""}
+            </div>
+
+            <button class="show-more-btn" onclick="toggleDetails(this)">Show More ▼</button>
         `;
+
+        container.appendChild(card);
     });
+}
+
+function toggleDetails(btn) {
+    const details = btn.parentElement.querySelector(".appointment-details");
+
+    if (details.style.display === "none") {
+        details.style.display = "block";
+        btn.textContent = "Show Less ▲";
+    } else {
+        details.style.display = "none";
+        btn.textContent = "Show More ▼";
+    }
 }
 
 /* --------------------------------------------------------------
@@ -749,29 +769,32 @@ async function loadCancelledAppointments() {
 
         document.getElementById("cancelledCount").textContent = cancelled.length;
 
-        const tbody = document.getElementById("cancelledTable");
-        tbody.innerHTML = "";
+        const list = document.getElementById("cancelledList");
+        if (!list) return; // Safety check
+
+        list.innerHTML = "";
 
         if (cancelled.length === 0) {
-            tbody.innerHTML =
-                `<tr><td colspan="6" class="empty-state">No cancelled appointments</td></tr>`;
+            list.innerHTML = `<p class="empty-state">No cancelled appointments</p>`;
             return;
         }
 
         cancelled.forEach(app => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${formatDate(app.appointment_date)}</td>
-                    <td>${formatTimeFromDB(app.appointment_time)}</td>
-                    <td>${app.reason}</td>
-                    <td>${app.name}</td>
-                    <td>${app.contact_no}</td>
-                    <td>${app.email}</td>
-                </tr>
-            `;
+            list.innerHTML += `
+        <div class="appointment-item simple-item">
+            <div class="appointment-summary">
+                <strong>${formatDate(app.appointment_date)}</strong>
+                <span>${formatTimeFromDB(app.appointment_time)}</span>
+            </div>
+        </div>
+    `;
         });
+
 
     } catch (error) {
         console.error("Error loading cancelled appointments:", error);
     }
 }
+
+
+
