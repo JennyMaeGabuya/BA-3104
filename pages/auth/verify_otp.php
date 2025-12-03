@@ -206,7 +206,7 @@ $email = $_GET['email'] ?? '';
             <div class="form-container">
                 <h2 class="form-title">Verify OTP</h2>
                 <p class="form-subtitle">
-                    We sent a 6-digit OTP to<br>
+                    We have sent a 6-digit OTP to<br>
                     <strong><?php echo htmlspecialchars($email); ?></strong>
                 </p>
 
