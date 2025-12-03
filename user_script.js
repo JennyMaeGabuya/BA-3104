@@ -50,6 +50,7 @@ const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 const galleryCount = document.getElementById('gallery-count');
 const idUploadInput = document.getElementById('claimIdUpload');
+const lastSeenInput = document.getElementById('claimLastSeen');
 const idUploadFeedback = document.getElementById('idUploadFeedback');
 const defaultIdMessage = 'Upload a clear BatStateU ID photo (portrait with the red banner).';
 let idUploadIsValid = false;
@@ -116,9 +117,9 @@ function renderCards(dataset){
           <span class="status-pill ${statusClass}">${statusText}</span>
         </div>
         <div class="category-chip">${escapeHtml(item.category)}</div>
-        <p class="found-desc">${escapeHtml(truncate(item.description, 160))}</p>
+        <p class="found-desc">Description hidden for safety. Contact admin if this is your item.</p>
         <div class="found-meta">
-          <div class="found-meta-item">📍 <span>${escapeHtml(item.location)}</span></div>
+          <div class="found-meta-item">📍 <span>Exact location withheld</span></div>
           <div class="found-meta-item">📅 <span>${escapeHtml(item.date)}</span></div>
         </div>
         <button class="btn-claim" data-id="${item.id}">Claim This Item</button>
@@ -247,7 +248,7 @@ function openClaimModal(ev) {
       <div class="preview-info">
         <h4>${escapeHtml(item.title)}</h4>
         <div class="tag">${escapeHtml(item.category)}</div>
-        <div class="meta">📍 ${escapeHtml(item.location)}</div>
+        <div class="meta">📍 Exact location shared after verification</div>
         <div class="meta">📅 Found on ${escapeHtml(item.date)}</div>
       </div>
     </div>
@@ -266,9 +267,11 @@ function resetClaimForm(){
   const details = document.getElementById('claimDetails');
   const contact = document.getElementById('claimContact');
   const upload = document.getElementById('claimIdUpload');
+  const lastSeen = document.getElementById('claimLastSeen');
   if(details) details.value = '';
   if(contact) contact.value = '';
   if(upload) upload.value = '';
+  if(lastSeen) lastSeen.value = '';
   idUploadIsValid = false;
   setIdUploadFeedback(defaultIdMessage, 'note');
   delete claimModal.dataset.reportId;
@@ -368,13 +371,17 @@ document.getElementById("cancelClaim").addEventListener("click", closeModal);
 document.getElementById("submitClaim").addEventListener("click", async () => {
   const detailsEl = document.getElementById("claimDetails");
   const contactEl = document.getElementById("claimContact");
+  const lastSeenEl = document.getElementById('claimLastSeen');
   const details = detailsEl.value.trim();
   const contact = contactEl.value.trim();
+  const lastSeen = lastSeenEl ? lastSeenEl.value.trim() : '';
   const idFile = idUploadInput && idUploadInput.files ? idUploadInput.files[0] : null;
 
-  if (!details || !contact) {
+  if (!details || !contact || !lastSeen) {
     alert("Please fill out all required fields before submitting.");
-    if(!details) detailsEl.focus(); else contactEl.focus();
+    if(!details) detailsEl.focus();
+    else if(!lastSeen) lastSeenEl.focus();
+    else contactEl.focus();
     return;
   }
 
@@ -399,6 +406,7 @@ document.getElementById("submitClaim").addEventListener("click", async () => {
     data.append('report_id', claimModal.dataset.reportId || '');
     data.append('details', details);
     data.append('contact', contact);
+    data.append('last_seen_location', lastSeen);
     data.append('school_id', idFile);
 
     const response = await fetch('submit_claim_request.php', {

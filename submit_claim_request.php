@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/auth_check.php';
 require_once __DIR__ . '/db_config.php';
+require_once __DIR__ . '/matching_service.php';
 
 header('Content-Type: application/json');
 
@@ -24,9 +25,14 @@ if (!$userId) {
 $reportId = trim((string)($_POST['report_id'] ?? ''));
 $details  = trim((string)($_POST['details'] ?? ''));
 $contact  = trim((string)($_POST['contact'] ?? ''));
+$lastSeen = trim((string)($_POST['last_seen_location'] ?? ''));
 
-if ($reportId === '' || $details === '' || $contact === '') {
+if ($reportId === '' || $details === '' || $contact === '' || $lastSeen === '') {
   respond(false, 'All fields are required.');
+}
+
+if (mb_strlen($lastSeen) > 255) {
+  respond(false, 'Last seen location is too long.');
 }
 
 if (!isset($_FILES['school_id']) || !is_uploaded_file($_FILES['school_id']['tmp_name'])) {
@@ -79,18 +85,30 @@ try {
   $next = (int)($maxRow['max_code'] ?? 0) + 1;
   $requestCode = sprintf('CR-%03d', $next);
 
-  $insert = $pdo->prepare("INSERT INTO claim_requests (request_code, report_id, item_type, user_id, details, contact_info, id_photo_path)
-    VALUES (:code, :report, 'Found', :uid, :details, :contact, :photo)");
+  $insert = $pdo->prepare("INSERT INTO claim_requests (request_code, report_id, item_type, user_id, details, last_seen_location, contact_info, id_photo_path)
+    VALUES (:code, :report, 'Found', :uid, :details, :lastSeen, :contact, :photo)");
   $insert->execute([
     ':code' => $requestCode,
     ':report' => $reportId,
     ':uid' => $userId,
     ':details' => $details,
+    ':lastSeen' => $lastSeen,
     ':contact' => $contact,
     ':photo' => $relativePath,
   ]);
+  $claimId = (int)$pdo->lastInsertId();
+  $matchingSummary = null;
+  try {
+    $matchingSummary = run_claim_matching($pdo, $claimId);
+  } catch (Throwable $e) {
+    error_log('Claim matching failed: ' . $e->getMessage());
+  }
 
-  respond(true, 'Claim request submitted.', ['requestCode' => $requestCode]);
+  respond(true, 'Claim request submitted.', [
+    'requestCode' => $requestCode,
+    'matches' => $matchingSummary['results'] ?? [],
+    'matchThreshold' => $matchingSummary['threshold'] ?? MATCH_DEFAULT_THRESHOLD,
+  ]);
 } catch (Throwable $e) {
   error_log('Claim request error: ' . $e->getMessage());
   respond(false, 'Server error while saving claim request.');

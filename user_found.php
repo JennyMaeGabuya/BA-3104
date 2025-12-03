@@ -267,9 +267,9 @@ $itemsCount = count($foundItems);
                     <span class="status-pill <?php echo $statusCls; ?>"><?php echo htmlspecialchars($statusText); ?></span>
                   </div>
                   <div class="category-chip"><?php echo $category; ?></div>
-                  <p class="found-desc"><?php echo $desc; ?></p>
+                  <p class="found-desc">Description hidden for safety. Contact admin if you believe this is yours.</p>
                   <div class="found-meta">
-                    <div class="found-meta-item">📍 <span><?php echo $location; ?></span></div>
+                    <div class="found-meta-item">📍 <span>Exact location withheld</span></div>
                     <div class="found-meta-item">📅 <span><?php echo $date; ?></span></div>
                   </div>
                   <button class="btn-claim" data-id="<?php echo htmlspecialchars($item['report_id']); ?>">Claim This Item</button>
@@ -309,6 +309,10 @@ $itemsCount = count($foundItems);
         placeholder="Please provide specific details about the item to verify ownership (e.g., brand, color, contents, distinguishing marks, etc.)"></textarea>
 
       <small class="helper">Be as specific as possible to help us verify your ownership</small>
+
+      <label class="label">Where did you last see it? *</label>
+      <input id="claimLastSeen" class="input" placeholder="e.g., CICS Building near the parking area" />
+      <small class="helper">We compare this with where the item was found to score the match.</small>
 
       <label class="label">Contact Information *</label>
       <input id="claimContact" class="input"
