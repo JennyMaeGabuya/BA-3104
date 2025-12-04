@@ -1,9 +1,11 @@
 <?php
 session_start();
 require_once __DIR__ . '/db_config.php';
+require_once __DIR__ . '/user_export_helpers.php';
 
 $errors = [];
 $success = '';
+sync_user_accounts_xml($pdo);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $first_name = trim($_POST['first_name'] ?? '');
@@ -45,6 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
           $insert = $pdo->prepare('INSERT INTO users (first_name, last_name, user_type, student_id, department, email, phone, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
           $insert->execute([$first_name, $last_name, $user_type, $student_id, $department, $email, $phone, $hash]);
+          $newUserId = (int)$pdo->lastInsertId();
+          sync_user_accounts_xml($pdo);
           $success = 'Account created successfully. You may now sign in.';
         } catch (PDOException $e) {
           // Show detailed DB error for local debugging. Remove or log in production.

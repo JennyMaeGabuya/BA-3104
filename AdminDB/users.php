@@ -5,6 +5,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
   session_start();
 }
 require_once __DIR__ . '/../db_config.php';
+require_once __DIR__ . '/../user_export_helpers.php';
 if (!isset($_SESSION['user_id']) || (($_SESSION['user_type'] ?? '') !== 'Admin')) {
   header('Location: ../login.php');
   exit;
@@ -36,6 +37,7 @@ try {
 } catch (Throwable $e) {
   $users = [];
 }
+sync_user_accounts_xml($pdo);
 ?>
 <!doctype html>
 <html lang="en">
@@ -115,7 +117,7 @@ try {
           <div class="table-wrap">
             <table class="reports-table" aria-label="Users">
               <thead>
-                <tr><th>Name</th><th>Email</th><th>Type</th><th>Phone</th><th>Actions</th></tr>
+                <tr><th>Name</th><th>Email</th><th>Type</th><th>Phone</th><th>Activity Log</th></tr>
               </thead>
               <tbody>
                 <?php if (empty($users)): ?>

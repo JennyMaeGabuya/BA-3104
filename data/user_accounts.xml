@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+  <user>
+    <id>1</id>
+    <first_name>JERISH ANNE</first_name>
+    <last_name>SARMIENTO</last_name>
+    <user_type>Student</user_type>
+    <student_id>23-677753</student_id>
+    <department>CICS</department>
+    <email>23-67753@g.batstate-u.edu.ph</email>
+    <phone>09076736615</phone>
+    <created_at>2025-12-02 07:46:36</created_at>
+  </user>
+  <user>
+    <id>2</id>
+    <first_name>JERISH ANNE</first_name>
+    <last_name>SARMIENTO</last_name>
+    <user_type>Admin</user_type>
+    <student_id>23-677753</student_id>
+    <department>CICS</department>
+    <email>jerish@g.batstate-u.edu.ph</email>
+    <phone>09076736615</phone>
+    <created_at>2025-12-02 07:50:37</created_at>
+  </user>
+  <user>
+    <id>3</id>
+    <first_name>Ralph</first_name>
+    <last_name>Aranda</last_name>
+    <user_type>Student</user_type>
+    <student_id>23-64865</student_id>
+    <department>CET</department>
+    <email>23-64865@g.batstate-u.edu.ph</email>
+    <phone>09511666686</phone>
+    <created_at>2025-12-02 19:35:14</created_at>
+  </user>
+  <user>
+    <id>4</id>
+    <first_name>ASHLEY</first_name>
+    <last_name>MALIBIRAN</last_name>
+    <user_type>Student</user_type>
+    <student_id>23-12345</student_id>
+    <department>CICS</department>
+    <email>23-1234@g.batstate-u.edu.ph</email>
+    <phone>09092345677</phone>
+    <created_at>2025-12-03 16:22:11</created_at>
+  </user>
+  <user>
+    <id>5</id>
+    <first_name>ASHLEY</first_name>
+    <last_name>MALIBIRAN</last_name>
+    <user_type>Admin</user_type>
+    <student_id>CET</student_id>
+    <department>CET</department>
+    <email>ashleymalibiran@g.batstate-u.edu.ph</email>
+    <phone>09092356677</phone>
+    <created_at>2025-12-04 15:55:14</created_at>
+  </user>
+  <user>
+    <id>11</id>
+    <first_name>Jomar</first_name>
+    <last_name>Pesigan</last_name>
+    <user_type>Faculty</user_type>
+    <student_id>23-68666</student_id>
+    <department>CET</department>
+    <email>23-68666@g.batstate-u.edu.ph</email>
+    <phone>09511663243</phone>
+    <created_at>2025-12-04 20:13:34</created_at>
+  </user>
+  <user>
+    <id>12</id>
+    <first_name>Jeverlyn</first_name>
+    <last_name>Pesigan</last_name>
+    <user_type>Student</user_type>
+    <student_id>23-61222</student_id>
+    <department>CICS</department>
+    <email>23-61222@g.batstate-u.edu.ph</email>
+    <phone>09987654321</phone>
+    <created_at>2025-12-04 20:29:07</created_at>
+  </user>
+</users>
