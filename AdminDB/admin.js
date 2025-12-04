@@ -98,6 +98,42 @@ document.addEventListener('DOMContentLoaded', () => {
   const tabButtons = document.querySelectorAll('.tabs .tab[data-tab]');
   const statusCards = Array.from(document.querySelectorAll('[data-status-card]'));
   const claimTable = document.getElementById('reportsTbody');
+  const CLAIM_EMPTY_SELECTOR = '[data-empty-row]';
+
+  function ensureClaimEmptyState() {
+    if (!claimTable) return;
+    const hasRows = claimTable.querySelectorAll('tr:not(' + CLAIM_EMPTY_SELECTOR + ')').length > 0;
+    const placeholder = claimTable.querySelector(CLAIM_EMPTY_SELECTOR);
+    if (!hasRows && !placeholder) {
+      const emptyRow = document.createElement('tr');
+      emptyRow.setAttribute('data-empty-row', 'true');
+      emptyRow.innerHTML = '<td colspan="8" class="empty-row">No claim requests submitted yet.</td>';
+      claimTable.appendChild(emptyRow);
+    } else if (hasRows && placeholder) {
+      placeholder.remove();
+    }
+  }
+
+  function adjustClaimCounts(delta) {
+    if (!delta) return;
+    const statValue = document.querySelector('[data-filter-target="claims"] .stat-chip__value');
+    if (statValue) {
+      const current = parseInt(statValue.textContent, 10);
+      if (!Number.isNaN(current)) {
+        statValue.textContent = Math.max(0, current + delta);
+      }
+    }
+    const panelCount = document.querySelector('#panel-claims .panel-count');
+    if (panelCount) {
+      const match = panelCount.textContent.match(/\d+/);
+      if (match) {
+        const next = Math.max(0, parseInt(match[0], 10) + delta);
+        panelCount.textContent = `${next} request(s)`;
+      }
+    }
+  }
+
+  ensureClaimEmptyState();
   const statChips = Array.from(document.querySelectorAll('.stat-chip[data-filter-target]'));
   const managementPanels = Array.from(document.querySelectorAll('.management-panel[data-panel-type]'));
   const managementGrid = document.querySelector('.management-grid[data-panel-filter]');
@@ -376,6 +412,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const statusPill = button.closest('.claim-actions')?.querySelector('[data-claim-status-label]');
       if (statusPill) {
         statusPill.textContent = statusLabel === 'Approved' ? 'Claimable' : (statusLabel === 'Claimed' ? 'Claimed' : (statusLabel === 'Rejected' ? "Doesn't match" : 'Pending review'));
+      }
+      if (action === 'Claimed') {
+        const row = button.closest('tr');
+        if (row) {
+          row.remove();
+          adjustClaimCounts(-1);
+          ensureClaimEmptyState();
+        }
       }
     } catch (error) {
       alert(error.message || 'Unable to update claim request');

@@ -52,6 +52,9 @@ try {
   if ($stmt->rowCount() !== 1) {
     respond(false, 'Request not found');
   }
+  if (!empty($claimRow['report_id'])) {
+    sync_found_report_status($pdo, $claimRow['report_id'], $canonicalStatus);
+  }
   try {
     dispatch_claim_notifications($canonicalStatus, $claimRow);
   } catch (Throwable $notifyError) {
@@ -104,6 +107,16 @@ function dispatch_claim_notifications(string $status, array $claim): void {
     foreach ($recipients as $recipient) {
       notify_claim_rejected($recipient, $ctx);
     }
+  }
+}
+
+function sync_found_report_status(PDO $pdo, string $reportId, string $status): void {
+  if ($reportId === '') {
+    return;
+  }
+  if ($status === 'Resolved') {
+    $stmt = $pdo->prepare("UPDATE found_reports SET status = 'Claimed', updated_at = NOW() WHERE report_id = :rid LIMIT 1");
+    $stmt->execute([':rid' => $reportId]);
   }
 }
 

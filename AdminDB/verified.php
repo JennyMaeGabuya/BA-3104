@@ -166,6 +166,7 @@ try {
               LIMIT 1
             )
             LEFT JOIN found_reports fr_match ON fr_match.id = best_match.found_report_id
+            WHERE cr.status <> 'Resolved'
             ORDER BY cr.created_at DESC";
   $stmt = $pdo->query($sql);
   $claims = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
@@ -516,7 +517,7 @@ function tokenize_inline(string $v): array {
                   <thead><tr><th>Image</th><th>User</th><th>Type</th><th>Item</th><th>Location</th><th>Match</th><th>Date</th><th>Actions</th></tr></thead>
                   <tbody id="reportsTbody">
                     <?php if (empty($claims)): ?>
-                      <tr>
+                      <tr data-empty-row="true">
                         <td colspan="8" class="empty-row">No claim requests submitted yet.</td>
                       </tr>
                     <?php else: ?>
