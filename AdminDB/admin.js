@@ -520,6 +520,221 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('modal-open');
   }
 
+  const userModal = document.getElementById('userModal');
+  const userDetailButtons = document.querySelectorAll('[data-user-detail]');
+  if (userModal && userDetailButtons.length) {
+    const nameEl = document.getElementById('userModalTitle');
+    const typeEl = document.getElementById('userModalType');
+    const emailEl = document.getElementById('userModalEmail');
+    const phoneEl = document.getElementById('userModalPhone');
+    const idEl = document.getElementById('userModalStudentId');
+    const deptEl = document.getElementById('userModalDepartment');
+    const joinedEl = document.getElementById('userModalJoined');
+    const lostCountEl = document.getElementById('userModalLostCount');
+    const foundCountEl = document.getElementById('userModalFoundCount');
+    const lostListEl = document.getElementById('userModalLostList');
+    const foundListEl = document.getElementById('userModalFoundList');
+    const sessionListEl = document.getElementById('userModalSessionList');
+    const dateFormatter = new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    const dateTimeFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+
+    const escapeHtml = (value) => String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    const formatDate = (value) => {
+      if (!value) return '—';
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? value : dateFormatter.format(parsed);
+    };
+
+    const formatDateTime = (value) => {
+      if (!value) return '—';
+      const parsed = new Date(value);
+      return Number.isNaN(parsed.getTime()) ? value : dateTimeFormatter.format(parsed);
+    };
+
+    const setListLoading = (element) => {
+      if (element) {
+        element.innerHTML = '<div class="user-modal__empty">Loading…</div>';
+      }
+    };
+
+    const renderEmpty = (element, message) => {
+      if (element) {
+        element.innerHTML = `<div class="user-modal__empty">${escapeHtml(message)}</div>`;
+      }
+    };
+
+    const renderReports = (element, items, badgeClass, emptyMessage) => {
+      if (!element) return;
+      if (!items || !items.length) {
+        renderEmpty(element, emptyMessage);
+        return;
+      }
+      element.innerHTML = '';
+      items.forEach(report => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'user-modal__record';
+        const name = escapeHtml(report.item_name || 'Item');
+        const reportId = escapeHtml(report.report_id || '—');
+        const status = escapeHtml(report.status || 'Pending');
+        const created = formatDate(report.created_at);
+        const badge = badgeClass === 'lost' ? 'Lost' : 'Found';
+        wrapper.innerHTML = `
+          <div>
+            <span class="user-modal__badge user-modal__badge--${badgeClass}">${badge}</span>
+            <strong>${name}</strong>
+            <span>Report ID: ${reportId}</span>
+          </div>
+          <div class="user-modal__record-meta">
+            <span>${status}</span>
+            <span>${created}</span>
+          </div>
+        `;
+        element.appendChild(wrapper);
+      });
+    };
+
+    const renderSessions = (element, sessions) => {
+      if (!element) return;
+      if (!sessions || !sessions.length) {
+        renderEmpty(element, 'No login activity recorded yet.');
+        return;
+      }
+      element.innerHTML = '';
+      sessions.forEach(session => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'user-modal__record';
+        const active = session.is_active === true || session.is_active === 1 || session.is_active === '1';
+        const statusClass = active ? 'user-modal__session-status--active' : 'user-modal__session-status--inactive';
+        const statusText = active ? 'Logged in' : 'Logged out';
+        const loginTime = formatDateTime(session.login_time);
+        const lastActivity = formatDateTime(session.last_activity);
+        const sessionId = escapeHtml(session.session_id || '—');
+        wrapper.innerHTML = `
+          <div>
+            <strong>${loginTime}</strong>
+            <span>Session ID: ${sessionId}</span>
+          </div>
+          <div class="user-modal__record-meta">
+            <span class="user-modal__session-status ${statusClass}">${statusText}</span>
+            <span>Last activity: ${lastActivity}</span>
+          </div>
+        `;
+        element.appendChild(wrapper);
+      });
+    };
+
+    const setModalSummary = (seed = {}) => {
+      if (nameEl) nameEl.textContent = seed.name || 'Loading user…';
+      if (typeEl) typeEl.textContent = seed.type || 'User';
+      if (emailEl) emailEl.textContent = seed.email || '—';
+      if (phoneEl) phoneEl.textContent = seed.phone || '—';
+      if (idEl) idEl.textContent = seed.student_id || '—';
+      if (deptEl) deptEl.textContent = seed.department || '—';
+      if (joinedEl) joinedEl.textContent = seed.created_at ? formatDate(seed.created_at) : '—';
+    };
+
+    const setCounts = (lost = 0, found = 0) => {
+      if (lostCountEl) lostCountEl.textContent = lost;
+      if (foundCountEl) foundCountEl.textContent = found;
+    };
+
+    const openUserModal = () => {
+      userModal.setAttribute('aria-hidden', 'false');
+      userModal.classList.add('is-visible');
+      document.body.classList.add('modal-open');
+    };
+
+    const closeUserModal = () => {
+      userModal.setAttribute('aria-hidden', 'true');
+      userModal.classList.remove('is-visible');
+      document.body.classList.remove('modal-open');
+    };
+
+    userModal.querySelectorAll('[data-user-close]').forEach(btn => {
+      btn.addEventListener('click', closeUserModal);
+    });
+
+    userModal.addEventListener('click', (event) => {
+      if (event.target === userModal) {
+        closeUserModal();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && userModal.classList.contains('is-visible')) {
+        closeUserModal();
+      }
+    });
+
+    const showError = (message) => {
+      renderEmpty(lostListEl, message);
+      renderEmpty(foundListEl, message);
+      renderEmpty(sessionListEl, message);
+    };
+
+    userDetailButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        let seed = {};
+        const raw = button.getAttribute('data-user-detail');
+        if (raw) {
+          try {
+            seed = JSON.parse(raw);
+          } catch (err) {
+            console.warn('Unable to parse user detail payload', err);
+          }
+        }
+        setModalSummary(seed);
+        setCounts(0, 0);
+        [lostListEl, foundListEl, sessionListEl].forEach(setListLoading);
+        openUserModal();
+
+        if (!window.USER_ACTIVITY_ENDPOINT || !seed.id) {
+          showError('User detail endpoint not configured.');
+          return;
+        }
+
+        try {
+          const formData = new FormData();
+          formData.append('user_id', seed.id);
+          const response = await fetch(window.USER_ACTIVITY_ENDPOINT, { method: 'POST', body: formData });
+          if (!response.ok) {
+            throw new Error('Unable to load user activity.');
+          }
+          const payload = await response.json();
+          if (!payload.success) {
+            throw new Error(payload.error || 'Unable to load user activity.');
+          }
+          const info = payload.user || {};
+          setModalSummary({
+            name: [info.first_name, info.last_name].filter(Boolean).join(' ') || seed.name,
+            type: info.user_type || seed.type,
+            email: info.email || seed.email,
+            phone: info.phone || seed.phone,
+            student_id: info.student_id || seed.student_id,
+            department: info.department || seed.department,
+            created_at: info.created_at || seed.created_at
+          });
+          const lostReports = payload.lost_reports || [];
+          const foundReports = payload.found_reports || [];
+          setCounts(lostReports.length, foundReports.length);
+          renderReports(lostListEl, lostReports, 'lost', 'No lost reports submitted.');
+          renderReports(foundListEl, foundReports, 'found', 'No found reports submitted.');
+          renderSessions(sessionListEl, payload.sessions || []);
+        } catch (error) {
+          console.error(error);
+          showError(error.message || 'Unable to load user details.');
+          showToast('Unable to load user details.');
+        }
+      });
+    });
+  }
+
   function showClaimModal(data) {
     const modal = document.createElement('dialog');
     modal.className = 'claim-dialog';

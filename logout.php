@@ -45,6 +45,18 @@ if ($scope === 'admin') {
     if (session_status() !== PHP_SESSION_ACTIVE) {
         session_start();
     }
+    $userSessionId = session_id();
+    if (file_exists(__DIR__ . '/db_config.php')) {
+        try {
+            require_once __DIR__ . '/db_config.php';
+            if (isset($pdo) && $userSessionId) {
+                $upd = $pdo->prepare('UPDATE sessions SET is_active = FALSE, last_activity = CURRENT_TIMESTAMP WHERE session_id = ?');
+                $upd->execute([$userSessionId]);
+            }
+        } catch (Exception $e) {
+            // ignore DB errors for logout
+        }
+    }
     $_SESSION = array();
     if (ini_get("session.use_cookies")) {
         $params = session_get_cookie_params();

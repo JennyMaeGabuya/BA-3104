@@ -164,8 +164,66 @@ try {
           </div>
         </section>
       </main>
+      <div id="userModal" class="user-modal" aria-hidden="true">
+        <div class="user-modal__panel" role="dialog" aria-modal="true" aria-labelledby="userModalTitle">
+          <button type="button" class="user-modal__close" data-user-close>&times;</button>
+          <header class="user-modal__header">
+            <p class="user-modal__eyebrow">Account Overview</p>
+            <h2 id="userModalTitle">Loading user…</h2>
+            <span class="user-modal__type" id="userModalType">—</span>
+          </header>
+          <div class="user-modal__summary">
+            <div>
+              <span>Email</span>
+              <strong id="userModalEmail">—</strong>
+            </div>
+            <div>
+              <span>Phone</span>
+              <strong id="userModalPhone">—</strong>
+            </div>
+            <div>
+              <span>Campus ID</span>
+              <strong id="userModalStudentId">—</strong>
+            </div>
+            <div>
+              <span>Department</span>
+              <strong id="userModalDepartment">—</strong>
+            </div>
+            <div>
+              <span>Member since</span>
+              <strong id="userModalJoined">—</strong>
+            </div>
+          </div>
+          <section class="user-modal__section">
+            <div class="user-modal__section-head">
+              <h3>Lost Reports</h3>
+              <span class="user-modal__count" id="userModalLostCount">0</span>
+            </div>
+            <div id="userModalLostList" class="user-modal__list"></div>
+          </section>
+          <section class="user-modal__section">
+            <div class="user-modal__section-head">
+              <h3>Found Reports</h3>
+              <span class="user-modal__count" id="userModalFoundCount">0</span>
+            </div>
+            <div id="userModalFoundList" class="user-modal__list"></div>
+          </section>
+          <section class="user-modal__section">
+            <div class="user-modal__section-head">
+              <h3>Login Activity</h3>
+            </div>
+            <div id="userModalSessionList" class="user-modal__list"></div>
+          </section>
+          <footer class="user-modal__footer">
+            <button type="button" class="btn" data-user-close>Close</button>
+          </footer>
+        </div>
+      </div>
     </div>
   </div>
+  <script>
+    window.USER_ACTIVITY_ENDPOINT = '/BA-3104/AdminDB/user_activity.php';
+  </script>
   <script src="admin.js"></script>
 </body>
 </html>
