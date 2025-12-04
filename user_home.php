@@ -260,7 +260,7 @@ require_once 'auth_check.php';
         <div class="photo" aria-hidden="true">
           <!-- replace 'campus.jpg' with your campus image -->
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3873.730839332063!2d121.09429617592337!3d13.995243191682063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd7b76e2f8184f%3A0x4adac1c9bbfaeb2e!2sBatangas%20State%20University%20-%20Malvar%20Campus!5e0!3m2!1sen!2sph!4v1709197000000!5m2!1sen!2sph"
+            src="https://maps.google.com/maps?q=Batangas%20State%20University&amp;ll=14.044948528846453,121.15595670600733&amp;z=18&amp;output=embed&amp;iwloc=0"
             width="100%"
             height="350"
             style="border:0; border-radius: 10px;"
