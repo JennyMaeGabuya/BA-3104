@@ -30,7 +30,7 @@ body {
 .left {
   flex: 1; /* take up half width */
   background: linear-gradient(rgba(200, 16, 46, 0.85), rgba(200, 16, 46, 0.85)),
-    url('campus.jpg') center/cover no-repeat; 
+    url('Design Image/2.jpg') center/cover no-repeat; 
   color: #fff;
   display: flex;
   flex-direction: column;
