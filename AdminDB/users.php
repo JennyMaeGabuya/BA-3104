@@ -28,6 +28,14 @@ $first = $_SESSION['first_name'] ?? '';
 $last = $_SESSION['last_name'] ?? '';
 $initials = strtoupper((strlen($first) ? $first[0] : '') . (strlen($last) ? $last[0] : ''));
 $fullname = trim(($first ?: '') . ' ' . ($last ?: ''));
+$users = [];
+try {
+  $stmt = $pdo->prepare("SELECT id, first_name, last_name, user_type, student_id, department, email, phone, created_at\n                         FROM users\n                         WHERE user_type IN ('Student','Faculty','Staff')\n                         ORDER BY created_at DESC");
+  $stmt->execute();
+  $users = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+} catch (Throwable $e) {
+  $users = [];
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -100,12 +108,57 @@ $fullname = trim(($first ?: '') . ' ' . ($last ?: ''));
       </header>
       <main class="page-body">
         <section class="table-card">
-          <div class="table-header"><div class="table-title">Users</div></div>
+          <div class="table-header">
+            <div class="table-title">Users</div>
+            <div class="table-count"><?= count($users) ?> account(s)</div>
+          </div>
           <div class="table-wrap">
             <table class="reports-table" aria-label="Users">
-              <thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Phone</th><th>Actions</th></tr></thead>
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Type</th><th>Phone</th><th>Actions</th></tr>
+              </thead>
               <tbody>
-                <tr><td>Juan Dela Cruz</td><td>juan@g.batstate-u.edu.ph</td><td>Student</td><td>09551234567</td><td><button class="btn">View</button></td></tr>
+                <?php if (empty($users)): ?>
+                  <tr>
+                    <td colspan="5" class="admin-empty admin-empty--table">No registered users yet.</td>
+                  </tr>
+                <?php else: ?>
+                  <?php foreach ($users as $user):
+                    $fullName = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')) ?: 'Unnamed User';
+                    $initials = strtoupper((($user['first_name'] ?? '')[0] ?? '') . (($user['last_name'] ?? '')[0] ?? '')) ?: '??';
+                    $email = $user['email'] ?? '—';
+                    $type = $user['user_type'] ?? 'Student';
+                    $phone = $user['phone'] ?: '—';
+                    $detailPayload = htmlspecialchars(json_encode([
+                      'id' => $user['id'] ?? null,
+                      'name' => $fullName,
+                      'email' => $email,
+                      'type' => $type,
+                      'student_id' => $user['student_id'] ?? '',
+                      'department' => $user['department'] ?? '',
+                      'phone' => $phone,
+                      'created_at' => $user['created_at'] ?? ''
+                    ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8');
+                  ?>
+                  <tr>
+                    <td>
+                      <div class="user-cell">
+                        <span class="user-avatar" aria-hidden="true"><?= htmlspecialchars($initials) ?></span>
+                        <div class="user-meta">
+                          <strong><?= htmlspecialchars($fullName) ?></strong>
+                          <small>ID: <?= htmlspecialchars($user['student_id'] ?? '—') ?></small>
+                        </div>
+                      </div>
+                    </td>
+                    <td><?= htmlspecialchars($email) ?></td>
+                    <td><?= htmlspecialchars($type) ?></td>
+                    <td><?= htmlspecialchars($phone) ?></td>
+                    <td>
+                      <button class="btn btn-small" type="button" data-user-detail='<?= $detailPayload ?>'>View</button>
+                    </td>
+                  </tr>
+                  <?php endforeach; ?>
+                <?php endif; ?>
               </tbody>
             </table>
           </div>
