@@ -627,7 +627,7 @@ function tokenize_inline(string $v): array {
           <h3>Claim Proof</h3>
           <p class="match-modal__proof-row">
             <strong>School ID:</strong>
-            <a href="#" id="matchModalIdLink" target="_blank" rel="noopener">View Upload</a>
+            <span id="matchModalIdNote" class="match-modal__proof-note">Attached below</span>
             <span id="matchModalIdMissing" class="match-modal__proof-missing">Not uploaded</span>
           </p>
           <div class="match-modal__id-block" id="matchModalIdBlock">
@@ -658,7 +658,7 @@ function tokenize_inline(string $v): array {
       const foundEl = document.getElementById('matchModalFound');
       const reasonsEl = document.getElementById('matchModalReasons');
       const proofEl = document.getElementById('matchModalProof');
-      const idLinkEl = document.getElementById('matchModalIdLink');
+      const idNoteEl = document.getElementById('matchModalIdNote');
       const idMissingEl = document.getElementById('matchModalIdMissing');
       const idImageEl = document.getElementById('matchModalIdImage');
       const idBlockEl = document.getElementById('matchModalIdBlock');
@@ -704,7 +704,7 @@ function tokenize_inline(string $v): array {
         if (foundEl) foundEl.innerHTML = '—';
         if (reasonsEl) reasonsEl.innerHTML = '';
         if (proofEl) proofEl.style.display = 'none';
-        if (idLinkEl) idLinkEl.style.display = 'none';
+        if (idNoteEl) idNoteEl.style.display = 'none';
         if (idMissingEl) idMissingEl.style.display = 'inline';
         if (idImageEl) {
           idImageEl.src = '';
@@ -747,14 +747,8 @@ function tokenize_inline(string $v): array {
           proofEl.style.display = showProof ? 'flex' : 'none';
         }
         const hasIdPhoto = showProof && Boolean(payload.id_photo && payload.id_photo.trim().length);
-        if (idLinkEl) {
-          if (hasIdPhoto) {
-            idLinkEl.href = payload.id_photo;
-            idLinkEl.style.display = 'inline';
-          } else {
-            idLinkEl.removeAttribute('href');
-            idLinkEl.style.display = 'none';
-          }
+        if (idNoteEl) {
+          idNoteEl.style.display = hasIdPhoto ? 'inline' : 'none';
         }
         if (idMissingEl) {
           idMissingEl.style.display = showProof && !hasIdPhoto ? 'inline' : 'none';

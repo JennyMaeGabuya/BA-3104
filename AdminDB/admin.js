@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const foundEl = document.getElementById('matchModalFound');
     const reasonsEl = document.getElementById('matchModalReasons');
     const proofEl = document.getElementById('matchModalProof');
-    const idLinkEl = document.getElementById('matchModalIdLink');
+    const idNoteEl = document.getElementById('matchModalIdNote');
     const idMissingEl = document.getElementById('matchModalIdMissing');
     const idImageEl = document.getElementById('matchModalIdImage');
     const idBlockEl = document.getElementById('matchModalIdBlock');
@@ -497,14 +497,8 @@ document.addEventListener('DOMContentLoaded', () => {
       proofEl.style.display = showProof ? 'flex' : 'none';
     }
     const hasIdPhoto = showProof && Boolean(payload.id_photo && payload.id_photo.trim().length);
-    if (idLinkEl) {
-      if (hasIdPhoto) {
-        idLinkEl.href = payload.id_photo;
-        idLinkEl.style.display = 'inline';
-      } else {
-        idLinkEl.removeAttribute('href');
-        idLinkEl.style.display = 'none';
-      }
+    if (idNoteEl) {
+      idNoteEl.style.display = hasIdPhoto ? 'inline' : 'none';
     }
     if (idMissingEl) {
       idMissingEl.style.display = showProof && !hasIdPhoto ? 'inline' : 'none';
