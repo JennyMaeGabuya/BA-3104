@@ -5,6 +5,8 @@
  */
 
 require_once '../auth_check.php';
+require_once '../db_config.php';
+require_once __DIR__ . '/notification_context.php';
 
 // Get user data from session (with safe fallbacks)
 $fullname = $_SESSION['fullname'] ?? $_SESSION['user_name'] ?? '';
@@ -22,10 +24,10 @@ if (empty($first_name) && !empty($fullname)) {
   }
 }
 
-// Preference fallbacks (boolean-like)
-$pref_email = !empty($_SESSION['pref_email']) || !empty($_SESSION['pref_email_found']) ? true : false;
-$pref_sms = !empty($_SESSION['pref_sms']) || !empty($_SESSION['pref_sms_updates']) ? true : false;
-$pref_weekly = !empty($_SESSION['pref_weekly']) ? true : false;
+$notificationContext = build_notification_context($pdo, $_SESSION['user_id'] ?? null, 10);
+$notificationDropdown = $notificationContext['dropdownNotifications'];
+$notificationTotal = $notificationContext['totalCount'];
+$notificationUnread = $notificationContext['unreadCount'];
 ?>
 <!doctype html>
 <html lang="en">
@@ -72,9 +74,9 @@ $pref_weekly = !empty($_SESSION['pref_weekly']) ? true : false;
     </a>
 
     <a href="notification.php" class="nav-item">
-        <span class="nav-icon" aria-hidden="true">🔔</span>
-        <span class="nav-label">Notifications</span>
-        <span class="nav-badge" id="sidebarBadge">4</span>
+      <span class="nav-icon" aria-hidden="true">🔔</span>
+      <span class="nav-label">Notifications</span>
+      <span class="nav-badge" id="sidebarBadge" <?= $notificationTotal === 0 ? 'style="display:none;"' : '' ?>><?= $notificationTotal ?></span>
     </a>
 
     <a href="settings.php" class="nav-item nav-item--active">
@@ -100,7 +102,7 @@ $pref_weekly = !empty($_SESSION['pref_weekly']) ? true : false;
           <div class="notification-container">
             <button class="icon-btn" id="notifBtn" aria-label="Notifications">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#374151" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 1 0-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h11z"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-              <span class="topbar-badge" id="topbarBadge">4</span>
+              <span class="topbar-badge" id="topbarBadge" <?= $notificationUnread === 0 ? 'style="display:none;"' : '' ?>><?= $notificationUnread > 0 ? $notificationUnread : '' ?></span>
             </button>
 
             <!-- Notification Dropdown -->
@@ -109,33 +111,22 @@ $pref_weekly = !empty($_SESSION['pref_weekly']) ? true : false;
                 <h3>Notifications</h3>
               </div>
               <div class="notification-dropdown-list">
-                <div class="notification-dropdown-item">
-                  <div class="notification-dropdown-content">
-                    <div class="notification-dropdown-title">Your report #LR-003 is pending admin approval (includes photo)</div>
-                    <div class="notification-dropdown-time">30 minutes ago</div>
+                <?php if (empty($notificationDropdown)): ?>
+                  <div class="notification-dropdown-item">
+                    <div class="notification-dropdown-content">
+                      <div class="notification-dropdown-title">No recent notifications.</div>
+                    </div>
                   </div>
-                </div>
-                
-                <div class="notification-dropdown-item">
-                  <div class="notification-dropdown-content">
-                    <div class="notification-dropdown-title">Your lost item report #LR-001 has been verified</div>
-                    <div class="notification-dropdown-time">2 hours ago</div>
-                  </div>
-                </div>
-                
-                <div class="notification-dropdown-item">
-                  <div class="notification-dropdown-content">
-                    <div class="notification-dropdown-title">A matching item was found for your report #LR-001</div>
-                    <div class="notification-dropdown-time">5 hours ago</div>
-                  </div>
-                </div>
-                
-                <div class="notification-dropdown-item">
-                  <div class="notification-dropdown-content">
-                    <div class="notification-dropdown-title">Please claim your item within 7 days</div>
-                    <div class="notification-dropdown-time">1 day ago</div>
-                  </div>
-                </div>
+                <?php else: ?>
+                  <?php foreach ($notificationDropdown as $notification): ?>
+                    <div class="notification-dropdown-item">
+                      <div class="notification-dropdown-content">
+                        <div class="notification-dropdown-title"><?= htmlspecialchars($notification['message']) ?></div>
+                        <div class="notification-dropdown-time"><?= htmlspecialchars(format_relative_time($notification['created_at'] ?? null)) ?></div>
+                      </div>
+                    </div>
+                  <?php endforeach; ?>
+                <?php endif; ?>
               </div>
               <div class="notification-dropdown-footer">
                 <a href="notification.php" class="view-all-link">View all notifications</a>
@@ -186,31 +177,30 @@ $pref_weekly = !empty($_SESSION['pref_weekly']) ? true : false;
         </form>
       </section>
 
-      <section class="card notif-card" aria-labelledby="notif-title">
-        <h2 id="notif-title" class="card-title">Notification Preferences</h2>
+      <section class="card profile-card" aria-labelledby="security-title">
+        <h2 id="security-title" class="card-title">Security</h2>
+        <form id="securityForm" class="form-grid" novalidate>
+          <div class="form-row">
+            <label class="field">
+              <span class="field-label">Current password</span>
+              <input id="currentPassword" name="currentPassword" type="password" placeholder="Current password" required>
+            </label>
 
-        <div class="checkbox-list">
-          <label class="checkbox">
-            <input id="prefEmailFound" type="checkbox" <?php echo ($pref_email ? 'checked' : ''); ?>>
-            <div>
-              <div class="cb-title">Email notifications when items are found</div>
-            </div>
+            <label class="field">
+              <span class="field-label">New password</span>
+              <input id="newPassword" name="newPassword" type="password" placeholder="New password (min 8 chars)" required>
+            </label>
+          </div>
+
+          <label class="field">
+            <span class="field-label">Confirm new password</span>
+            <input id="confirmPassword" name="confirmPassword" type="password" placeholder="Confirm new password" required>
           </label>
 
-          <label class="checkbox">
-            <input id="prefSmsUpdates" type="checkbox" <?php echo ($pref_sms ? 'checked' : ''); ?>>
-            <div>
-              <div class="cb-title">SMS notifications for report updates</div>
-            </div>
-          </label>
-
-          <label class="checkbox">
-            <input id="prefWeeklySummary" type="checkbox" <?php echo ($pref_weekly ? 'checked' : ''); ?>>
-            <div>
-              <div class="cb-title">Weekly summary of found items</div>
-            </div>
-          </label>
-        </div>
+          <div class="form-actions">
+            <button type="submit" id="changePasswordBtn" class="btn btn-save">Change Password</button>
+          </div>
+        </form>
       </section>
     </main>
   </div>

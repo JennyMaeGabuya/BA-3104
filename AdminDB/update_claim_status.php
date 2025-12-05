@@ -3,6 +3,7 @@ session_name('ADMINSESSID');
 session_start();
 require_once __DIR__ . '/../db_config.php';
 require_once __DIR__ . '/../mail_notifications.php';
+require_once __DIR__ . '/../notification_helpers.php';
 
 header('Content-Type: application/json');
 
@@ -56,7 +57,7 @@ try {
     sync_found_report_status($pdo, $claimRow['report_id'], $canonicalStatus);
   }
   try {
-    dispatch_claim_notifications($canonicalStatus, $claimRow);
+    dispatch_claim_notifications($pdo, $canonicalStatus, $claimRow);
   } catch (Throwable $notifyError) {
     error_log('Claim notification dispatch failed: ' . $notifyError->getMessage());
   }
@@ -65,7 +66,7 @@ try {
   respond(false, 'Server error');
 }
 
-function dispatch_claim_notifications(string $status, array $claim): void {
+function dispatch_claim_notifications(PDO $pdo, string $status, array $claim): void {
   if (!$claim) {
     return;
   }
@@ -74,11 +75,11 @@ function dispatch_claim_notifications(string $status, array $claim): void {
     return;
   }
   $reportId = $claim['report_id'] ?? ($claim['request_code'] ?? 'report');
+  $reference = $claim['request_code'] ?? strtoupper(substr($reportId, -6));
   $itemName = $claim['found_item_name'] ?? 'your item';
   if ($status === 'Approved') {
     $pickupLocation = $claim['pickup_location'] ?? ($claim['location_found'] ?? 'the admin office');
     $pickupWindow = trim((string)getenv('FINDIT_PICKUP_WINDOW')) ?: 'Mon-Fri, 8 AM - 5 PM';
-    $reference = $claim['request_code'] ?? strtoupper(substr($reportId, -6));
     $ctx = [
       'reportId' => $reportId,
       'itemName' => $itemName,
@@ -89,6 +90,11 @@ function dispatch_claim_notifications(string $status, array $claim): void {
     foreach ($recipients as $recipient) {
       notify_item_claimable($recipient, $ctx);
     }
+    $accountUserId = intval($claim['user_id'] ?? 0);
+    if ($accountUserId > 0) {
+      $message = "Claim request {$reference} for '{$itemName}' is approved and ready for pickup at {$pickupLocation}.";
+      insert_notification($pdo, $accountUserId, $message, 'claim_ready', $reportId ?: $reference);
+    }
   } elseif ($status === 'Resolved') {
     $ctx = [
       'reportId' => $reportId,
@@ -98,6 +104,12 @@ function dispatch_claim_notifications(string $status, array $claim): void {
     foreach ($recipients as $recipient) {
       notify_item_claimed($recipient, $ctx);
     }
+    $accountUserId = intval($claim['user_id'] ?? 0);
+    if ($accountUserId > 0) {
+      $timestamp = $ctx['claimedAt'];
+      $message = "Claim request {$reference} for '{$itemName}' was marked claimed on {$timestamp}.";
+      insert_notification($pdo, $accountUserId, $message, 'claim_resolved', $reportId ?: $reference);
+    }
   } elseif ($status === 'Rejected') {
     $ctx = [
       'reportId' => $reportId,
@@ -106,6 +118,11 @@ function dispatch_claim_notifications(string $status, array $claim): void {
     ];
     foreach ($recipients as $recipient) {
       notify_claim_rejected($recipient, $ctx);
+    }
+    $accountUserId = intval($claim['user_id'] ?? 0);
+    if ($accountUserId > 0) {
+      $message = "Claim request {$reference} for '{$itemName}' was rejected. Reason: {$ctx['reason']}";
+      insert_notification($pdo, $accountUserId, $message, 'claim_rejected', $reportId ?: $reference);
     }
   }
 }

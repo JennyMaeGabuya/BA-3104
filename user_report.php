@@ -234,7 +234,7 @@ require_once 'auth_check.php';
         <ol>
             <li>Your report is submitted to the admin team.</li>
             <li>The report will be reviewed for accuracy.</li>
-            <li>If your item is found, you will be contacted immediately.</li>
+            <li>If your item is found, you will be emailed immediately.</li>
             <li>You may monitor updates through your Dashboard.</li>
         </ol>
     </div>

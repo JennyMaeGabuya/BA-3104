@@ -4,6 +4,7 @@ session_name('ADMINSESSID');
 session_start();
 require_once __DIR__ . '/../db_config.php';
 require_once __DIR__ . '/../mail_notifications.php';
+require_once __DIR__ . '/../notification_helpers.php';
 
 function fail($msg) {
   http_response_code(400);
@@ -79,6 +80,14 @@ try {
       'email' => $emailAddr,
       'name' => $reportRow['full_name'] ?? '',
     ], $context);
+  }
+  $accountUserId = intval($reportRow['user_id'] ?? 0);
+  if ($accountUserId > 0) {
+    $displayName = trim((string)($reportRow['item_name'] ?? ''));
+    $actionVerb = $action === 'approve' ? 'verified' : 'rejected';
+    $itemSuffix = $displayName !== '' ? " for \"{$displayName}\"" : '';
+    $message = "Your {$reportType} report{$itemSuffix} (#{$reportId}) has been {$actionVerb}.";
+    insert_notification($pdo, $accountUserId, $message, 'report_status', $reportId);
   }
   header('Location: /BA-3104/AdminDB/pendding.php?updated=1');
   exit;

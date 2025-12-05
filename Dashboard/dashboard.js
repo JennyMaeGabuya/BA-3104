@@ -152,12 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
     phone: document.getElementById('phone'),
   };
 
-  const prefs = {
-    emailFound: document.getElementById('prefEmailFound'),
-    smsUpdates: document.getElementById('prefSmsUpdates'),
-    weekly: document.getElementById('prefWeeklySummary'),
-  };
-
   const toast = document.getElementById('toast');
   const toastMessage = document.getElementById('toastMessage');
 
@@ -192,14 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
       phone: inputs.phone.value.trim(),
     };
 
-    const data = {
-      profile,
-      prefs: {
-        emailFound: prefs.emailFound.checked,
-        smsUpdates: prefs.smsUpdates.checked,
-        weekly: prefs.weekly.checked,
-      }
-    };
+    const data = { profile };
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
@@ -208,6 +195,48 @@ document.addEventListener('DOMContentLoaded', () => {
     toastMessage.textContent = msg;
     toast.hidden = false;
     setTimeout(() => { toast.hidden = true; }, ms);
+  }
+
+  // Change password handling
+  const securityForm = document.getElementById('securityForm');
+  const changeBtn = document.getElementById('changePasswordBtn');
+  if (securityForm && changeBtn) {
+    securityForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const current = document.getElementById('currentPassword')?.value || '';
+      const nw = document.getElementById('newPassword')?.value || '';
+      const confirm = document.getElementById('confirmPassword')?.value || '';
+      if (!current || !nw || !confirm) {
+        showToast('Please fill all password fields');
+        return;
+      }
+      if (nw.length < 8) {
+        showToast('New password must be at least 8 characters');
+        return;
+      }
+      if (nw !== confirm) {
+        showToast('Passwords do not match');
+        return;
+      }
+      changeBtn.disabled = true;
+      try {
+        const res = await fetch('change_password.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ current_password: current, new_password: nw })
+        });
+        const data = await res.json();
+        if (data && data.success) {
+          showToast(data.message || 'Password changed');
+          securityForm.reset();
+        } else {
+          alert(data && data.error ? data.error : 'Unable to change password');
+        }
+      } catch (err) {
+        alert('An error occurred while changing password.');
+      }
+      changeBtn.disabled = false;
+    });
   }
 
   // Basic validation
@@ -234,14 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!validate()) return;
     save();
     showToast('Settings saved');
-  });
-
-  // auto-save prefs when toggled
-  Object.values(prefs).forEach(el => {
-    el.addEventListener('change', () => {
-      save();
-      showToast('Preferences updated');
-    });
   });
 
   // initial load

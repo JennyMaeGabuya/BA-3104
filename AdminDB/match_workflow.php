@@ -3,6 +3,7 @@ session_name('ADMINSESSID');
 session_start();
 require_once __DIR__ . '/../db_config.php';
 require_once __DIR__ . '/../mail_notifications.php';
+require_once __DIR__ . '/../notification_helpers.php';
 require_once __DIR__ . '/../match_workflow_helpers.php';
 
 header('Content-Type: application/json');
@@ -157,6 +158,41 @@ if ($targetStatus === 'claimable') {
   }
 }
 
+if ($targetStatus === 'claimable') {
+  record_match_notification($pdo, $lostRow, 'lost', 'claimable', $lostId, $foundId, $context['itemName'] ?? 'item');
+  record_match_notification($pdo, $foundRow, 'found', 'claimable', $lostId, $foundId, $context['itemName'] ?? 'item');
+} elseif ($targetStatus === 'claimed') {
+  $claimedItem = $foundRow['item_name'] ?? ($lostRow['item_name'] ?? 'item');
+  record_match_notification($pdo, $lostRow, 'lost', 'claimed', $lostId, $foundId, $claimedItem);
+  record_match_notification($pdo, $foundRow, 'found', 'claimed', $lostId, $foundId, $claimedItem);
+} elseif ($targetStatus === 'rejected') {
+  $rejectedItem = $foundRow['item_name'] ?? ($lostRow['item_name'] ?? 'item');
+  record_match_notification($pdo, $lostRow, 'lost', 'rejected', $lostId, $foundId, $rejectedItem);
+  record_match_notification($pdo, $foundRow, 'found', 'rejected', $lostId, $foundId, $rejectedItem);
+}
+
 respond(true, 'Match workflow updated.', [
   'status' => $targetStatus,
 ]);
+
+function record_match_notification(PDO $pdo, array $report, string $sourceLabel, string $status, string $lostId, string $foundId, string $itemName): void {
+  $userId = intval($report['user_id'] ?? 0);
+  if ($userId <= 0) {
+    return;
+  }
+  $baseReportId = $report['report_id'] ?? ($status === 'claimed' ? $foundId : $lostId);
+  $referenceId = $sourceLabel === 'lost' ? $foundId : $lostId;
+  $message = '';
+  $type = 'claim_event';
+  if ($status === 'claimable') {
+    $message = "Your {$sourceLabel} report ({$baseReportId}) for '{$itemName}' is ready for pickup because of match {$referenceId}.";
+    $type = 'claim_ready';
+  } elseif ($status === 'claimed') {
+    $message = "Match {$referenceId} for '{$itemName}' was marked claimed.";
+    $type = 'claim_resolved';
+  } elseif ($status === 'rejected') {
+    $message = "Match {$referenceId} for '{$itemName}' was rejected.";
+    $type = 'claim_rejected';
+  }
+  insert_notification($pdo, $userId, $message, $type, $referenceId ?: $baseReportId);
+}

@@ -530,6 +530,9 @@ a{ color:inherit; text-decoration:none; }
 .stat-chip__hint{font-size:12px;color:var(--text-muted)}
 .dark-mode .stat-chip{background:#091226;border-color:rgba(255,255,255,0.06);box-shadow:0 12px 28px rgba(0,0,0,0.35)}
 .dark-mode .stat-chip--reset{background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.15)}
+.dark-mode .stat-chip__label{color:#d7e6ff}
+.dark-mode .stat-chip__value{color:#f8fbff}
+.dark-mode .stat-chip__hint{color:#9fb6d1}
 
 /* management grid */
 .management-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;margin-top:10px;align-items:start}
@@ -544,7 +547,7 @@ a{ color:inherit; text-decoration:none; }
 .panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
 .panel-header h2{margin:0;font-size:17px}
 .panel-count{font-size:13px;font-weight:700;color:var(--text-secondary)}
-.panel-scroll{flex:1;overflow:auto;padding-right:6px;margin-top:8px}
+.panel-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-right:6px;margin-top:8px;max-height:70vh}
 .panel-scroll::-webkit-scrollbar{width:6px}
 .panel-scroll::-webkit-scrollbar-thumb{background:rgba(15,23,42,0.15);border-radius:999px}
 .panel-scroll--table{max-height:420px}
@@ -599,6 +602,14 @@ a{ color:inherit; text-decoration:none; }
 .dark-mode .workflow-btn--accent{background:rgba(59,130,246,0.2);border-color:rgba(59,130,246,0.4);color:#cfe0ff}
 .dark-mode .workflow-btn--danger{background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.4);color:#ffe4e6}
 .dark-mode .workflow-btn:hover:not(:disabled){background:rgba(255,77,109,0.2);border-color:rgba(255,77,109,0.4);color:#ffe4ec}
+.dark-mode .management-panel{background:#0c1629;border-color:rgba(255,255,255,0.08);box-shadow:0 18px 40px rgba(0,0,0,0.45)}
+.dark-mode .panel-header h2{color:#f0f6ff}
+.dark-mode .panel-count{color:#b9cbe0}
+.dark-mode .report-tile__row h3{color:#f8fbff}
+.dark-mode .report-tile__meta{color:#d8e7ff}
+.dark-mode .report-tile__meta span{color:#9fb6d1}
+.dark-mode .report-tile__desc{color:#d9e4f4}
+.dark-mode .panel-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.14)}
 
 @media (min-width:1200px){
   .management-grid{grid-template-columns:repeat(2,minmax(0,1fr));}

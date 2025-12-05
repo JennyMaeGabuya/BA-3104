@@ -786,7 +786,7 @@ a{color:var(--red)}
 .form-row{display:flex;gap:16px;align-items:flex-start}
 .field{display:flex;flex-direction:column;flex:1}
 .field-label{font-size:13px;color:var(--text-muted);margin-bottom:8px}
-input[type="text"],input[type="email"],input[type="tel"],select{
+input[type="text"],input[type="email"],input[type="tel"],input[type="password"],select{
   height:44px;padding:10px 14px;border-radius:10px;border:1px solid var(--border-color);background:var(--input-bg);font-size:15px;outline:none;color:var(--text-primary);transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 input:focus,select:focus{box-shadow:0 6px 18px rgba(15,23,42,0.06);border-color:rgba(200,16,46,0.3)}

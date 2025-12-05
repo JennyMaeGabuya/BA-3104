@@ -11,10 +11,121 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('foundForm');
   const successBox = document.getElementById('successBox');
   const btnCancel = document.getElementById('btnCancel');
+  const dateInput = document.getElementById('dateFound');
+  const timeInput = document.getElementById('timeFound');
 
   // Check if elements exist (for pages that don't have the form)
   if (!dropzone || !fileInput || !previewRow || !form) {
     return;
+  }
+
+  function getPhilippinesNow() {
+    return new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }));
+  }
+
+  function pad(value) {
+    return String(value).padStart(2, '0');
+  }
+
+  function formatDate(value) {
+    return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`;
+  }
+
+  function formatTime(value) {
+    return `${pad(value.getHours())}:${pad(value.getMinutes())}`;
+  }
+
+  function updateDateConstraints() {
+    if (!dateInput) {
+      return;
+    }
+
+    const today = formatDate(getPhilippinesNow());
+    dateInput.max = today;
+
+    if (dateInput.value && dateInput.value > today) {
+      dateInput.value = today;
+    }
+  }
+
+  function getSelectedDateValue() {
+    return dateInput ? dateInput.value : '';
+  }
+
+  function getSelectedTimeValue() {
+    return timeInput ? timeInput.value : '';
+  }
+
+  function parseSelectedDateTime() {
+    const dateValue = getSelectedDateValue();
+    const timeValue = getSelectedTimeValue() || '00:00';
+    if (!dateValue) {
+      return null;
+    }
+    const dateTimeString = `${dateValue}T${timeValue}:00`;
+    const parsed = new Date(dateTimeString);
+    return Number.isFinite(parsed.getTime()) ? parsed : null;
+  }
+
+  function isFutureDateTime() {
+    const selected = parseSelectedDateTime();
+    if (!selected) {
+      return false;
+    }
+    return selected.getTime() > getPhilippinesNow().getTime();
+  }
+
+  function clampTimeToNow() {
+    if (!timeInput || !dateInput) {
+      return;
+    }
+    const now = getPhilippinesNow();
+    const today = formatDate(now);
+    const currentTime = formatTime(now);
+    if (dateInput.value === today && timeInput.value && timeInput.value > currentTime) {
+      timeInput.value = currentTime;
+    }
+  }
+
+  function updateTimeConstraints() {
+    if (!timeInput) {
+      return;
+    }
+
+    const now = getPhilippinesNow();
+    const today = formatDate(now);
+    const currentTime = formatTime(now);
+
+    if (dateInput && dateInput.value === today) {
+      timeInput.max = currentTime;
+      clampTimeToNow();
+    } else {
+      timeInput.removeAttribute('max');
+    }
+  }
+
+  function refreshDateTimeConstraints() {
+    updateDateConstraints();
+    updateTimeConstraints();
+  }
+
+  if (dateInput) {
+    dateInput.addEventListener('input', () => {
+      if (dateInput.value && dateInput.max && dateInput.value > dateInput.max) {
+        dateInput.value = dateInput.max;
+      }
+      updateTimeConstraints();
+    });
+  }
+
+  if (timeInput && dateInput) {
+    timeInput.addEventListener('input', clampTimeToNow);
+    timeInput.addEventListener('change', clampTimeToNow);
+  }
+
+  if (dateInput || timeInput) {
+    refreshDateTimeConstraints();
+    setInterval(refreshDateTimeConstraints, 60000);
   }
 
   let currentFile = null;
@@ -268,6 +379,18 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('phone').focus();
       alert('Please enter a valid phone number.');
       return;
+    }
+
+    if (isFutureDateTime()) {
+      if (timeInput && dateInput) {
+        alert('Please select a time and date that are not in the future.');
+        if (timeInput.value && dateInput.value) {
+          timeInput.focus();
+        } else {
+          dateInput.focus();
+        }
+        return;
+      }
     }
 
     // All validation passed - prepare form data
