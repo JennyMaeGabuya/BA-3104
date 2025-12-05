@@ -100,17 +100,42 @@ function notification_icon_class(string $type): string {
 }
 
 function format_relative_time(?string $timestamp): string {
-  if (!$timestamp) {
+  // Normalize timezone to Manila to match campus context and DB server.
+  static $tz = null;
+  if ($tz === null) {
+    $tz = new DateTimeZone('Asia/Manila');
+  }
+
+  if (!$timestamp || $timestamp === '0000-00-00 00:00:00') {
+    return '--';
+  }
+
+  try {
+    $created = new DateTimeImmutable($timestamp, $tz);
+  } catch (Throwable $e) {
+    return '--';
+  }
+
+  $now = new DateTimeImmutable('now', $tz);
+  $diff = $now->getTimestamp() - $created->getTimestamp();
+
+  if ($diff < 60) {
     return 'just now';
   }
-  $ts = strtotime($timestamp);
-  if ($ts === false) {
-    return 'just now';
+  if ($diff < 3600) {
+    $mins = floor($diff / 60);
+    return $mins . ' minute' . ($mins === 1 ? '' : 's') . ' ago';
   }
-  $diff = time() - $ts;
-  if ($diff < 60) return 'just now';
-  if ($diff < 3600) return floor($diff / 60) . ' minute' . ($diff < 120 ? '' : 's') . ' ago';
-  if ($diff < 86400) return floor($diff / 3600) . ' hour' . ($diff < 7200 ? '' : 's') . ' ago';
-  if ($diff < 172800) return 'yesterday';
-  return date('M j, Y', $ts);
+  if ($diff < 86400) {
+    $hrs = floor($diff / 3600);
+    return $hrs . ' hour' . ($hrs === 1 ? '' : 's') . ' ago';
+  }
+  if ($diff < 172800) {
+    return 'yesterday';
+  }
+  if ($diff < 604800) {
+    $days = floor($diff / 86400);
+    return $days . ' day' . ($days === 1 ? '' : 's') . ' ago';
+  }
+  return $created->format('M j, Y');
 }

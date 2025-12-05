@@ -203,9 +203,7 @@ require_once 'auth_check.php';
           <span class="label-text">Item Location for Pickup <span class="required">*</span></span>
           <select name="pickupLocation" id="pickupLocation" required>
             <option value="" disabled selected>Where can the owner claim this item?</option>
-            <option>I have the item with me</option>
             <option>Lost & Found Office</option>
-            <option>Security Office</option>
             <option>Bring to Admin</option>
           </select>
         </label>

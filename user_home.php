@@ -4,6 +4,13 @@
  */
 
 require_once 'auth_check.php';
+require_once 'db_config.php';
+require_once 'notification_helpers.php';
+
+$userId = intval($_SESSION['user_id'] ?? 0);
+$notifLimit = 4;
+$notifications = $userId > 0 ? fetch_user_notifications($pdo, $userId, $notifLimit) : [];
+$unreadCount = count(array_filter($notifications, fn($note) => empty($note['is_read'])));
 ?>
 <!doctype html>
 <html lang="en">
@@ -55,7 +62,7 @@ require_once 'auth_check.php';
             <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2z"></path>
             <path d="M18 16v-5a6 6 0 1 0-12 0v5l-2 2v1h16v-1z"></path>
           </svg>
-          <span class="notif-dot" id="notifDot"></span>
+          <span class="notif-dot" id="notifDot" <?= $unreadCount === 0 ? 'style="display:none;"' : '' ?>></span>
         </div>
 
         <!-- Notification Dropdown -->
@@ -64,33 +71,23 @@ require_once 'auth_check.php';
             <h3>Notifications</h3>
           </div>
           <div class="notification-dropdown-list">
-            <div class="notification-dropdown-item">
-              <div class="notification-dropdown-content">
-                <div class="notification-dropdown-title">Your report #LR-003 is pending admin approval (includes photo)</div>
-                <div class="notification-dropdown-time">30 minutes ago</div>
+            <?php if (empty($notifications)): ?>
+              <div class="notification-dropdown-item">
+                <div class="notification-dropdown-content">
+                  <div class="notification-dropdown-title">No notifications yet.</div>
+                  <div class="notification-dropdown-time">—</div>
+                </div>
               </div>
-            </div>
-            
-            <div class="notification-dropdown-item">
-              <div class="notification-dropdown-content">
-                <div class="notification-dropdown-title">Your lost item report #LR-001 has been verified</div>
-                <div class="notification-dropdown-time">2 hours ago</div>
-              </div>
-            </div>
-            
-            <div class="notification-dropdown-item">
-              <div class="notification-dropdown-content">
-                <div class="notification-dropdown-title">A matching item was found for your report #LR-001</div>
-                <div class="notification-dropdown-time">5 hours ago</div>
-              </div>
-            </div>
-            
-            <div class="notification-dropdown-item">
-              <div class="notification-dropdown-content">
-                <div class="notification-dropdown-title">Please claim your item within 7 days</div>
-                <div class="notification-dropdown-time">1 day ago</div>
-              </div>
-            </div>
+            <?php else: ?>
+              <?php foreach ($notifications as $notification): ?>
+                <div class="notification-dropdown-item">
+                  <div class="notification-dropdown-content">
+                    <div class="notification-dropdown-title"><?= htmlspecialchars($notification['message']) ?></div>
+                    <div class="notification-dropdown-time"><?= htmlspecialchars(format_relative_time($notification['created_at'] ?? null)) ?></div>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </div>
           <div class="notification-dropdown-footer">
             <a href="Dashboard/notification.php" class="view-all-link">View all notifications</a>

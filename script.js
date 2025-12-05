@@ -7,7 +7,7 @@ const ITEMS = [
     location: "Cafeteria",
     date: "2025-11-11",
     status: "Available",
-    image: "https://images.unsplash.com/photo-1520975913949-2f6d60c3f0d6?q=80&w=1400&auto=format&fit=crop",
+    image: "Design Image/4.jpg",
     description: "Black Nike backpack with laptop compartment. Contains some textbooks."
   },
   {
@@ -27,7 +27,7 @@ const ITEMS = [
     location: "Gymnasium",
     date: "2025-11-09",
     status: "Available",
-    image: "https://images.unsplash.com/photo-1585238341976-1f8a1f3c6c3b?q=80&w=1400&auto=format&fit=crop",
+    image: "Design Image/5.jpg",
     description: "Brown leather wallet with student ID inside. Owner can identify by providing ID number."
   },
   {
@@ -57,7 +57,7 @@ const ITEMS = [
     location: "Cafeteria",
     date: "2025-11-07",
     status: "Available",
-    image: "https://images.unsplash.com/photo-1580894908360-8b62e4d7b8b6?q=80&w=1400&auto=format&fit=crop",
+    image: "Design Image/6.jpg",
     description: "White wireless earbuds with charging case. Brand: Generic."
   }
 ];
