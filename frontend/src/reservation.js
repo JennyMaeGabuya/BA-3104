@@ -1,4 +1,7 @@
+// WARNING SPAGHETTI CODE BELOW 
+
 import './reservation.css'
+import { sendReservation } from './utils/api';
 
 const zone = document.getElementById("zone")
 const spotList = document.getElementById("spotList");
@@ -12,6 +15,17 @@ let selectedSpot = null;
 
 
 function generateZones(zone) {
+
+  fetch("http://localhost/ParkEase/BA-3104/backend/public/save-reservation") // get all the reservations
+  .then(res => res.text())
+  .then(xmlString => {
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(xmlString, "text/xml");
+    console.log(xml);
+  })
+  .catch(err => console.error(err));
+
+  // in the future GET ZONES FROM DATABASE BACKEND
   const spots = [];
   for(let i = 1; i <= 12; i++) {
     const mySpot = {id : `${zone}-${i}` , occupied: Math.random() < 0.18}
@@ -44,37 +58,6 @@ function updatePreviewButton() {
     previewBtn.classList.remove("cursor-pointer");
   }
 }
-
-function generateSpots() {
-  selectedSpot = null; // reset selection on zone change
-  updatePreviewButton();
-
-  const zoneAl = zone.value;
-  const zones = generateZones(zoneAl);
-
-  spotList.innerHTML = "";
-  zones.forEach(z => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = z.id + (z.occupied ? " (occupied)" : "");
-    btn.className = `
-      spot px-3 py-2 rounded-md border transition-all
-      ${z.occupied ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-white hover:bg-amber-100 border-amber-300"}
-    `;
-    btn.disabled = z.occupied;
-
-    btn.addEventListener("click", () => {
-      document.querySelectorAll(".spot").forEach(b => b.classList.remove("bg-amber-300"));
-      btn.classList.add("bg-amber-300");
-      selectedSpot = z.id;
-      updatePreviewButton();
-    });
-
-    spotList.appendChild(btn);
-  });
-}
-
-zone.addEventListener("change", generateSpots);
 
 function validateForm() {
   const fullName = document.getElementById("fullName").value.trim();
@@ -122,6 +105,39 @@ function validateForm() {
   return true;
 }
 
+
+function generateSpots() {
+  selectedSpot = null; // reset selection on zone change
+  updatePreviewButton();
+
+  const zoneAl = zone.value;
+  const zones = generateZones(zoneAl);
+
+  spotList.innerHTML = "";
+  zones.forEach(z => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = z.id + (z.occupied ? " (occupied)" : "");
+    btn.className = `
+      spot px-3 py-2 rounded-md border transition-all
+      ${z.occupied ? "bg-red-200 text-gray-400 cursor-not-allowed" : "bg-white hover:bg-amber-100 border-amber-300"}
+    `;
+    btn.disabled = z.occupied;
+
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".spot").forEach(b => b.classList.remove("bg-amber-300"));
+      btn.classList.add("bg-amber-300");
+      selectedSpot = z.id;
+      updatePreviewButton();
+    });
+
+    spotList.appendChild(btn);
+  });
+}
+
+zone.addEventListener("change", generateSpots);
+
+
 previewBtn.addEventListener("click", () => {
   if(!validateForm()) return;
   const data = getFormData();
@@ -145,12 +161,31 @@ modalCancel.addEventListener("click", () => {
   modal.classList.remove("flex");
 });
 
+// CONFIRM - SEND SOME DATA - POST
 modalConfirm.addEventListener("click", () => {
   const data = getFormData();
-  console.log("Reservation confirmed:", data);
-  alert(`Reservation confirmed for ${data.spot}!`);
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
+  const xmlData = generateXML(data);
+  sendReservation(xmlData, data);
 });
+
+
+// GENERATE THE XML TO STORE IN DATABASE
+function generateXML(data) {
+  const xmlDoc = document.implementation.createDocument("", "", null);
+  const reservation = xmlDoc.createElement("reservation");
+  // creates <reservation></reservation>
+
+  for (const key in data) {
+    const element = xmlDoc.createElement(key); // example creates <fullName> </fullname>  
+    element.textContent = data[key]; // then sets the text content to data at key
+    reservation.appendChild(element);// append it
+  }
+
+  xmlDoc.appendChild(reservation);
+
+  // Convert to string
+  const serializer = new XMLSerializer();
+  return serializer.serializeToString(xmlDoc);
+}
 
 generateSpots();
