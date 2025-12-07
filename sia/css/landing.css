@@ -1,0 +1,135 @@
+:root{
+    --primary-color: #b30000;
+    --primary-dark: #8c0000;
+    --text: #222;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+    margin:0;
+    font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    color:var(--text);
+}
+
+.site-header{
+    position:fixed;
+    left:0;
+    right:0;
+    top:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 24px;
+    z-index:10;
+    min-height: 80px;
+}
+.logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.brand-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #111;
+}
+.logo{height:48px}
+.nav-link{color:rgba(255,255,255,0.95);text-decoration:none;background:#b30000;padding:8px 12px;border-radius:8px;font-weight:600}
+
+.hero{
+    min-height:100vh;
+    display:flex;align-items:center;justify-content:center;
+    background-image:linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)), url('../media/bsu.jpg');
+    background-size:cover;background-position:center; background-attachment:fixed;
+    padding:100px 20px 48px;
+}
+
+.hero-inner{
+    width:100%;max-width:1100px;background: #ffffff; border-radius:12px;padding:48px;box-shadow:0 18px 40px rgba(0,0,0,0.22);text-align:left; border: #111 2px solid;
+}
+.title{font-size:2rem;margin:0 0 8px 0;color:#111}
+.subtitle{margin:0 0 20px 0;color:#4b4b4b}
+.note{margin-top:20px;color:#666;font-size:0.9rem}
+
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.btn{display:inline-block;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:700;letter-spacing:0.6px}
+.btn-primary{background:linear-gradient(135deg,var(--primary-color),var(--primary-dark));color:#fff}
+.btn-ghost{background:transparent;border:2px solid rgba(0,0,0,0.08);color:var(--primary-dark)}
+
+/* New layout: two-column hero */
+.hero-grid{display:grid;grid-template-columns:1fr 320px;gap:32px;align-items:center}
+.hero-left{padding-right:8px}
+.hero-right{display:flex;align-items:center;justify-content:center}
+.image-bubble{width:300px;height:300px;border-radius:20px;background-image:url('../media/bsubc.jpg');background-size:cover;background-position:center;box-shadow:0 20px 40px rgba(0,0,0,0.30);border:6px solid #b30000}
+
+.info-card{margin-top:22px;background:linear-gradient(180deg, #b30000, #ffffff)!important;padding:18px;border-radius:10px;border:1px solid rgba(0,0,0,0.04);box-shadow:0 6px 18px rgba(0,0,0,0.06)}
+.info-title{margin:0 0 8px 0;color:var(--primary-dark);font-weight:700;font-size:1.05rem}
+.info-text{margin:0 0 14px 0;color:#444;line-height:1.6;font-size:0.98rem}
+.core-values{margin:0;padding-left:20px;color:#444;display:flex;flex-direction:column;gap:8px}
+.core-values li{margin:0;list-style:disc}
+
+.info-grid{display:grid;grid-template-columns:1fr 220px;gap:22px;align-items:start}
+.info-left{}
+.info-left{padding:16px;border-radius:8px;background:linear-gradient(rgba(255,255,255,0.86), rgba(255,255,255,0.86)), url('../media/bsu.jpg');background-size:cover;background-position:center;border:1px solid rgba(0,0,0,0.03);box-shadow:0 6px 18px rgba(0,0,0,0.04)}
+.info-right{background:linear-gradient(180deg, rgba(243, 243, 243, 0.98), rgba(255,255,255,0.96));padding:12px;border-radius:8px;border:1px solid rgba(0,0,0,0.03)}
+.info-right .core-values{padding-left:16px}
+
+/* Centered cards carousel */
+.cards-wrapper{display:flex;justify-content:center}
+.my-swiper{width:100%;max-width:820px;pointer-events:auto;height:340px}
+.my-swiper .swiper-wrapper{height:100%}
+.my-swiper .swiper-slide{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.slide-card{background:linear-gradient(180deg,#e9ecef 0%, #dfe6ea 100%);padding:22px;border-radius:12px;box-shadow:0 14px 34px rgba(0,0,0,0.08);border:1px solid rgb(0, 0, 0);width:100%;max-width:750px;height:100%;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;overflow:auto}
+.slide-card .info-title{margin-bottom:8px}
+.slide-card .info-text{color:#333;line-height:1.6}
+
+/* Cards effect: make inactive slides hidden behind the active card visually */
+.swiper.cards-effect .swiper-slide{position:relative}
+.swiper.cards-effect .swiper-slide .slide-card{position:relative}
+
+/* Navigation buttons */
+.swiper-button-next,.swiper-button-prev{color:var(--primary-dark);background:rgba(255,255,255,0.98);width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(0,0,0,0.08);border:1px solid rgba(0,0,0,0.05);}
+.swiper-button-next::after,.swiper-button-prev::after{font-size:18px}
+
+/* Pagination dots */
+.swiper-pagination-bullet{background:rgba(0,0,0,0.18)}
+.swiper-pagination-bullet-active{background:var(--primary-color)}
+
+@media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr}
+    .image-bubble{display:none}
+}
+
+@media (max-width:720px){
+    .my-swiper{max-width:100%;height:320px}
+    .slide-card{padding:16px}
+}
+
+.small{margin:0 0 8px 0;color:#666}
+.mini-form{display:flex;gap:8px;align-items:center}
+.mini-input{flex:1;padding:10px 12px;border-radius:8px;border:1px solid #eee}
+.mini-actions{display:flex;align-items:center}
+
+.site-footer{position:fixed;left:0;right:0;bottom:12px;text-align:center;color:#fff;pointer-events:none}
+
+@media (max-width:720px){
+    .hero-inner{padding:24px}
+    .title{font-size:1.4rem}
+    .logo{height:40px}
+    .hero-grid{grid-template-columns:1fr}
+    .image-bubble{width:100%;height:220px;border-radius:12px}
+    .info-grid{grid-template-columns:1fr}
+    .info-right{order:2}
+}
+
+/* Increased specificity so hero info-card background applies */
+.hero .info-card {
+    background: linear-gradient(180deg, #e63946, #ffffff);
+}
+
+/* Override header to use white background navbar */
+.site-header {
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}

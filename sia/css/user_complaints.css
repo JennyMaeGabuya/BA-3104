@@ -1,0 +1,543 @@
+/* Minimalist UI - user complaints; matches login/landing visuals */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root{
+    --primary: #b30000;
+    --primary-dark: #8c0000;
+    --bg: #f6f7fb;
+    --panel: #ffffff;
+    --muted: #6b7280;
+    --radius: 12px;
+    --shadow: 0 12px 30px rgba(15,23,42,0.06);
+
+}
+
+*{box-sizing:border-box}
+body{margin:0;font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:#0b1220}
+
+/* Page background: BSU campus image with subtle dim overlay */
+body{
+    background-image: url('../media/bsubc.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+/* Dim overlay so white panels remain readable */
+body::before{
+    content: '';
+    position: fixed;
+    inset: 0;
+    /* darker translucent overlay to improve contrast */
+    background: rgba(11,18,32,0.36);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ensure main content is above the overlay */
+.sidebar, .main, .modal-content, .mapmodal-content { position: relative; z-index: 1 }
+/* Center popup / hover cards and add show animation
+     - Makes modal-like boxes appear centered at the top of the viewport
+     - Animation triggers when the element receives the `.show` or `.visible` class
+     - Works for existing `.modal-content` and `.mapmodal-content` and an optional
+         `.popup-card` helper class if you prefer a semantic name for custom popups */
+
+.modal-content, .mapmodal-content, .popup-card {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(.995);
+    max-width: 720px;
+    width: min(720px, calc(100% - 48px));
+    margin: 0 auto;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    background: var(--panel);
+    border: 4px solid #000;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 260ms cubic-bezier(.2,.9,.3,1), opacity 260ms ease;
+    z-index: 1002;
+    max-height: 90vh;
+    overflow: auto;
+}
+
+.modal-content.show, .mapmodal-content.show, .popup-card.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, -50%) scale(1);
+    animation: popIn 340ms cubic-bezier(.2,.9,.3,1);
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -52%) scale(.98);
+    }
+    60% {
+        opacity: 1;
+        transform: translate(-50%, -49%) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+body.modal-open{overflow:hidden}
+
+/* Sidebar */
+.sidebar{width:220px;position:fixed;left:24px;top:24px;bottom:24px;background:linear-gradient(180deg, #ffffff, #9e9e9e);border-radius:14px;padding:16px;box-shadow:var(--shadow);border:1px solid rgba(11,18,32,0.06)}
+.sidebar .logo{font-weight:700;color:var(--primary-dark);font-size:18px;margin-bottom:12px}
+.sidebar a{display:block;padding:10px;border-radius:8px;color:var(--muted);text-decoration:none;margin-bottom:6px}
+.sidebar a.nav-btn{color: #000000;display:flex;align-items:center;gap:10px}
+
+/* Icon + text split so multi-line labels align under the text, not the icon */
+.sidebar .nav-icon{flex:0 0 28px;text-align:center;font-size:16px;line-height:1}
+.sidebar .nav-text{display:block;line-height:1.2}
+.sidebar a.active,.sidebar a:hover{background:rgba(179,0,0,0.06);color:var(--primary-dark);box-shadow:inset 0 0 0 1px rgba(179,0,0,0.02)}
+.sidebar a.active{background:linear-gradient(90deg, rgba(179,0,0,0.06), rgba(179,0,0,0.03));border-left:4px solid var(--primary);padding-left:8px}
+
+/* Sidebar dark mode (toggle with JS adding `.dark` to `.sidebar`) */
+.sidebar.dark{
+    background: linear-gradient(180deg, #111214, #0f0f10);
+    border-color: rgba(255,255,255,0.03);
+}
+.sidebar.dark .logo{color:#ffffff}
+.sidebar.dark a{
+    color:#d9d9d9;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.sidebar.dark a i{
+    flex:0 0 28px;
+    text-align:center;
+    font-size:16px;
+    line-height:1;
+}
+.sidebar.dark a:hover,
+.sidebar.dark a.active{
+    background: rgba(179,0,0,0.06);
+    color: #ffefef;
+    box-shadow: inset 0 0 0 1px rgba(179,0,0,0.02);
+}
+.sidebar.dark a.active{
+    background: linear-gradient(90deg, rgba(179,0,0,0.06), rgba(179,0,0,0.03));
+    border-left: 4px solid #b30000;
+    padding-left: 8px;
+}
+.sidebar.dark .logout{ color: #ff8888; }
+.sidebar.dark .logout:hover{
+    background: rgba(255,68,68,0.06);
+    color: #ff6666;
+}
+
+.sidebar .logout{ color: #000000; }
+.sidebar .dark-toggle{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:8px;border-top:1px solid rgba(11,18,32,0.04)}
+.sidebar .dark-toggle button{background:linear-gradient(180deg, #000000, #303436);border:1px solid rgba(255,255,255,0.08);color:#fff;padding:6px 8px;border-radius:8px;cursor:pointer}
+.sidebar.dark .dark-toggle button{border:1px solid rgba(255,255,255,0.12)}
+
+/* Global dark mode: apply when <body> has class `dark` */
+body.dark{
+    --bg: #000000;
+    --panel: #303436;
+    --muted: #cfcfcf;
+    background-color: #000000;
+    color: #e6e6e6;
+}
+body.dark::before{ background: rgba(0,0,0,0.6); }
+
+/* Headings and content over the background */
+body.dark .topbar h2,
+body.dark .content > section h3 { color: #e6e6e6; text-shadow: none; }
+
+/* Tables */
+body.dark .content table th { color: #e6e6e6; border-bottom:1px solid rgba(255,255,255,0.06); }
+body.dark .content table td { color: rgba(255,255,255,0.88); }
+
+/* Panels / cards / modals */
+body.dark .card,
+body.dark .chart,
+body.dark form .form-row,
+body.dark .modal-content,
+body.dark .mapmodal-content { 
+    background: linear-gradient(180deg, #000000, #303436);
+    color: #e6e6e6;
+    border-color: #565d61;
+    box-shadow: none;
+}
+
+/* Toast contrast */
+body.dark #toast{ box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+
+/* Inputs and selects on dark */
+body.dark .content > section #dateFilter,
+body.dark .content > section #sortSelect,
+body.dark .content > section #searchFilter,
+body.dark .content > section select,
+body.dark .content > section input[type="text"] {
+    color: #e6e6e6 !important;
+    background: #43484c !important;
+    border: 1px solid #565d61 !important;
+}
+
+/* Ensure modal close icon is visible on dark */
+body.dark .close{ color:#d3d3d3 }
+
+
+/* Main layout */
+.main{margin-left:268px;padding:28px}
+.topbar{
+    padding:6px 0 20px 0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+}
+.topbar-left{display:flex;align-items:center;gap:8px;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.topbar h2{margin:0;font-size:1.6rem}
+.topbar h2{color:#ffffff;text-shadow:0 2px 6px rgba(11,18,32,0.6)}
+.content > section h3{color:#ffffff;text-shadow:0 1px 3px rgba(11,18,32,0.5);margin-top:0;margin-bottom:14px}
+
+/* Make filter labels and controls readable when they sit over the background */
+.content > section .filter-container label,
+.content > section label,
+.content > section #dateFilter-label,
+.content > section #dateFilter,
+.content > section #sortSelect,
+.content > section #searchFilter {
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(11,18,32,0.6);
+}
+
+/* Table headers and cells when table is rendered directly on the page background */
+.content table th{
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(11,18,32,0.6);
+    font-weight:700;
+    border-bottom:1px solid rgba(255,255,255,0.12);
+}
+.content table td{
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 1px 2px rgba(11,18,32,0.35);
+}
+
+/* Make action buttons remain visible (keep their existing backgrounds) */
+.content table button.delete, .content table button.view{
+    box-shadow: 0 6px 16px rgba(15,23,42,0.12);
+}
+
+/* Make select, search and sort controls use dark text and white background so dropdowns and options are readable */
+.content > section #dateFilter,
+.content > section #sortSelect,
+.content > section #searchFilter,
+.content > section select,
+.content > section input[type="text"] {
+    color: #0b1220 !important;
+    background: #ffffff !important;
+    border: 1px solid #dfe6ee !important;
+}
+
+.content > section select option {
+    color: #0b1220;
+    background: #ffffff;
+}
+
+/* placeholder style for search input when over background */
+.content > section #searchFilter::placeholder{ color: rgba(11,18,32,0.45) }
+
+/* ensure the drop-down menu backgrounds appear white in browsers that inherit page background */
+select::-ms-expand { color: #0b1220 }
+.content{max-width:1120px;margin-top:6px}
+
+/* Dashboard header: title + filter in one row */
+.dashboard-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:15px;
+}
+.dashboard-header h3{margin:0;}
+.dashboard-header .filter-container{
+    margin:0;
+}
+
+/* Sections: only show the active section */
+.section{display:none;opacity:0;transform:translateY(6px);transition:all 220ms ease-in-out;margin-bottom:26px}
+.section.active{display:block;opacity:1;transform:none}
+
+/* Filters */
+.filter-container{display:flex;justify-content:flex-end;align-items:center;margin-bottom:16px}
+.filter-container label{margin-right:10px;color:var(--muted)}
+.filter-container select{padding:8px 10px;border-radius:8px;border:1px solid #e6e9ee;background:#fff}
+
+/* Page-level dark toggle (placed under Dashboard Overview) */
+.page-dark-toggle{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.page-dark-toggle label{font-weight:600;color:#ffffff}
+.toggle-btn{padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(30, 25, 25, 0.385);color:#fff;cursor:pointer}
+.toggle-btn[aria-pressed="true"]{background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-color:rgba(0,0,0,0.08);box-shadow:0 6px 16px rgba(179,0,0,0.12)}
+
+/* Stat cards */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}
+.card{background:linear-gradient(180deg, #ffffff, #9e9e9e);padding:14px;border-radius:12px;box-shadow:var(--shadow);border:2px solid #000;text-align:center}
+.card h4{margin:0 0 8px 0;color:var(--muted);font-weight:600}
+.card p{margin:0;font-size:24px;font-weight:700}
+
+/* Chart card */
+.chart{background:linear-gradient(180deg, #ffffff, #9e9e9e);padding:18px;border-radius:12px;box-shadow:var(--shadow);margin-bottom:18px;border:2px solid #000}
+/* Constrain pie chart so it stays within the card and doesn't grow too large */
+.chart{height:380px;display:flex;align-items:center;justify-content:center}
+.chart canvas{max-width:520px;height:100% !important;display:block;margin:0 auto}
+
+/* Submit form */
+form .form-row{background:var(--panel);padding:16px;border-radius:12px;box-shadow:var(--shadow);border:2px solid #000;margin-bottom:18px}
+textarea#message{width:100%;min-height:220px;padding:14px;border-radius:10px;border:1px solid #e6e9ee;background:#fff;color:#111;resize:vertical}
+#charCount{margin-top:8px;color:var(--muted);font-size:0.9rem}
+/* Make labels and controls inside the submit section readable over the background */
+#submit label{color:#ffffff;text-shadow:0 1px 3px rgba(11,18,32,0.6);font-weight:500}
+#submit label input{margin-right:10px;vertical-align:middle}
+#submit textarea#message{background:#16131377; color:#ffffff}
+#submit textarea#message::placeholder{color:rgb(255, 255, 255)}
+#submit #charCount{color:#ffffff;opacity:0.95}
+#submit input[type="checkbox"]{accent-color:var(--primary)}
+label{color:var(--muted)}
+input[type=submit], button, .action-btn{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+
+/* Table */
+table{width:100%;border-collapse:collapse;background:transparent}
+th,td{padding:12px 10px;border-bottom:1px solid #eef2f6;color:#0b1220}
+th{background:transparent;text-align:left;color:var(--muted);font-weight:600}
+tr:hover td{background:rgba(11,18,32,0.02)}
+button.view, button.delete{border-radius:8px;padding:8px 10px;border:none;cursor:pointer}
+button.view{background:linear-gradient(135deg,#16a34a,#10b981);color:#fff}
+button.delete{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+
+/* Modals */
+.modal{display:none;position:fixed;inset:0;z-index:1005;align-items:center;justify-content:center;background:rgba(11,18,32,0.35)}
+.modal-content,.mapmodal-content{background:linear-gradient(180deg, #ffffff, #9e9e9e);padding:18px;border-radius:12px;box-shadow:var(--shadow);width:720px;max-width:95%;border:2px solid #000;z-index:1006}
+.modal-content h3{margin-top:0}
+#complaintModalBody,#singleFeedbackBody{max-height:320px;overflow:auto;padding:8px;color:#111}
+
+/* Ensure complaint/feedback text is readable in dark mode */
+body.dark #complaintModalBody,
+body.dark #singleFeedbackBody {
+    color: #e6e6e6;
+}
+.close{position:absolute;right:18px;top:14px;font-size:22px;color:var(--muted);cursor:pointer}
+
+/* Controls */
+#searchFilter,#sortSelect{padding:8px;border-radius:8px;border:1px solid #e6e9ee}
+
+/* Toast */
+#toast{position:fixed;left:50%;transform:translateX(-50%);top:28px;background:linear-gradient(135deg,#16a34a,#10b981);color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,0.08);visibility:hidden}
+#toast.show{visibility:visible}
+
+/* Make sure toast sits above overlays and isn't blurred */
+#toast{
+    z-index: 99999;
+}
+
+/* modal-overlay helper (JS toggles display) */
+.modal-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: none;
+    z-index: 1000;
+}
+
+/* When JS toggles inline style to 'display: block' ensure the modal uses flex layout to center contents */
+.modal[style*="display:block"] { display: flex !important; }
+
+/* When a modal is open, keep toast clear and interactive */
+.modal-open #toast{
+    filter: none !important;
+    pointer-events: auto;
+}
+
+@media (max-width:900px){
+    .cards{grid-template-columns:repeat(2,1fr)}
+    .sidebar{display:none}
+    .main{margin-left:20px}
+}
+
+@media (max-width:520px){
+    .cards{grid-template-columns:1fr}
+    .modal-content{width:92%}
+}
+
+/* utility */
+.muted{color:var(--muted)}
+
+/* BSU logo (plain image) in top-right */
+.bsu-logo{
+    display: block;
+    margin: 6px auto 12px;
+    width: 84px;
+    height: auto;
+}
+
+@media (max-width:900px){
+    .bsu-logo{ width:76px; }
+}
+
+@media (max-width:520px){
+    .bsu-logo{ width:64px; }
+}
+
+/* -----------------------------
+   Sidebar – Centered Logo + Divider
+------------------------------*/
+.sidebar .logo {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+}
+
+.sidebar .logo img {
+    width: 84px;
+    height: auto;
+}
+
+.sidebar .logo h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+/* Hover animation on sidebar links */
+.sidebar a {
+    transition: 0.22s ease;
+}
+
+.sidebar a:hover {
+    transform: translateX(4px);
+}
+
+
+/* -----------------------------
+   Topbar Enhanced Styling
+------------------------------*/
+.topbar {
+    background: rgba(0, 0, 0, 0.35);
+    padding: 22px;
+    border-radius: 14px;
+    backdrop-filter: blur(4px);
+    margin-bottom: 20px;
+}
+
+.topbar h2 {
+    margin-bottom: 6px;
+}
+
+.topbar p, 
+.topbar span,
+.topbar label {
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.55);
+}
+
+
+/* -----------------------------
+   Stat Cards – Better Shadows
+------------------------------*/
+.card {
+    box-shadow: 0 6px 18px rgba(0,0,0,0.20);
+    transition: 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+}
+
+
+/* -----------------------------
+   Smooth Fade-In Animation for Sections
+------------------------------*/
+.section.active {
+    animation: fadeInDash 0.45s ease;
+}
+
+@keyframes fadeInDash {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+
+/* -----------------------------
+   Quick Action Floating Button (Optional)
+------------------------------*/
+.quick-actions {
+    position: fixed;
+    bottom: 26px;
+    right: 26px;
+    background: var(--panel);
+    padding: 12px 16px;
+    border-radius: 12px;
+    display: flex;
+    gap: 12px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+    z-index: 999;
+}
+
+.quick-actions button {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+}
+
+/* Theme toggle control styles (shared with admin) */
+.theme-toggle { display: flex; justify-content: center; align-items: center; }
+.theme-toggle-input { position: absolute; opacity: 0; pointer-events: none; }
+.theme-toggle-label { display: inline-block; cursor: pointer; }
+.theme-toggle-label .toggle-track {
+    width: 86px;
+    height: 38px;
+    background: #111;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    padding: 6px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+    transition: background 220ms ease;
+}
+.theme-toggle-label .toggle-thumb {
+    width: 26px;
+    height: 26px;
+    background: #191919;
+    border-radius: 50%;
+    display: block;
+    transform: translateX(0);
+    transition: transform 260ms cubic-bezier(.2,.9,.2,1), background 220ms ease, box-shadow 220ms ease;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    position: relative;
+}
+.theme-toggle-label .toggle-thumb::before {
+    content: '🌙';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+}
+.theme-toggle-label.active .toggle-track { background: #f0f0f0; box-shadow: inset 0 2px 6px rgba(0,0,0,0.06); }
+.theme-toggle-label.active .toggle-thumb { transform: translateX(46px); background: #fff; box-shadow: 0 6px 18px rgba(16,24,32,0.08); }
+.theme-toggle-label.active .toggle-thumb::before { content: '☀'; }
+
+@media (max-width: 480px) {
+    .theme-toggle-label .toggle-track { width: 72px; height: 34px; padding: 5px; }
+    .theme-toggle-label .toggle-thumb { width: 24px; height: 24px; }
+    .theme-toggle-label.active .toggle-thumb { transform: translateX(38px); }
+}

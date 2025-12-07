@@ -1,0 +1,715 @@
+/* Admin Dashboard Styles - Clean External CSS */
+:root {
+    --primary-color: #b30000;
+    --primary-dark: #8c0000;
+    --batstateu-red: #b30000;
+    --batstateu-red-dark: #8c0000;
+    --text-color: #333;
+    --text-dark: #151111;
+    --text-light: #666;
+    --light-gray: #f5f5f5;
+    --white: #ffffff;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Body Background - Matching Login Page */
+body {
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                url('media/bsu.jpg') center/cover no-repeat fixed;
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+}
+
+/* Main Container */
+.main-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    animation: fadeIn 0.5s ease-in-out;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header Container */
+.header-container {
+    background: var(--primary-color);
+    color: white;
+    text-align: center;
+    padding: 2rem 1rem;
+    margin-bottom: 2rem;
+}
+
+.header-container img {
+    height: 80px;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.header-container h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.logout-btn {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: white;
+    color: var(--primary-color);
+    text-decoration: none;
+    border-radius: 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Styles */
+.card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card h2, .card h3 {
+    color: var(--text-dark);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+}
+
+/* Message/Alert Styles */
+.message {
+    padding: 0.85rem 1.75rem 0.85rem 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    text-align: center;
+    position: relative;
+    animation: fadeInAlert 0.35s ease-out;
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes fadeInAlert {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message.success {
+    background-color: #dfffe6;
+    color: #0a7a27;
+}
+
+.message.error {
+    background-color: #ffe5e5;
+    color: #b30000;
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 500;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Form Elements */
+.inline-form {
+    display: inline-block;
+}
+
+select {
+    padding: 0.6rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    background: white;
+    color: var(--text-dark);
+    transition: var(--transition);
+    font-family: 'Poppins', sans-serif;
+    margin-right: 0.5rem;
+}
+
+select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(179, 0, 0, 0.1);
+    outline: none;
+}
+
+textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    resize: vertical;
+    transition: var(--transition);
+    min-height: 150px;
+}
+
+textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(179, 0, 0, 0.1);
+    outline: none;
+}
+
+/* Button Styles */
+button, .btn {
+    position: relative;
+    background: linear-gradient(135deg, #b30000, #8c0000);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    margin: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+button::before, .btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #8c0000, #6a0000);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+    border-radius: var(--border-radius);
+}
+
+button:hover, .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    opacity: 0.9;
+}
+
+button:hover::before, .btn:hover::before {
+    opacity: 1;
+}
+
+button:active, .btn:active {
+    transform: translateY(0);
+}
+
+/* Button Icons */
+button i, .btn i {
+    margin-right: 5px;
+    font-size: 0.9em;
+}
+
+/* Specific Button Variants */
+.show-complaint-btn {
+    background: var(--primary-color);
+    color: white;
+}
+
+.feedback-btn {
+    background: #28a745;
+    color: white;
+}
+
+.view-btn {
+    background: #17a2b8;
+    color: white;
+}
+
+button[type='submit'] {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.25s ease-out;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.modal.active,
+.modal[style*="flex"] {
+    display: flex;
+    animation: modalFadeIn 0.25s ease-out forwards;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    background: #ffffff;
+    padding: 0;
+    border-radius: 22px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+    position: relative;
+    transform: scale(0.9) translateY(30px);
+    transform-origin: center;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-height: 90vh;
+    overflow: hidden;
+    border: 2px solid #b30000;
+    border-top: 4px solid #b30000;
+    opacity: 0;
+    animation: modalZoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes modalZoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal.active .modal-content,
+.modal[style*="flex"] .modal-content {
+    animation: modalZoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Modal Header */
+.modal-header {
+    position: relative;
+    margin-bottom: 0;
+    padding: 2rem 2.5rem 1.5rem;
+    background: linear-gradient(135deg, #ffffff, #fafafa);
+    border-bottom: 3px solid #b30000;
+}
+
+.modal-header h3 {
+    color: #b30000;
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-header h3 i {
+    font-size: 1.3rem;
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 2rem 2.5rem;
+    line-height: 1.6;
+    overflow-y: auto;
+    max-height: calc(90vh - 200px);
+}
+
+/* Modal Footer */
+.modal-footer {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.modal-footer.inline-footer {
+    padding: 0;
+    border: none;
+    margin-top: 1.5rem;
+}
+
+/* Close Button */
+.close, .close-btn {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f5f5f5;
+    border: 2px solid #e0e0e0;
+    font-size: 1.5rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #666;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.close:hover, .close-btn:hover {
+    background: #b30000;
+    border-color: #b30000;
+    color: white;
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 15px rgba(179, 0, 0, 0.4);
+}
+
+/* Form Elements in Modal */
+.modal input[type="text"],
+.modal input[type="email"],
+.modal textarea,
+.modal select {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    margin-bottom: 1.2rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background-color: #f9f9f9;
+    font-family: 'Poppins', sans-serif;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.modal textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #444;
+}
+
+.form-hint {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: #666;
+    font-style: italic;
+}
+
+.modal input[type="text"]:focus,
+.modal input[type="email"]:focus,
+.modal textarea:focus,
+.modal select:focus {
+    border-color: #b30000;
+    box-shadow: 0 0 0 3px rgba(179, 0, 0, 0.1);
+    outline: none;
+    background-color: #fff;
+}
+
+/* Complaint Details Styling */
+.complaint-details {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    white-space: pre-wrap;
+    line-height: 1.7;
+    border-left: 4px solid #b30000;
+}
+
+/* Feedback Details Styling */
+.feedback-details {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.feedback-item {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid #b30000;
+}
+
+.feedback-meta {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.feedback-text {
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Loading Animation */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    animation: pulse 1.5s infinite;
+}
+
+.loading i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* Success Message */
+.success-message {
+    text-align: center;
+    padding: 2rem;
+    color: #28a745;
+}
+
+.success-message i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+    color: #28a745;
+}
+
+/* Error Message */
+.error-message {
+    text-align: center;
+    padding: 2rem;
+    color: #dc3545;
+}
+
+.error-message i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+    color: #dc3545;
+}
+
+/* Styles for dynamically loaded content in modals */
+#feedbackDetails table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+}
+
+#feedbackDetails table th {
+    background: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+#feedbackDetails table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    color: var(--text-dark);
+}
+
+#feedbackDetails table tr:last-child td {
+    border-bottom: none;
+}
+
+#feedbackDetails table tr:hover {
+    background-color: #f9f9f9;
+}
+
+#feedbackDetails p {
+    text-align: center;
+    color: #666;
+    padding: 1rem;
+    font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+
+    .card {
+        padding: 1.25rem;
+    }
+
+    .header-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .header-container h1 {
+        font-size: 1.5rem;
+    }
+
+    .header-container img {
+        height: 70px;
+    }
+
+    .logout-btn {
+        padding: 0.4rem 1.2rem;
+        font-size: 0.8rem;
+    }
+
+    .show-complaint-btn, .feedback-btn, .view-btn, .btn, button[type='submit'] {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+        margin: 0 2px;
+    }
+
+    th, td {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .modal-content {
+        padding: 0;
+        width: 95%;
+        border-radius: 12px;
+    }
+
+    .modal-header {
+        padding: 1.5rem;
+    }
+
+    .modal-header h3 {
+        font-size: 1.3rem;
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-container {
+        max-width: 100%;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    th, td {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    button, .btn {
+        display: block;
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+
+    .inline-form {
+        display: block;
+    }
+
+    .inline-form select {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+  <user>
+    <id>1</id>
+    <username>aDBQa0xRdFhEc0lCM1ZzM044czFIQT09</username>
+    <email>MEFkM0pDUUlud08zSitOK1MyeFhMTUtIalF0ZU44UWNpSTRkNWdHeGxZcz0=</email>
+    <password>$2y$10$63Kud9N1nfWDHiotg1F7..N2gQdRqDCOG2mafY1O0t//AnpARFYN2</password>
+  </user>
+  <user>
+    <id>2</id>
+    <username>bGtWeTIvNm5nbVNTMHJ6U0xrU2dUUT09</username>
+    <email>dUgzWDJjaWQveDQwa3k3bFYyWWNFWU93Kzg4UEVGSk85eld1a3JLYzcvVT0=</email>
+    <password>$2y$10$qS6wF2P9isdwflnxpeNlsupK6KbMcGKkCsp7Kr6JmA3p8z/KmBMCW</password>
+  </user>
+  <user>
+    <id>3</id>
+    <username>RVF4YWpOaGZsazJBMU5LL3ZxLytKZz09</username>
+    <email>U2x5WmxXY1VVY3Btem1ESCsvQVRIY1pNNTBhclpZVjNtSTY2VnQwenBiQT0=</email>
+    <password>$2y$10$voVbFdt.QeGbt6Ixb.0eeu7i.aBvjcWO26BVEok49NOx61VmTtyee</password>
+  </user>
+  <user>
+    <id>4</id>
+    <username>Q0RGcjQ3SFE4bDBFZHVMbnVvaTBRQT09</username>
+    <email>cW5Pc1FPZTVGUmY4OUQvbFJyQkMrSlIwdm5paDlMcjkrc3pEcnJuNG54Yz0=</email>
+    <password>$2y$10$ux5DZXRU1SgWS.aKqkDAXuAPMfoooYHrXcHqlFs8pbzb7pmMsO5uG</password>
+  </user>
+</users>

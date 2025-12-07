@@ -1,0 +1,410 @@
+/* Common styles for authentication pages */
+:root {
+    --primary-color: #b30000;
+    --primary-dark: #8c0000;
+    --text-color: #333;
+    --light-gray: #f5f5f5;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                url('../media/bsu.jpg') center/cover no-repeat fixed;
+    color: var(--text-color);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+}
+
+.container {
+    width: 100%;
+    /* allow the layout to be wider so the login card can match register modal size */
+    /* total width = hero (520) + card (520) */
+    max-width: 1040px;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease-in-out;
+    /* Full viewport height to create a two-column hero + card layout */
+    height: 100vh;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0;
+    padding: 0 12px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.logo-container img {
+    height: 80px;
+    margin-bottom: 0.75rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.logo-container h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.logo-container p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+}
+
+/* Left-side hero container (use in markup as a sibling to the auth card) */
+.hero-container {
+    /* left column: match size of auth card for visual balance */
+    flex: 0 0 520px;
+    /* force exact matching width so panels touch */
+    min-width: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem;
+    color: #fff;
+    text-align: center;
+    background: url('../media/bsubc.png') center/cover no-repeat;
+    position: relative;
+    max-height: calc(100vh - 140px);
+    align-self: center;
+    border-radius: 8px 0 0 8px;
+    overflow: hidden;
+}
+
+/* subtle dark overlay to improve contrast */
+.hero-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.3) 60%);
+}
+
+.hero-container .logo-container,
+.hero-container h1,
+.hero-container p {
+    color: #fff;
+    text-shadow: 0 6px 18px rgba(0,0,0,0.45);
+    position: relative;
+    z-index: 1;
+}
+
+.hero-container .logo-container img {
+    height: 96px;
+    margin-bottom: 1rem;
+}
+
+.hero-container h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.hero-container p {
+    font-size: 1.05rem;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.98);
+    padding: 2rem;
+    border-radius: 0 8px 8px 0;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* prevent the card itself from forcing the page to scroll */
+    max-height: calc(100vh - 140px);
+    overflow: auto;
+    /* match hero width */
+    flex: 0 0 520px;
+    width: 520px;
+    max-width: calc(100% - 32px);
+    align-self: center;
+    position: relative;
+}
+
+.back-arrow {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(179, 0, 0, 0.1);
+    border-radius: 50%;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.back-arrow:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateX(-3px);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    border: 1px solid #000000;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    transition: var(--transition);
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(179, 0, 0, 0.1);
+    outline: none;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(179, 0, 0, 0.2);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.auth-links span {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.auth-links a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+    position: relative;
+}
+
+.auth-links a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background-color: var(--primary-color);
+    transition: var(--transition);
+}
+
+.auth-links a:hover::after {
+    width: 100%;
+}
+
+.message {
+    padding: 0.85rem 1.75rem 0.85rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+    text-align: center;
+    position: relative;
+    animation: fadeInAlert 0.35s ease-out;
+    line-height: 1.4;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes fadeInAlert {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.message.error {
+    background-color: #ffe5e5;
+    color: #b30000;
+}
+
+.message.success {
+    background-color: #dfffe6;
+    color: #0a7a27;
+}
+
+.close-btn {
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: inherit;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        height: auto;
+        flex-direction: column;
+        padding-top: 36px;
+    }
+
+    .card {
+        padding: 1.5rem;
+        /* On smaller screens, allow the card to become full width */
+        width: 100%;
+    }
+    
+    .logo-container img {
+        height: 80px;
+    }
+    
+    .logo-container h1 {
+        font-size: 1.5rem;
+    }
+    
+    .hero-container { padding: 1.5rem 1rem; }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 12px;
+    }
+    
+    .card {
+        padding: 1.25rem;
+        width: 100%;
+    }
+    
+    .logo-container img {
+        height: 64px;
+    }
+    
+    .logo-container h1 {
+        font-size: 1.3rem;
+    }
+    
+    .logo-container p {
+        font-size: 0.9rem;
+    }
+    
+    /* hide hero on narrow phones to focus on the form */
+    .hero-container { display: none; }
+}
+
+/* Additional login-specific styles can go here */
+.forgot-password {
+    display: block;
+    text-align: right;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+/* Match register modal reset link to the login Reset styles */
+.register-reset {
+    display: block;
+    text-align: center;
+    margin-top: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+.register-reset:hover {
+    text-decoration: underline;
+}
+/* Hide any hr placed before/after forms inside the card (safety) */
+.card > hr { display: none; }
+
+/* Reset link next to "Forgot password?" inside auth-links */
+.auth-links .forgot-password {
+    display: inline;
+    text-align: left;
+    margin-top: 0;
+}
+/* When a modal is open, blur the page content behind it */
+.modal-open .container {
+    filter: blur(6px) saturate(0.98);
+    transition: filter 220ms ease-in-out;
+    pointer-events: none; /* prevent interactions while modal is open */
+}
+
+.modal-open header,
+.modal-open footer {
+    pointer-events: none;
+}
+/* Make hero and login card exactly same size */
+.hero-container,
+.card {
+    flex: 1;
+    min-width: 520px;
+    max-width: 520px;
+    height: 550px; /* You may change the value depending on design */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}

@@ -1,0 +1,95 @@
+/* Additional styles specific to the register page */
+
+.password-strength {
+    margin-top: 0.5rem;
+    height: 4px;
+    background: #eee;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.password-strength::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0;
+    background: #ff4444;
+    transition: width 0.3s ease;
+}
+
+.password-strength.weak::before {
+    width: 30%;
+    background: #ff4444;
+}
+
+.password-strength.medium::before {
+    width: 60%;
+    background: #ffbb33;
+}
+
+.password-strength.strong::before {
+    width: 100%;
+    background: #00C851;
+}
+
+.password-hint {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.terms {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 1rem;
+    line-height: 1.5;
+}
+
+.terms a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.terms a:hover {
+    text-decoration: underline;
+}
+
+/* Animation for form elements */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-group {
+    animation: fadeInUp 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+/* Delay animations for each form group */
+.form-group:nth-child(1) { animation-delay: 0.1s; }
+.form-group:nth-child(2) { animation-delay: 0.2s; }
+.form-group:nth-child(3) { animation-delay: 0.3s; }
+.form-group:nth-child(4) { animation-delay: 0.4s; }
+.form-group:nth-child(5) { animation-delay: 0.5s; }
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .password-hint {
+        font-size: 0.7rem;
+    }
+    
+    .terms {
+        font-size: 0.8rem;
+    }
+}
