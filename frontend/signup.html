@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ParkEase | Sign Up</title>
+  <script type="module" src="/src/main.js"></script>
+</head>
+
+<body class="bg-gray-100">
+  <!-- NAV -->
+  <nav class="flex w-full items-center justify-between px-10 md:px-40 py-5 bg-white shadow">
+    <div class="text-gray-700 text-2xl font-bold">ParkEase</div>
+
+    <ul class="hidden md:flex gap-10 items-center text-gray-700 font-medium">
+      <li><a class="hover:text-red-600" href="index.html">Home</a></li>
+      <li><a class="hover:text-red-600" href="reservation.html">Reserve Parking</a></li>
+      <li><a class="hover:text-red-600" href="#">Services</a></li>
+      <li><a class="hover:text-red-600" href="#">Contact</a></li>
+    </ul>
+
+    <div class="md:hidden text-3xl cursor-pointer">☰</div>
+  </nav>
+
+  <!-- SIGNUP FORM -->
+  <main class="flex flex-col items-center justify-center min-h-[80vh] px-5">
+    <div class="bg-white p-10 rounded-xl shadow-lg w-full max-w-md">
+      <h2 class="text-3xl font-bold text-gray-800 text-center mb-6">Create Account</h2>
+
+      <form action="" method="POST" class="flex flex-col gap-4">
+        <input
+          type="text"
+          name="fullName"
+          placeholder="Full Name"
+          class="w-full border-black text-black px-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-600 focus:outline-none"
+          required
+        />
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          class="w-full px-4 border-black text-black py-3 border rounded-lg focus:ring-2 focus:ring-red-600 focus:outline-none"
+          required
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          class="w-full px-4 py-3 border-black text-black border rounded-lg focus:ring-2 focus:ring-red-600 focus:outline-none"
+          required
+        />
+
+        <button
+          class="bg-red-700 text-white py-3 rounded-lg hover:bg-red-800 transition"
+        >
+          Sign Up
+        </button>
+      </form>
+
+      <p class="text-center text-gray-600 mt-4">
+        Already have an account?
+        <a href="login.html" class="text-red-700 hover:underline">Login</a>
+      </p>
+    </div>
+  </main>
+
+  <footer class="w-full text-center py-5 bg-gray-200 text-gray-700">
+    © 2025 ParkEase | All Rights Reserved
+  </footer>
+</body>
+</html>

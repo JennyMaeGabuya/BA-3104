@@ -12,28 +12,38 @@ const modalConfirm = document.getElementById("modalConfirm");
 const previewBtn = document.getElementById("previewBtn");
 
 let selectedSpot = null;
+const zonesFromDatabase = [];
 
-
-function generateZones(zone) {
-
-  fetch("http://localhost/ParkEase/BA-3104/backend/public/save-reservation") // get all the reservations
-  .then(res => res.text())
-  .then(xmlString => {
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(xmlString, "text/xml");
-    console.log(xml);
-  })
-  .catch(err => console.error(err));
-
-  // in the future GET ZONES FROM DATABASE BACKEND
-  const spots = [];
+async function generateZones(zone) {
+  const spots = []; // SLOTS
   for(let i = 1; i <= 12; i++) {
-    const mySpot = {id : `${zone}-${i}` , occupied: Math.random() < 0.18}
+    const mySpot = {id : `${zone}-${i}` , occupied : ""}
     spots.push(mySpot);
   }
-  return spots;
-}
+  zonesFromDatabase.length = 0;
+  // get all the reservations
+  const res = await fetch("http://localhost/ParkEase/BA-3104/backend/public/save-reservation");
+  const xmlString = await res.text();
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(xmlString, "text/xml");
+  console.log(xml.getElementsByTagName("reservation").length)
+  const reservations = xml.getElementsByTagName("reservation");
+  
+  for (let i = 0 ; i < reservations.length; i++) {
+    console.log(reservations[i].getElementsByTagName("spot")[0])
+    zonesFromDatabase.push(reservations[i].getElementsByTagName("spot")[0].textContent)
+  }
 
+  console.log(zonesFromDatabase)
+  const newSpots =  spots.filter(spot => {
+    if(zonesFromDatabase.includes(spot.id)){
+      spot.occupied = true;
+    }
+  })
+
+  return spots;
+
+}
 
 function getFormData() {
   return {
@@ -106,13 +116,13 @@ function validateForm() {
 }
 
 
-function generateSpots() {
+async function generateSpots() {
   selectedSpot = null; // reset selection on zone change
   updatePreviewButton();
 
   const zoneAl = zone.value;
-  const zones = generateZones(zoneAl);
-
+  const zones = await generateZones(zoneAl);
+  console.log(zones);
   spotList.innerHTML = "";
   zones.forEach(z => {
     const btn = document.createElement("button");

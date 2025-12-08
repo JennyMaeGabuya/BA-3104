@@ -61,6 +61,7 @@ if ($method === "POST" && str_ends_with($uri, "/save-reservation")) {
 } 
 
 if ($method === "GET" && str_ends_with($uri, "/save-reservation")) {
+    // SEND XML
     $result = $conn->query("SELECT * FROM reservations");
     $xml = new SimpleXMLElement("<reservations/>");
     while ($row = $result->fetch_assoc()) {
