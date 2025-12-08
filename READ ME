@@ -1,0 +1,39 @@
+TO SETUP DATABASE
+You need to Have XAMPP and Create the DATABASE
+To create the database needed just paste this into the sql query
+
+CREATE DATABASE IF NOT EXISTS visitorlog_db;
+USE visitorlog_db
+
+after pasting you can import the visitorlog_db.sql using the import option,
+but you can also do it manually.
+
+to set up users table copy and paste this in the sql query:
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+to insert a user copy and paste this, for the username you can change it 
+to your preferred user and for the password you can use the passHash.php
+file for more info.
+
+INSERT INTO `users` (`id`, `username`, `password`) VALUES
+(2, 'admin', '$2y$10$rXQopgF2tZpn2wToRX0xAezfSsS6I6/PxlfeTuLHXG6Uf6DtgJewm');
+
+
+To set up vusutirs table copy and paste this in the sql query:
+
+CREATE TABLE `visitors` (
+  `visitor_id` int(11) NOT NULL,
+  `full_name` varchar(50) NOT NULL,
+  `user_type` varchar(50) NOT NULL,
+  `srcode` varchar(50) DEFAULT NULL,
+  `contact` varchar(50) NOT NULL,
+  `purpose` text DEFAULT NULL,
+  `time_in` datetime DEFAULT current_timestamp(),
+  `time_out` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

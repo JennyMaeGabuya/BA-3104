@@ -1,0 +1,824 @@
+/* -------------------- Base / Layout -------------------- */
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  margin: 0;
+  background-image: url('../img/uni.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+  background-position: center;
+  background-color: #c41e3a;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(196, 30, 58, 0.4);
+  backdrop-filter: blur(3px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+h1 {
+  color: #ffffff;
+  margin: 0;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.h1-link {
+  display: inline-block;
+  margin: 0 auto 20px auto;
+  text-decoration: none;
+  color: inherit;
+  font-size: 36px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  padding: 15px 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-wrapper {
+  text-align: center;
+  margin-bottom: 0px;
+  padding: 20px 0;
+}
+
+.h1-link:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+input[type="text"],
+textarea,
+select,
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+textarea {
+  resize: none;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Flexbox Container */
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.left-side {
+  flex: 2 1 400px;
+}
+
+.left-side form {
+  max-width: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+.right-side {
+  flex: 1 1 300px;
+}
+
+.map-container {
+  width: 100%;
+  margin-top: 10px;
+  height: 200px;
+}
+
+.map-container iframe {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background: #ccc;
+  margin: 15px 0;
+}
+
+/* -------------------- Login Page -------------------- */
+/* Center the whole login page */
+.login-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
+}
+
+.login-card {
+  background: #ffffff;
+  width: 320px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.login-card h2 {
+  margin: 0 0 12px;
+}
+
+.error-msg {
+  padding: 8px;
+  background: #ffdddd;
+  color: #b30000;
+  border-left: 4px solid #b30000;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.login-card form {
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+  border-radius: 0;
+  margin-top: 15px;
+}
+
+.login-card input[type="text"],
+.login-card input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.login-card button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.login-card button:hover {
+  background-color: #0056b3;
+}
+
+/* -------------------- Admin Page -------------------- */
+.admin-wrap {
+  max-width: 900px;
+  margin: 30px auto;
+}
+
+.admin-page {
+  display: block;
+  padding: 20px;
+  background: #4e5c01be;
+}
+
+.admin-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #000000;
+}
+
+.user-info-bar {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.logout-btn {
+  text-decoration: none;
+  color: #000000;
+  font-weight: bold;
+  padding: 5px 10px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  transition: background-color 0.5s;
+}
+
+.logout-btn:hover {
+  background-color: #ddd;
+}
+
+.signed-in-msg {
+  color: #000000;
+  font-size: 0.9em;
+}
+
+.dashboard-title {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.back-link-container {
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  width: 100%;
+  padding: 10px 142px;
+  background-color: #007bff;
+  border: none;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: none;
+}
+
+.back-btn:hover {
+  background-color: #0056b3;
+}
+
+.table-container {
+  overflow-x: auto; /* Ensures the table scrolls horizontally on small screens */
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse; /* Removes spacing between borders */
+  background-color: #ffffff;
+}
+
+table th, table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #000000;
+}
+
+table th {
+  background-color: #fcfcfc; /* Light gray header background */
+  color: #333;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
+table tbody tr:hover {
+  background-color: #ffffff; /* Subtle highlight on hover */
+}
+
+.timeout-btn {
+  background-color: #f39c12;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.timeout-btn:hover {
+  background-color: #d35400;
+}
+
+.search-input {
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+  width: 250px;
+  margin-right: 15px;
+}
+
+/* -------------------- Filter Form & Controls (improved) -------------------- */
+/* Use flex to place controls and buttons to the right without fixed margins */
+.filter-controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+/* Optional title inside the controls area */
+.filter-controls-bar h2 {
+  margin: 0;
+}
+
+/* .filter-form acts as a horizontal container for form actions */
+.filter-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end; /* places buttons to the right */
+  flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Buttons inside filter form - removed absolute margins */
+.filter-form .apply-btn,
+.filter-form .reset-btn,
+.filter-form .add-visitor-btn {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 8px 15px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
+}
+
+/* Specific button colors */
+.filter-form .apply-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.filter-form .apply-btn:hover {
+  background-color: #0056b3;
+}
+
+.filter-form .reset-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.filter-form .reset-btn:hover {
+  background-color: #545b62;
+}
+
+.filter-form .add-visitor-btn {
+  background-color: #28a745;
+  color: white;
+}
+
+.filter-form .add-visitor-btn:hover {
+  background-color: #1e7e34;
+}
+
+/* -------------------- Header / Nav for add visitor -------------------- */
+.header-nav-section {
+  display: flex;
+  align-items: center;
+}
+
+.main-nav {
+  display: flex;
+  margin-left: 30px;
+  gap: 8px;
+}
+
+/* nav buttons: removed huge margin-left; let the nav layout control spacing */
+.main-nav .nav-btn {
+  text-decoration: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: background-color 0.2s, color 0.2s;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  color: #000000;
+}
+
+.main-nav .nav-btn:hover {
+  background-color: #ddd;
+}
+
+.main-nav .current-page {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* -------------------- Manual Check-in Form -------------------- */
+.visitor-form {
+  background-color: #ffffff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  margin: 20px auto;
+  text-align: left;
+}
+
+.visitor-form .submit-btn {
+  width: 100%;
+  margin-top: 25px;
+  padding: 12px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.visitor-form .submit-btn:hover {
+  background-color: #1e7e34;
+}
+
+/* Status Messages */
+.status-message {
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-weight: bold;
+  max-width: 500px;
+  margin: 20px auto;
+}
+
+.status-message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* -------------------- XML Actions & Import/Export (new) -------------------- */
+/* Container to hold import/export buttons (aligns to right when inside a flex parent) */
+.xml-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.import-btn {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
+  background-color: #28a745;
+  color: white;
+}
+
+.import-btn:hover {
+  background-color: #1e7e34;
+}
+
+/* Export button - removed the huge absolute margin; now uses flow/layout */
+.export-btn {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
+  background-color: #f0f0f0;
+  color: #000000;
+}
+
+.export-btn:hover {
+  background-color: #ddd;
+}
+
+/* -------------------- Statistics Cards (kept your gradient style) -------------------- */
+.stats-container {
+  display: flex;
+  gap: 20px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.stat-box {
+  flex: 1;
+  min-width: 200px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-box.checked-in {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.stat-box.checked-out {
+  background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+}
+
+.stat-box.total {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-number {
+  font-size: 42px;
+  font-weight: bold;
+  margin: 10px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.stat-label {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+}
+
+/* -------------------- Import XML Page Styles (for importXml.php) -------------------- */
+.import-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.import-container h2 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.import-container p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* Message blocks (re-usable) */
+.message {
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* File input area */
+.file-input-wrapper {
+  margin: 20px 0;
+}
+
+.file-input-wrapper input[type="file"] {
+  padding: 12px;
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.file-input-wrapper input[type="file"]:hover {
+  border-color: #007bff;
+}
+
+/* Button group used in import form / other places */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.upload-btn {
+  flex: 1;
+  padding: 12px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.upload-btn:hover {
+  background-color: #1e7e34;
+}
+
+.button-group .back-btn {
+  flex: 1;
+  padding: 12px 20px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.button-group .back-btn:hover {
+  background-color: #545b62;
+}
+
+/* -------------------- Small utility / responsiveness tweaks -------------------- */
+/* Make sure long contents don't break layout; keeps buttons stacking nicely on small screens */
+@media (max-width: 520px) {
+  .xml-actions {
+    gap: 8px;
+  }
+
+  .stats-container {
+    flex-direction: column;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .import-btn,
+  .export-btn,
+  .upload-btn,
+  .button-group .back-btn {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .back-btn {
+    padding: 10px;
+  }
+
+  .filter-form {
+    justify-content: center;
+  }
+
+  .search-input {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+/* -------------------- Edit Log Book Styles -------------------- */
+
+/* Action buttons in table */
+.edit-log-btn, 
+.delete-log-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-right: 5px;
+    transition: background-color 0.2s;
+}
+
+.edit-log-btn {
+    background-color: #2196F3;
+    color: white;
+}
+
+.edit-log-btn:hover {
+    background-color: #0b7dda;
+}
+
+.delete-log-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.delete-log-btn:hover {
+    background-color: #da190b;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 30px;
+    border: none;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h2 {
+    color: #d32f2f;
+    margin-bottom: 15px;
+}
+
+.modal-content p {
+    color: #555;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.close-btn {
+    background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    color: white;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.35);
+}
