@@ -1,3 +1,12 @@
+READ ME FILE FOR GROUP 6 VISITOR LOG
+FOLLOW THESE STEPS TO SET UP THE VISITOR LOG
+
+TO USE THE SYSTEM USING XAMPP
+DOWNLOAD XAMPP >https://www.apachefriends.org/download.html
+DOWNLOAD ALL FILES FOR THE VISITOR LOG
+COMPILE THEM IN A FOLDER NAMED 'visitorlogsia'
+AND PUT THEM IN THE HTDOCS FOLDER ON THE XAMPP MOTHER FOLDER
+
 TO SETUP DATABASE
 You need to Have XAMPP and Create the DATABASE
 To create the database needed just paste this into the sql query
@@ -36,4 +45,5 @@ CREATE TABLE `visitors` (
   `purpose` text DEFAULT NULL,
   `time_in` datetime DEFAULT current_timestamp(),
   `time_out` datetime DEFAULT NULL
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
