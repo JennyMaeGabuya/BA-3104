@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ParkEase | Sign Up</title>
   <script type="module" src="/src/main.js"></script>
+  <script type="module" src="/src/utils/auth.js"></script>
 </head>
 
 <body class="bg-gray-100">
@@ -27,7 +28,7 @@
     <div class="bg-white p-10 rounded-xl shadow-lg w-full max-w-md">
       <h2 class="text-3xl font-bold text-gray-800 text-center mb-6">Create Account</h2>
 
-      <form action="" method="POST" class="flex flex-col gap-4">
+      <form id="signupForm" class="flex flex-col gap-4">
         <input
           type="text"
           name="fullName"

@@ -199,3 +199,45 @@ function generateXML(data) {
 }
 
 generateSpots();
+
+
+async function getUser() {
+  try {
+    const res = await fetch("http://localhost/ParkEase/BA-3104/backend/public/check-auth", {
+      method: "GET",
+      credentials: 'include' // important for sessions
+    });
+
+    if (!res.ok) {
+      // Not logged in
+      window.location.href = "/login.html"; // redirect to login page
+      return;
+    }
+
+    const data = await res.json();
+    console.log(data);
+
+    // OPTIONAL: show user info
+    // $_SESSION["user"] is data.user.name 
+    if(data.status === 'success') {
+      document.getElementById("userName").textContent = data.user.name;
+      document.getElementById("studentId").value = data.user.id;
+    }
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    window.location.href = "/login.html"; // redirect on error
+  }
+}
+
+  async function logout() {
+    const logoutRes = await fetch("http://localhost/ParkEase/BA-3104/backend/public/logout") 
+    
+  }
+
+  // LOGOUT BUTTON DESTROY SESSION
+  document.getElementById("logoutButton").addEventListener( "click" , (e) => {
+    e.preventDefault();
+    logout();
+  })
+
+getUser();

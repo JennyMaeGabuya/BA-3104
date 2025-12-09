@@ -1,14 +1,26 @@
 <?php
 // Always send CORS headers, immediately at the top
-header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
 
-// Handle preflight OPTIONS request and exit
+// Handle preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
+
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => '',
+    'secure' => false,        // ok for HTTP localhost
+    'httponly' => true,
+    'samesite' => 'Lax'       // Lax works for localhost fetch
+]);
+session_start();
+
 
 // Now continue with your normal PHP code
 $method = $_SERVER["REQUEST_METHOD"];
@@ -71,6 +83,21 @@ if ($method === "GET" && str_ends_with($uri, "/save-reservation")) {
         }
     }
     echo $xml->asXML();
+}
+
+if($method === "POST" && str_ends_with($uri , "/login")) {
+    require "login.php";
+    exit(); 
+}
+
+if($method === "POST" && str_ends_with($uri, "/signup")){
+    require "signup.php";
+    exit();
+}
+
+if($method === "GET" && str_ends_with($uri ,"/check-auth")) {
+    require "checkauth.php";
+    exit();
 }
 
 $conn->close();

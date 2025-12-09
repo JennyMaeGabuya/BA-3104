@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ParkEase — University Parking Reservation</title>
   <meta name="description" content="ParkEase — Simple reservation page for University Parking System" />
-  <script src="./src//reservation.js" type="module">
+  <script src="./src/reservation.js" type="module"></script>
+
   </script>
 </head>
 
@@ -14,16 +15,37 @@
   <div class="max-w-[980px] mx-auto my-9 p-5">
     
     <!-- Header -->
-    <header class="flex gap-4 items-center mb-4">
+  <header class="flex items-center justify-between mb-4 p-4 bg-white shadow-md rounded-xl">
+    <!-- Logo & Title -->
+    <div class="flex items-center gap-4">
       <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-blue-300 flex items-center justify-center text-white font-bold">
         PE
       </div>
-
       <div>
         <h1 class="text-xl font-semibold m-0">ParkEase</h1>
         <p class="text-muted text-sm m-0">University Parking Reservation System</p>
       </div>
-    </header>
+    </div>
+
+    <!-- User Info -->
+    <div class="relative">
+          <!-- Dropdown Menu -->
+      <div class="dropdown dropdown-end relative">
+        <label tabindex="0" class="btn btn-ghost flex items-center gap-6 rounded-full ">
+          <!-- <img src="https://via.placeholder.com/32" alt="User Avatar" class="w-8 h-8 rounded-full"> -->
+          <span id="userName" class="text-sm font-medium">Juan Dela Cruz</span>
+          <span id="studentId" class="text-sm font-medium">23-63506</span>
+        </label>
+
+        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-white rounded-box w-52 mt-2">
+          <li><a href="#">Profile</a></li>
+          <li><a href="#">Settings</a></li>
+          <li><hr class="my-1 border-gray-200"></li>
+          <li><a id="logoutButton" href="" class="text-red-600">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
 
     <!-- Main Card -->
     <main class="bg-(--card) shadow-xl rounded-xl p-6">
@@ -58,9 +80,9 @@
                 <input id="vPlate" name="vPlate" class="w-full p-2 border rounded-md" placeholder="ABC-1234" required />
               </div>
 
-              <div class="flex-1">
+              <div class="flex-1 dropdown">
                 <label for="vType" class="text-muted text-sm">Vehicle type</label>
-                <select id="vType" name="vType" class="w-full p-2 border rounded-md">
+                <select id="vType" name="vType" class="w-full select bg-red-200 p-2 rounded-md">
                   <option value="car">Car</option>
                   <option value="motorcycle">Motorcycle</option>
                   <option value="bicycle">Bicycle</option>
@@ -189,4 +211,5 @@
   </div>
 </div>
 </body>
+<script type="module" src="./src/utils/utils.js"></script>
 </html>

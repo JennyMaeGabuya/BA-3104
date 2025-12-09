@@ -27,9 +27,10 @@
     <div class="bg-white p-10 rounded-xl shadow-lg w-full max-w-md">
       <h2 class="text-3xl font-bold text-gray-800 text-center mb-6">Login</h2>
 
-      <form class="flex flex-col gap-4">
+      <form class="flex flex-col gap-4" id="loginForm">
         <input
           type="email"
+          name="email"
           placeholder="Email"
           class="w-full px-4 py-3 border border-black rounded-lg focus:ring-2 focus:ring-red-600 focus:outline-none text-black"
           required
@@ -37,13 +38,14 @@
 
         <input
           type="password"
+          name="password"
           placeholder="Password"
           class="w-full px-4 py-3 border border-black text-black rounded-lg focus:ring-2 focus:ring-red-600 focus:outline-none"
           required
         />
 
         <button
-          class="bg-red-700 text-white py-3 rounded-lg hover:bg-red-800 transition"
+          class="bg-red-700 btn border-none text-white py-3 rounded-lg hover:bg-red-800 transition"
         >
           Login
         </button>
@@ -59,5 +61,19 @@
   <footer class="w-full text-center py-5 bg-gray-200 text-gray-700">
     © 2025 ParkEase | All Rights Reserved
   </footer>
+
+  <!-- DaisyUI Modal -->
+    <input type="checkbox" id="errorModalToggle" class="modal-toggle" />
+    <div class="modal hidden" >
+      <div class="modal-box">
+        <h3 class="font-bold text-lg">Oops!</h3>
+        <p id="modalMessage" class="py-4">This is an error message.</p>
+        <div class="modal-action">
+          <label for="errorModalToggle" class="btn">Close</label>
+        </div>
+      </div>
+    </div>
+
+
 </body>
 </html>

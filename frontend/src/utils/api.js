@@ -12,7 +12,7 @@ export function sendReservation (xmlData, data) {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(result, "application/xml");
     const successTag = xmlDoc.querySelector("success");
-
+    
     if (successTag) {
         const message = successTag.textContent; // "Reservation saved"
         console.log(message);
