@@ -220,8 +220,8 @@ async function getUser() {
     // OPTIONAL: show user info
     // $_SESSION["user"] is data.user.name 
     if(data.status === 'success') {
-      document.getElementById("userName").textContent = data.user.name;
-      document.getElementById("studentId").value = data.user.id;
+      document.getElementById("userName").textContent = data.user.fullname;
+      document.getElementById("studentId").textContent = data.user.studentId;
     }
   } catch (err) {
     console.error("Error fetching user:", err);
@@ -230,7 +230,11 @@ async function getUser() {
 }
 
   async function logout() {
-    const logoutRes = await fetch("http://localhost/ParkEase/BA-3104/backend/public/logout") 
+    const logoutRes = await fetch("http://localhost/ParkEase/BA-3104/backend/public/logout", {
+      method : "POST",
+      credentials : "include"
+    });
+    console.log(logoutRes);
     
   }
 
@@ -238,6 +242,7 @@ async function getUser() {
   document.getElementById("logoutButton").addEventListener( "click" , (e) => {
     e.preventDefault();
     logout();
+    window.location.reload();
   })
 
 getUser();

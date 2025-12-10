@@ -15,7 +15,7 @@ $mailPassword = $_ENV["GMAIL_PASSWORD"];
 $newEmail = $_POST["email"];
 $newFullName = $_POST["fullName"];
 $newPassword = password_hash($_POST["password"], PASSWORD_DEFAULT);
-
+$newStudentId = $_POST["studentId"];
 $token = bin2hex(random_bytes(16)); // 32 characters
 
 
@@ -32,7 +32,7 @@ if ($emailCheck->num_rows > 0) {
 }
 
 
-if ($conn->query("INSERT INTO users (fullname, email, password, token, verified) VALUES ('$newFullName', '$newEmail', '$newPassword', '$token', 0)")) {
+if ($conn->query("INSERT INTO users (fullname, email, password, token, verified, studentId) VALUES ('$newFullName', '$newEmail', '$newPassword', '$token', 0, '$newStudentId')")) {
   $mail = new PHPMailer(true);
   try {
     $mail->isSMTP();
