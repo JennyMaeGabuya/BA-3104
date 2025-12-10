@@ -1,7 +1,7 @@
 <?php
 // Always send CORS headers, immediately at the top
 header("Access-Control-Allow-Origin: http://localhost:5173");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, DELETE, PUT");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
 
@@ -107,6 +107,11 @@ if($method === "POST" && str_ends_with($uri ,"/logout")) {
 
 if($method === "GET" && str_ends_with($uri , "/check-user-reservation")){
     require "check_user_reservation.php";
+    exit();
+}
+
+if($method === "DELETE" && str_ends_with($uri, "/delete-reservation")){
+    require "delete-reservation.php";
     exit();
 }
 

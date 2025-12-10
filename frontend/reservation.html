@@ -7,7 +7,7 @@
   <meta name="description" content="ParkEase — Simple reservation page for University Parking System" />
   <script src="./src/reservation.js" type="module"></script>
   <script src="./src/summary.js" type="module"></script>
-  
+  <script src="./src/cancel-reservation.js" type="module"></script>
 </head>
 
 <body class="m-0 bg-(--bg) text-[#0f1724] font-inter">
@@ -165,8 +165,13 @@
                 Confirm & Save
               </button>
 
-              <button id="downloadBtn" clfs="border border-(--accent) text-(--accent) px-3 py-2 rounded-md opacity-50">
+              <button id="downloadBtn" class="border border-(--accent) text-(--accent) px-3 py-2 rounded-md opacity-50">
                 Download
+              </button>
+              <button 
+                id="cancelReservationBtn" 
+                class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 hidden">
+                Cancel Reservation
               </button>
             </div>
           </div>

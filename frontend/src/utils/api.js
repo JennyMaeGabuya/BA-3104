@@ -20,9 +20,12 @@ export function sendReservation (xmlData, data) {
     } else {
         showModal("Something went wrong."); // fallback
     }                 // Log server response // <success></success>
-    alert(`Reservation confirmed for ${data.spot}!`);
+    alert(`Reservation confirmed for spot ${data.spot}!`);
     modal.classList.add("hidden");       // Hide modal
     modal.classList.remove("flex");      // Remove flex display class
+    setTimeout(() => {
+      window.location.reload();
+    },1000)
   })
   .catch(error => {
     console.error("Error saving reservation:", error);

@@ -118,7 +118,7 @@ function validateForm() {
 }
 
 
-async function generateSpots() {
+export async function generateSpots() {
   selectedSpot = null; // reset selection on zone change
   updatePreviewButton();
 
@@ -277,6 +277,7 @@ async function getUser() {
     previewBtn.disabled = true;
     previewBtn.textContent = "Already Reserved";
     previewBtn.classList.add("opacity-50", "cursor-not-allowed");
+    document.getElementById("cancelReservationBtn").classList.remove("hidden");
 
     // Optionally disable all inputs too
     document.querySelectorAll("#reservationForm input, #reservationForm select").forEach(el => {
@@ -310,24 +311,6 @@ async function getUser() {
 const downloadBtn = document.getElementById("downloadBtn");
 const summaryBody = document.getElementById("summaryBody");
 
-// // Function to create receipt text
-// function generateReceiptText(data) {
-//   return `
-// PARKING RESERVATION RECEIPT
-// ===========================
-
-// Full Name: ${data.fullName}
-// Student/Staff ID: ${data.studentId}
-// Vehicle Plate: ${data.vPlate}
-// Vehicle Type: ${data.vType}
-// Date: ${data.rDate}
-// Time: ${data.startTime} - ${data.endTime}
-// Spot: ${data.spot}
-
-// Thank you for using ParkEase!
-// ===========================
-// `;
-// }
 
 // Call this whenever you update the summary
 function updateSummary(data) {

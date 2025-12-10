@@ -1,11 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ParkEase | Admin</title>
+  <script type="module" src="/src/admin.js"></script>
+  <script type="module" src=""></script>
 </head>
-<body>
-  
+
+<body class="bg-gray-100 min-h-screen">
+
+  <!-- NAVBAR -->
+  <nav class="bg-amber-600 text-white px-6 py-4 flex justify-between items-center shadow">
+    <h1 class="text-xl font-bold">ParkEase Admin</h1>
+    <button id="logoutAdmin" class="bg-white text-amber-600 px-4 py-2 rounded-md hover:bg-gray-200">
+      Logout
+    </button>
+  </nav>
+
+  <main class="max-w-5xl mx-auto mt-10">
+    <h2 class="text-2xl text-amber-500 font-bold mb-6">All Reservations</h2>
+
+    <div class="mb-4">
+      <button id="refreshBtn" class="bg-amber-600 text-white px-4 py-2 rounded-md hover:bg-amber-700">
+        Refresh List
+      </button>
+
+      <button id="deleteAllBtn" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 ml-2">
+        Delete ALL Reservations
+      </button>
+    </div>
+
+    <!-- TABLE -->
+    <div class="bg-white shadow rounded-lg p-4">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b">
+            <th class="py-2">Full Name</th>
+            <th class="py-2">Student ID</th>
+            <th class="py-2">Plate</th>
+            <th class="py-2">Date</th>
+            <th class="py-2">Time</th>
+            <th class="py-2">Spot</th>
+            <th class="py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="reservationTable" class="text-sm">
+          <!-- JS loads rows here -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
 </body>
 </html>

@@ -38,21 +38,22 @@ export function updateSummary(data) {
   downloadBtn.disabled = false;
   downloadBtn.classList.remove("opacity-50", "cursor-not-allowed");
 }
+if(downloadBtn) {
+    downloadBtn.addEventListener("click", () => {
+    const data = getFormData();
+    const doc = new jsPDF();
 
-downloadBtn.addEventListener("click", () => {
-  const data = getFormData();
-  const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("PARKING RESERVATION RECEIPT", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Full Name: ${data.fullName}`, 20, 40);
+    doc.text(`Student/Staff ID: ${data.studentId}`, 20, 50);
+    doc.text(`Vehicle Plate: ${data.vPlate}`, 20, 60);
+    doc.text(`Vehicle Type: ${data.vType}`, 20, 70);
+    doc.text(`Date: ${data.rDate}`, 20, 80);
+    doc.text(`Time: ${data.startTime} - ${data.endTime}`, 20, 90);
+    doc.text(`Spot: ${data.spot}`, 20, 100);
 
-  doc.setFontSize(16);
-  doc.text("PARKING RESERVATION RECEIPT", 20, 20);
-  doc.setFontSize(12);
-  doc.text(`Full Name: ${data.fullName}`, 20, 40);
-  doc.text(`Student/Staff ID: ${data.studentId}`, 20, 50);
-  doc.text(`Vehicle Plate: ${data.vPlate}`, 20, 60);
-  doc.text(`Vehicle Type: ${data.vType}`, 20, 70);
-  doc.text(`Date: ${data.rDate}`, 20, 80);
-  doc.text(`Time: ${data.startTime} - ${data.endTime}`, 20, 90);
-  doc.text(`Spot: ${data.spot}`, 20, 100);
-
-  doc.save(`ParkEase_Receipt_${data.rDate}_${data.spot}.pdf`);
-});
+    doc.save(`ParkEase_Receipt_${data.rDate}_${data.spot}.pdf`);
+  });
+}
