@@ -137,4 +137,11 @@ if($method === "GET" && str_ends_with($uri, "/get-all-reservations")){
     exit();
 }
 
+
+if($method === "POST" && str_ends_with($uri, "/delete-reservation-admin")){
+    require "delete_reservation_admin.php";
+    exit();
+}
+
+
 $conn->close();

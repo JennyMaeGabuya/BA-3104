@@ -60,9 +60,50 @@ async function getReservations() {
 
   document.querySelectorAll(".deleteBtn").forEach(btn => {
     btn.addEventListener("click", () => {
-      // deleteReservation(btn.dataset.id);
-      console.log("delete reserv")
+      deleteReservation(btn.dataset.id);
     });
   });
   
 }
+
+async function deleteReservation(studentId) {
+  if (!confirm(`Delete reservation for ID: ${studentId}?`)) return;
+
+  const res = await fetch("http://localhost/ParkEase/BA-3104/backend/public/delete-reservation-admin", {
+    method: "POST",
+    credentials: "include",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ studentId })
+  });
+
+  const data = await res.json();
+  console.log(data);
+  alert(data.message);
+  getReservations();
+}
+
+
+deleteAllBtn.addEventListener("click", async () => {
+  if (!confirm("Are you sure you want to DELETE ALL reservations?")) return;
+
+  const res = await fetch("http://localhost/ParkEase/BA-3104/backend/public/delete-all-reservations", {
+    method: "POST",
+    credentials: "include"
+  });
+
+  const data = await res.json();
+  alert(data.message);
+
+  getReservations();
+});
+
+refreshBtn.addEventListener("click", getReservations);
+
+// logoutAdmin.addEventListener("click", async () => {
+//   await fetch("http://localhost/ParkEase/BA-3104/backend/public/logout-admin", {
+//     method: "POST",
+//     credentials: "include"
+//   });
+
+//   window.location.href = "/admin-login.html";
+// });
