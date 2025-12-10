@@ -221,7 +221,23 @@ async function getUser() {
     // $_SESSION["user"] is data.user.name 
     if(data.status === 'success') {
       document.getElementById("userName").textContent = data.user.fullname;
-      document.getElementById("studentId").textContent = data.user.studentId;
+      document.getElementById("userStudentId").textContent = data.user.studentId; // updated
+      document.getElementById("fullName").value = data.user.fullname;
+      document.getElementById("studentId").value = data.user.studentId;
+
+      const reservationRes = await fetch(
+        "http://localhost/ParkEase/BA-3104/backend/public/check-user-reservation",
+        {
+          method: "GET",
+          credentials: "include"
+        }
+      );
+      const reservationData = await reservationRes.json();
+      console.log(reservationData)
+
+      if(reservationData.hasReservation) {
+        disableReservationForm();
+      }
     }
   } catch (err) {
     console.error("Error fetching user:", err);
@@ -235,8 +251,8 @@ async function getUser() {
       credentials : "include"
     });
     console.log(logoutRes);
-    
   }
+
 
   // LOGOUT BUTTON DESTROY SESSION
   document.getElementById("logoutButton").addEventListener( "click" , (e) => {
@@ -245,4 +261,16 @@ async function getUser() {
     window.location.reload();
   })
 
-getUser();
+  function disableReservationForm() {
+    const previewBtn = document.getElementById("previewBtn");
+    previewBtn.disabled = true;
+    previewBtn.textContent = "Already Reserved";
+    previewBtn.classList.add("opacity-50", "cursor-not-allowed");
+
+    // Optionally disable all inputs too
+    document.querySelectorAll("#reservationForm input, #reservationForm select").forEach(el => {
+      el.disabled = true;
+    });
+  }
+
+getUser()

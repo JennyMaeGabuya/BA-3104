@@ -8,7 +8,7 @@ function openErrorModal(message) {
   const modalToggle = document.getElementById("errorModalToggle");
   setTimeout(() => {
     modalToggle.checked = true;
-  }, 500)
+  }, 100)
   modalToggle.nextElementSibling.classList.remove("hidden");
 
 }
@@ -34,6 +34,33 @@ document.addEventListener("submit", async (e) => {
     openErrorModal(data.message)
   }
 });
+
+
+
+// UNAUTHORIZED MODAL
+document.getElementById("goReservation").addEventListener("click", async (e) => {
+  e.preventDefault(); // block navigation for now
+  
+  const res = await fetch("http://localhost/ParkEase/BA-3104/backend/public/check-auth", {
+    method: "GET",
+    credentials: "include"
+  });
+  const modalToggle = document.getElementById("authBlockModal");
+  console.log(modalToggle)
+  if (!res.ok) {
+    // User is NOT logged in → show modal
+    modalToggle.nextElementSibling.classList.remove("hidden");
+    setTimeout(() => {
+      modalToggle.checked = true;
+    }, 100)
+    return;
+  }
+
+  // User is logged in → allow navigation
+  window.location.href = "reservation.html";
+});
+
+
 
 document.addEventListener("submit" , async (e) => {
   if (e.target.id !== "signupForm") return;

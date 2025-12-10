@@ -105,4 +105,9 @@ if($method === "POST" && str_ends_with($uri ,"/logout")) {
     exit();
 }
 
+if($method === "GET" && str_ends_with($uri , "/check-user-reservation")){
+    require "check_user_reservation.php";
+    exit();
+}
+
 $conn->close();

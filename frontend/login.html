@@ -9,12 +9,13 @@
 
 <body class="bg-gray-100">
   <!-- NAVBAR -->
+   
   <nav class="flex w-full items-center justify-between px-10 md:px-40 py-5 bg-white shadow">
     <div class="text-gray-700 text-2xl font-bold">ParkEase</div>
 
     <ul class="hidden md:flex gap-10 items-center text-gray-700 font-medium">
       <li><a class="hover:text-red-600" href="index.html">Home</a></li>
-      <li><a class="hover:text-red-600" href="reservation.html">Reserve Parking</a></li>
+      <li><a class="hover:text-red-600" id="goReservation" href="reservation.html">Reserve Parking</a></li>
       <li><a class="hover:text-red-600" href="#">Services</a></li>
       <li><a class="hover:text-red-600" href="#">Contact</a></li>
     </ul>
@@ -62,7 +63,7 @@
     © 2025 ParkEase | All Rights Reserved
   </footer>
 
-  <!-- DaisyUI Modal -->
+  <!-- ERROR MODAL -->
     <input type="checkbox" id="errorModalToggle" class="modal-toggle" />
     <div class="modal hidden" >
       <div class="modal-box">
@@ -73,6 +74,17 @@
         </div>
       </div>
     </div>
+  <!-- NOT LOGGED IN MODAL -->
+  <input type="checkbox" id="authBlockModal" class="modal-toggle" />
+  <div class="modal hidden">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">Unauthorized</h3>
+      <p class="py-4">You must log in before accessing reservations.</p>
+      <div class="modal-action">
+        <label for="authBlockModal" class="btn">Okay</label>
+      </div>
+    </div>
+  </div>
 
 
 </body>

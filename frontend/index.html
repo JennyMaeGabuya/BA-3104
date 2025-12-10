@@ -16,7 +16,7 @@
 
       <ul class="hidden md:flex gap-10 items-center text-gray-700 font-medium">
         <li><a class="hover:text-red-600" href="#">Home</a></li>
-        <li><a class="hover:text-red-600" href="#">Reserve Parking Now</a></li>
+        <li><a class="hover:text-red-600" id="goReservation" href="reservation.html">Reserve Parking Now</a></li>
         <li><a class="hover:text-red-600" href="#">Services</a></li>
         <li><a class="hover:text-red-600" href="#">Contact</a></li>
         <li><a class="hover:text-red-600" href="login.html">Login</a></li>
@@ -31,8 +31,8 @@
       <p class="text-gray-600 text-lg md:text-xl max-w-2xl">
         Tired of not getting any parking inside the campus?
       </p>
-      <a href="reservation.html">
-        <button class="bg-red-700 text-white mt-6 px-8 py-3 rounded-lg hover:bg-red-800">
+      <a id="goReservationButton" href="reservation.html">
+        <button  class="bg-red-700 text-white mt-6 px-8 py-3 rounded-lg hover:bg-red-800">
           Reserve Now!
         </button>
       </a>
@@ -63,5 +63,16 @@
   <footer class="w-full text-center py-5 bg-gray-200 text-gray-700">
     © 2025 ParkEase | All Rights Reserved
   </footer>
+  <!-- MODAL -->
+  <input type="checkbox" id="authBlockModal" class="modal-toggle" />
+  <div class="modal hidden">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">Unauthorized</h3>
+      <p class="py-4">You must log in before accessing reservations. Redirecting you to login page.</p>
+      <div class="modal-action">
+        <label for="authBlockModal" class="btn">Okay</label>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
