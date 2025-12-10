@@ -47,3 +47,16 @@ export function showModal(message) {
         setTimeout(() => modal.remove(), 300); // remove after animation
     });
 }
+
+export function getFormData() {
+  return {
+    fullName: document.getElementById("fullName").value,
+    studentId: document.getElementById("studentId").value,
+    vPlate: document.getElementById("vPlate").value,
+    vType: document.getElementById("vType").value,
+    rDate: document.getElementById("rDate").value,
+    startTime: document.getElementById("startTime").value,
+    endTime: document.getElementById("endTime").value,
+    spot: selectedSpot
+  }
+}

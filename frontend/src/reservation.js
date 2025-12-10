@@ -1,5 +1,5 @@
 // WARNING SPAGHETTI CODE BELOW 
-
+import jsPDF from "jspdf";
 import './reservation.css'
 import { sendReservation } from './utils/api';
 
@@ -10,6 +10,8 @@ const modalContent = document.getElementById("modalContent");
 const modalCancel = document.getElementById("modalCancel");
 const modalConfirm = document.getElementById("modalConfirm");
 const previewBtn = document.getElementById("previewBtn");
+
+let currentReservation = null; // Will store the reservation to download
 
 let selectedSpot = null;
 const zonesFromDatabase = [];
@@ -164,6 +166,9 @@ previewBtn.addEventListener("click", () => {
 
   modal.classList.remove("hidden");
   modal.classList.add("flex");
+
+  currentReservation = data;
+  updateSummary(currentReservation);
 });
 
 modalCancel.addEventListener("click", () => {
@@ -207,7 +212,7 @@ async function getUser() {
       method: "GET",
       credentials: 'include' // important for sessions
     });
-
+    console.log(res.ok)
     if (!res.ok) {
       // Not logged in
       window.location.href = "/login.html"; // redirect to login page
@@ -233,15 +238,14 @@ async function getUser() {
         }
       );
       const reservationData = await reservationRes.json();
-      console.log(reservationData)
-
+      
       if(reservationData.hasReservation) {
-        disableReservationForm();
+        disableReservationForm(reservationData);
       }
     }
   } catch (err) {
     console.error("Error fetching user:", err);
-    window.location.href = "/login.html"; // redirect on error
+    // window.location.href = "/login.html"; // redirect on error
   }
 }
 
@@ -250,6 +254,7 @@ async function getUser() {
       method : "POST",
       credentials : "include"
     });
+    window.location.href = 'login.html';
     console.log(logoutRes);
   }
 
@@ -261,7 +266,13 @@ async function getUser() {
     window.location.reload();
   })
 
-  function disableReservationForm() {
+  document.getElementById("existingReservationModal").addEventListener("click", (e) => {
+    if(e.target.id === "existingReservationModal") {
+      e.target.classList.add("hidden");
+    }
+  });
+
+  function disableReservationForm(reservationData) {
     const previewBtn = document.getElementById("previewBtn");
     previewBtn.disabled = true;
     previewBtn.textContent = "Already Reserved";
@@ -271,6 +282,87 @@ async function getUser() {
     document.querySelectorAll("#reservationForm input, #reservationForm select").forEach(el => {
       el.disabled = true;
     });
+    const { reservation } = reservationData;
+    if(reservation) {
+
+      currentReservation = reservation; // store the data globally
+      updateSummary(currentReservation);
+      const modal = document.getElementById("existingReservationModal");
+      const content = document.getElementById("existingReservationContent");
+
+      // Populate modal with reservation info
+      content.innerHTML = `
+        <p><strong>Full Name:</strong> ${reservation.fullName}</p>
+        <p><strong>Student/Staff ID:</strong> ${reservation.studentId}</p>
+        <p><strong>Vehicle Plate:</strong> ${reservation.vPlate}</p>
+        <p><strong>Vehicle Type:</strong> ${reservation.vType}</p>
+        <p><strong>Date:</strong> ${reservation.rDate}</p>
+        <p><strong>Time:</strong> ${reservation.startTime} - ${reservation.endTime}</p>
+        <p><strong>Spot:</strong> ${reservation.spot}</p>
+      `;
+
+      // Show modal
+      modal.classList.remove("hidden");
+    }
   }
+
+// SUMMMARY
+const downloadBtn = document.getElementById("downloadBtn");
+const summaryBody = document.getElementById("summaryBody");
+
+// // Function to create receipt text
+// function generateReceiptText(data) {
+//   return `
+// PARKING RESERVATION RECEIPT
+// ===========================
+
+// Full Name: ${data.fullName}
+// Student/Staff ID: ${data.studentId}
+// Vehicle Plate: ${data.vPlate}
+// Vehicle Type: ${data.vType}
+// Date: ${data.rDate}
+// Time: ${data.startTime} - ${data.endTime}
+// Spot: ${data.spot}
+
+// Thank you for using ParkEase!
+// ===========================
+// `;
+// }
+
+// Call this whenever you update the summary
+function updateSummary(data) {
+  summaryBody.innerHTML = `
+    <p><strong>Full Name:</strong> ${data.fullName}</p>
+    <p><strong>Student/Staff ID:</strong> ${data.studentId}</p>
+    <p><strong>Vehicle Plate:</strong> ${data.vPlate}</p>
+    <p><strong>Vehicle Type:</strong> ${data.vType}</p>
+    <p><strong>Date:</strong> ${data.rDate}</p>
+    <p><strong>Time:</strong> ${data.startTime} - ${data.endTime}</p>
+    <p><strong>Spot:</strong> ${data.spot}</p>
+  `;
+
+  // Enable download button
+  downloadBtn.disabled = false;
+  downloadBtn.classList.remove("opacity-50", "cursor-not-allowed");
+}
+
+downloadBtn.addEventListener("click", () => {
+  const data = currentReservation; // now i can access it
+  const doc = new jsPDF();
+
+  doc.setFontSize(16);
+  doc.text("PARKING RESERVATION RECEIPT", 20, 20);
+  doc.setFontSize(12);
+  doc.text(`Full Name: ${data.fullName}`, 20, 40);
+  doc.text(`Student/Staff ID: ${data.studentId}`, 20, 50);
+  doc.text(`Vehicle Plate: ${data.vPlate}`, 20, 60);
+  doc.text(`Vehicle Type: ${data.vType}`, 20, 70);
+  doc.text(`Date: ${data.rDate}`, 20, 80);
+  doc.text(`Time: ${data.startTime} - ${data.endTime}`, 20, 90);
+  doc.text(`Spot: ${data.spot}`, 20, 100);
+
+  doc.save(`ParkEase_Receipt_${data.rDate}_${data.spot}.pdf`);
+});
+
 
 getUser()

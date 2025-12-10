@@ -6,8 +6,8 @@
   <title>ParkEase — University Parking Reservation</title>
   <meta name="description" content="ParkEase — Simple reservation page for University Parking System" />
   <script src="./src/reservation.js" type="module"></script>
-
-  </script>
+  <script src="./src/summary.js" type="module"></script>
+  
 </head>
 
 <body class="m-0 bg-(--bg) text-[#0f1724] font-inter">
@@ -161,11 +161,11 @@
             </div>
 
             <div class="flex gap-2 mt-3">
-              <button id="confirmBtn" disabled class="bg-(--accent) text-white px-3 py-2 rounded-md opacity-50">
+              <button id="confirmBtn" disabled class=" bg-(--accent) text-white px-3 py-2 rounded-md opacity-50">
                 Confirm & Save
               </button>
 
-              <button id="downloadBtn" disabled clfs="border border-(--accent) text-(--accent) px-3 py-2 rounded-md opacity-50">
+              <button id="downloadBtn" clfs="border border-(--accent) text-(--accent) px-3 py-2 rounded-md opacity-50">
                 Download
               </button>
             </div>
@@ -207,6 +207,16 @@
               class="px-4 py-2 rounded-lg bg-(--accent) text-white font-semibold hover:bg-amber-600 transition">
         Confirm
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Existing Reservation Modal -->
+<div id="existingReservationModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 animate-fadeIn">
+    <h3 class="text-xl font-bold text-gray-800 mb-4">Your Current Reservation</h3>
+    <div id="existingReservationContent" class="text-gray-600 text-sm space-y-2">
+      <!-- Populated dynamically by JS -->
     </div>
   </div>
 </div>
