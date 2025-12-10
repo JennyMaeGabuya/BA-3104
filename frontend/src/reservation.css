@@ -7,3 +7,18 @@
   --card : #ffffff;
   --bg : #f5f7fb;
 }
+
+
+@media (max-width : 520px) {
+  .row3 {
+    display:  grid;
+    grid-template-columns: repeat(1 , 1fr);
+  } 
+}
+
+@media (max-width : 420px) {
+  .summary-buttons {
+    display: grid;
+    grid-template-columns: repeat(1 , 2fr);
+  }
+}

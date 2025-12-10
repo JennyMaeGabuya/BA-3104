@@ -79,7 +79,7 @@ document.addEventListener("submit" , async (e) => {
   if (data.status === "success") {
     window.location.href = "verify.html";
   } else {
-    alert(data.message || "Error");
+    openErrorModal(data.message || "Error");
   }
 
 });

@@ -19,6 +19,16 @@ $newStudentId = $_POST["studentId"];
 $token = bin2hex(random_bytes(16)); // 32 characters
 
 
+$studentCheck = $conn->prepare("SELECT id FROM users WHERE studentId = ?");
+$studentCheck->bind_param("s", $newStudentId);
+$studentCheck->execute();
+$studentCheck->store_result();
+
+if ($studentCheck->num_rows > 0) {
+    echo json_encode(["status" => "error", "message" => "Student ID already exists"]);
+    exit();
+}
+
 //CHECK IF EMAIL EXISTS
 $emailCheck = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $emailCheck->bind_param("s", $newEmail);

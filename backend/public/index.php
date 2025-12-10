@@ -53,6 +53,12 @@ if ($method === "POST" && str_ends_with($uri, "/save-reservation")) {
     }
 
     $xml = simplexml_load_string($xmlData);
+
+    if(!$xml) {
+        http_response_code(401);
+        echo "<error>Invalid XML</error>";
+    }
+ 
     $fullName = $conn->real_escape_string($xml->fullName);
     $studentId = $conn->real_escape_string($xml->studentId);
     $vPlate = $conn->real_escape_string($xml->vPlate);
@@ -61,6 +67,17 @@ if ($method === "POST" && str_ends_with($uri, "/save-reservation")) {
     $startTime = $conn->real_escape_string($xml->startTime);
     $endTime = $conn->real_escape_string($xml->endTime);
     $spot = $conn->real_escape_string($xml->spot);
+
+    // CHECK IF STUDENT EXISTS
+    $stmt = $conn->prepare("SELECT * FROM reservations WHERE studentId = ? AND rDate = ? AND spot = ?");
+    $stmt->bind_param("sss", $studentId, $rDate, $spot);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if($result->num_rows > 0){
+        echo "<error>Reservation already exists</error>"; // RETURN ERROR IF TRUE
+        exit();
+    }
+
 
     $query = "INSERT INTO reservations 
               (fullName, studentId, vPlate, vType, rDate, startTime, endTime, spot) 
@@ -112,6 +129,11 @@ if($method === "GET" && str_ends_with($uri , "/check-user-reservation")){
 
 if($method === "DELETE" && str_ends_with($uri, "/delete-reservation")){
     require "delete-reservation.php";
+    exit();
+}
+
+if($method === "GET" && str_ends_with($uri, "/get-all-reservations")){
+    require "get_all_reservations.php";
     exit();
 }
 
