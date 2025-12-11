@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us | ParkEase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+    }
+  </style>
+  <script type="module" src="/src/main.js"></script>
+</head>
+
+<body class="bg-gray-100">
+  <!-- NAVIGATION -->
+  <nav class="flex w-full fixed top-0 left-0 items-center justify-between px-8 md:px-32 py-5 bg-white/90 backdrop-blur shadow z-50">
+    <div class="text-gray-800 text-3xl font-extrabold tracking-wide">ParkEase</div>
+
+    <ul class="hidden md:flex gap-10 items-center text-gray-700 font-medium">
+      <li><a class="hover:text-red-600 transition" href="index.html">Home</a></li>
+      <li><a class="hover:text-red-600 transition" href="reservation.html">Reserve</a></li>
+      <li><a class="hover:text-red-600 transition" href="admin.html">Services</a></li>
+      <li><a class="hover:text-red-600 transition" href="#">Contact</a></li>
+      <li><a class="hover:text-red-600 transition" href="login.html">Login</a></li>
+    </ul>
+
+    <div class="md:hidden text-3xl cursor-pointer">☰</div>
+  </nav>
+
+  <!-- CONTACT SECTION -->
+  <main class="pt-32 pb-20 px-6 flex flex-col items-center">
+    <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">Contact Us</h1>
+    <p class="text-gray-700 max-w-2xl text-center mb-12">
+      Have questions, concerns, or feedback? We're here to help!  
+      Reach out to the ParkEase support team anytime.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl w-full">
+
+      <!-- CONTACT FORM -->
+      <form class="bg-white p-8 rounded-2xl shadow-lg flex flex-col gap-5">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-2">Send us a message</h2>
+
+        <div>
+          <label class="block text-gray-700 mb-1 font-medium">Full Name</label>
+          <input type="text" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600" placeholder="Your Name">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1 font-medium">Email</label>
+          <input type="email" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600" placeholder="you@example.com">
+        </div>
+
+        <div>
+          <label class="block text-gray-700 mb-1 font-medium">Message</label>
+          <textarea class="w-full p-3 border rounded-lg h-32 resize-none focus:outline-none focus:ring-2 focus:ring-red-600" placeholder="How can we assist you?"></textarea>
+        </div>
+
+        <button class="bg-red-700 text-white py-3 rounded-lg hover:bg-red-800 transition">
+          Send Message
+        </button>
+      </form>
+
+      <!-- CONTACT DETAILS -->
+      <div class="bg-white p-8 rounded-2xl shadow-lg">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Get in touch</h2>
+
+        <div class="flex flex-col gap-5 text-gray-700">
+
+          <div class="flex items-start gap-4">
+            <div class="text-3xl">📍</div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Office Location</h3>
+              <p>ParkEase Support Center, Campus Road, PH</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="text-3xl">📞</div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Phone</h3>
+              <p>+63 912 345 6789</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="text-3xl">✉️</div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Email</h3>
+              <p>support@parkease.com</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4">
+            <div class="text-3xl">⏰</div>
+            <div>
+              <h3 class="font-semibold text-gray-900">Working Hours</h3>
+              <p>Mon – Fri, 8:00 AM – 5:00 PM</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="w-full text-center py-6 bg-gray-200 text-gray-700 mt-auto shadow-inner">
+    © 2025 ParkEase | All Rights Reserved
+  </footer>
+
+</body>
+</html>

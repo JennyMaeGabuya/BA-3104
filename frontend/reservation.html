@@ -5,9 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ParkEase — University Parking Reservation</title>
   <meta name="description" content="ParkEase — Simple reservation page for University Parking System" />
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v8.2.0/ol.css">
   <script src="./src/reservation.js" type="module"></script>
   <script src="./src/summary.js" type="module"></script>
   <script src="./src/cancel-reservation.js" type="module"></script>
+  <script src="./src/utils/utils.js" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ol@v8.2.0/dist/ol.js"></script>
+
+  <!-- MAP INIT SCRIPT -->
+  <script type="module" src="./src/map-init.js"></script>
 </head>
 
 <body class="m-0 bg-(--bg) text-[#0f1724] font-inter">
@@ -15,48 +23,46 @@
   <div class="max-w-[980px] mx-auto my-9 p-5">
     
     <!-- Header -->
-  <header class="flex items-center justify-between mb-4 p-4 bg-white shadow-md rounded-xl">
-    <!-- Logo & Title -->
-    <div class="flex items-center gap-4">
-      <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-blue-300 flex items-center justify-center text-white font-bold">
-        PE
+    <header class="flex items-center justify-between mb-4 p-4 bg-white shadow-md rounded-xl">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-blue-300 flex items-center justify-center text-white font-bold">
+          PE
+        </div>
+        <div>
+          <h1 class="text-xl font-semibold m-0">ParkEase</h1>
+          <p class="text-muted text-sm m-0">University Parking Reservation System</p>
+        </div>
       </div>
-      <div>
-        <h1 class="text-xl font-semibold m-0">ParkEase</h1>
-        <p class="text-muted text-sm m-0">University Parking Reservation System</p>
+
+      <!-- User dropdown -->
+      <div class="relative">
+        <div class="dropdown dropdown-end relative">
+          <label tabindex="0" class="btn btn-ghost flex items-center gap-6 rounded-full">
+            <span id="userName" class="text-sm font-medium">Juan Dela Cruz</span>
+            <span id="userStudentId" class="text-sm font-medium">23-63506</span>
+          </label>
+          <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-white rounded-box w-52 mt-2">
+            <li><a href="#">Profile</a></li>
+            <li><a href="#">Settings</a></li>
+            <li><hr class="my-1 border-gray-200"></li>
+            <li><a id="logoutButton" href="" class="text-red-600">Logout</a></li>
+          </ul>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <!-- User Info -->
-    <div class="relative">
-          <!-- Dropdown Menu -->
-      <div class="dropdown dropdown-end relative">
-        <label tabindex="0" class="btn btn-ghost flex items-center gap-6 rounded-full ">
-          <!-- <img src="https://via.placeholder.com/32" alt="User Avatar" class="w-8 h-8 rounded-full"> -->
-          <span id="userName" class="text-sm font-medium">Juan Dela Cruz</span>
-          <span id="userStudentId" class="text-sm font-medium">23-63506</span>
-        </label>
-
-        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-white rounded-box w-52 mt-2">
-          <li><a href="#">Profile</a></li>
-          <li><a href="#">Settings</a></li>
-          <li><hr class="my-1 border-gray-200"></li>
-          <li><a id="logoutButton" href="" class="text-red-600">Logout</a></li>
-        </ul>
-      </div>
-    </div>
-  </header>
-
-    <!-- Main Card -->
+    <!-- Main -->
     <main class="bg-(--card) shadow-xl rounded-xl p-6">
       
       <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5">
 
-        <!-- Left Section -->
+        <!-- Left content -->
         <section>
 
           <h2 class="m-0 text-lg font-semibold">Create a Reservation</h2>
-          <p class="text-muted text-sm">Reserve a parking slot ahead of time. Fill in your details and choose a zone and slot.</p>
+          <p class="text-muted text-sm">
+            Reserve a parking slot ahead of time. Fill in your details and choose a zone and slot.
+          </p>
 
           <form id="reservationForm" novalidate class="mt-4 space-y-4">
 
@@ -76,7 +82,7 @@
             <!-- Row 2 -->
             <div class="flex gap-3">
               <div class="flex-1">
-                <label  class="text-muted text-sm">Vehicle plate</label>
+                <label class="text-muted text-sm">Vehicle plate</label>
                 <input id="vPlate" name="vPlate" class="w-full p-2 border rounded-md" placeholder="ABC-1234" required />
               </div>
 
@@ -118,6 +124,14 @@
               </select>
             </div>
 
+            <!-- Parking Map -->
+            <div class="mt-4">
+              <label class="text-muted text-sm">Campus Map (Select a Zone)</label>
+
+              <!-- 🌍 MAP CONTAINER -->
+              <div id="parkingMap" class="w-full h-80 mt-2 rounded-lg shadow-md border"></div>
+            </div>
+
             <!-- Spots -->
             <div>
               <label class="text-muted text-sm">Pick a parking spot</label>
@@ -140,7 +154,7 @@
 
           <hr class="my-4 border-gray-200" />
 
-          <!-- Quick Rules -->
+          <!-- Quick rules -->
           <section>
             <h3 class="font-semibold mb-2">Quick rules</h3>
             <ul class="text-muted text-sm list-disc pl-5 space-y-1">
@@ -162,13 +176,14 @@
             </div>
 
             <div class="summary-buttons flex gap-2 mt-3">
-              <button id="confirmBtn" disabled class=" bg-(--accent) text-white px-3 py-2 rounded-md opacity-50">
+              <button id="confirmBtn" disabled class="bg-(--accent) text-white px-3 py-2 rounded-md opacity-50">
                 Confirm & Save
               </button>
 
               <button id="downloadBtn" class="border border-(--accent) text-(--accent) px-3 py-2 rounded-md opacity-50">
                 Download
               </button>
+
               <button 
                 id="cancelReservationBtn" 
                 class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 hidden">
@@ -193,39 +208,25 @@
   </div>
 
   <!-- Modal -->
-<div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 animate-fadeIn ">
-    <!-- Header -->
-    <h3 class="text-xl font-bold text-gray-800 mb-4">Confirm Reservation</h3>
+  <div id="modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 animate-fadeIn">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Confirm Reservation</h3>
+      <div id="modalContent" class="text-gray-600 text-sm space-y-2"></div>
 
-    <!-- Modal Content -->
-    <div id="modalContent" class="text-gray-600 text-sm space-y-2">
-      <!-- Filled dynamically via JS -->
-    </div>
-
-    <!-- Buttons -->
-    <div class="flex justify-end gap-3 mt-6">
-      <button id="modalCancel" 
-              class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition">
-        Cancel
-      </button>
-      <button id="modalConfirm" 
-              class="px-4 py-2 rounded-lg bg-(--accent) text-white font-semibold hover:bg-amber-600 transition">
-        Confirm
-      </button>
+      <div class="flex justify-end gap-3 mt-6">
+        <button id="modalCancel" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition">Cancel</button>
+        <button id="modalConfirm" class="px-4 py-2 rounded-lg bg-(--accent) text-white font-semibold hover:bg-amber-600 transition">Confirm</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Existing Reservation Modal -->
-<div id="existingReservationModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-  <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 animate-fadeIn">
-    <h3 class="text-xl font-bold text-gray-800 mb-4">Your Current Reservation</h3>
-    <div id="existingReservationContent" class="text-gray-600 text-sm space-y-2">
-      <!-- Populated dynamically by JS -->
+  <!-- Existing Reservation Modal -->
+  <div id="existingReservationModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl w-[90%] max-w-md p-6 animate-fadeIn">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">Your Current Reservation</h3>
+      <div id="existingReservationContent" class="text-gray-600 text-sm space-y-2"></div>
     </div>
   </div>
-</div>
+
 </body>
-<script type="module" src="./src/utils/utils.js"></script>
 </html>

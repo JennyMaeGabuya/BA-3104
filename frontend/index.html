@@ -4,76 +4,107 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ParkEase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+    }
+  </style>
 </head>
 
 <body class="bg-gray-100">
   <main class="flex flex-col w-full items-center min-h-screen">
 
-    <!-- navi? -->
-    <nav class="flex w-full items-center justify-between px-10 md:px-40 py-5 bg-white shadow">
-      <div class="text-gray-700 text-2xl font-bold">ParkEase</div>
+    <!-- NAVIGATION -->
+    <nav class="flex w-full fixed top-0 left-0 items-center justify-between px-8 md:px-32 py-5 bg-white/90 backdrop-blur shadow z-50">
+      <div class="text-gray-800 text-3xl font-extrabold tracking-wide">ParkEase</div>
 
       <ul class="hidden md:flex gap-10 items-center text-gray-700 font-medium">
-        <li><a class="hover:text-red-600" href="#">Home</a></li>
-        <li><a class="hover:text-red-600" id="goReservation" href="reservation.html">Reserve Parking Now</a></li>
-        <li><a class="hover:text-red-600" href="admin.html">Services</a></li>
-        <li><a class="hover:text-red-600" href="#">Contact</a></li>
-        <li><a class="hover:text-red-600" href="login.html">Login</a></li>
+        <li><a class="hover:text-red-600 transition" href="#">Home</a></li>
+        <li><a class="hover:text-red-600 transition" id="goReservation" href="reservation.html">Reserve Parking Now</a></li>
+        <li><a class="hover:text-red-600 transition" href="admin.html">Services</a></li>
+        <li><a class="hover:text-red-600 transition" href="contact.html">Contact</a></li>
+        <li><a class="hover:text-red-600 transition" href="login.html">Login</a></li>
       </ul>
 
       <div class="md:hidden text-3xl cursor-pointer">☰</div>
     </nav>
 
-    <!-- heroooooooooo! -->
-    <section class="flex flex-col items-center text-center mt-20 px-5">
-      <h1 class="text-4xl md:text-6xl font-bold mb-4 text-gray-800">Welcome to ParkEase</h1>
-      <p class="text-gray-600 text-lg md:text-xl max-w-2xl">
-        Tired of not getting any parking inside the campus?
+    <!-- HERO SECTION -->
+    <section class="flex flex-col items-center text-center mt-36 px-5 animate-fadeIn">
+      <h1 class="text-4xl md:text-6xl font-extrabold mb-4 text-gray-900 leading-tight">
+        Welcome to <span class="text-red-700">ParkEase</span>
+      </h1>
+
+      <p class="text-gray-700 text-lg md:text-xl max-w-2xl">
+        No more driving around the campus hoping for a parking spot.
       </p>
+
       <a id="goReservationButton" href="reservation.html">
-        <button  class="bg-red-700 text-white mt-6 px-8 py-3 rounded-lg hover:bg-red-800">
+        <button class="bg-red-700 text-white mt-6 px-10 py-3 rounded-lg shadow-md hover:bg-red-800 hover:scale-105 transition duration-300">
           Reserve Now!
         </button>
       </a>
     </section>
 
-    <!-- mga features -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 px-10 md:px-40 mb-20 w-full max-w-6xl">
+    <!-- FEATURES -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 px-10 md:px-40 mb-20 w-full max-w-7xl">
 
-      <div class="bg-white p-6 rounded-xl shadow text-center">
-        <h3 class="text-xl text-gray-700 font-semibold mb-2">Fast</h3>
-        <p class="text-gray-600">Optimized layout for quick loading and smooth performance.</p>
-      </div>
+  <div class="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition duration-300 text-center">
+    <h3 class="text-2xl text-gray-800 font-semibold mb-3">📊 Real-Time Availability</h3>
+    <p class="text-gray-600">See which parking slots are open before you arrive — updated instantly.</p>
+  </div>
 
-      <div class="bg-white p-6 rounded-xl shadow text-center">
-        <h3 class="text-xl text-gray-700 font-semibold mb-2">Responsive</h3>
-        <p class="text-gray-600">Looks great on all devices — mobile, tablet, and desktop.</p>
-      </div>
+  <div class="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition duration-300 text-center">
+    <h3 class="text-2xl text-gray-800 font-semibold mb-3">🛡️ Penalty Prevention</h3>
+    <p class="text-gray-600">Avoid penalties — the system ensures no double-booking or unauthorized parking.</p>
+  </div>
 
-      <div class="bg-white p-6 rounded-xl shadow text-center">
-        <h3 class="text-xl text-gray-700 font-semibold mb-2">Customizable</h3>
-        <p class="text-gray-600">Easily modify colors, layout, text, and components.</p>
-      </div>
+  <div class="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition duration-300 text-center">
+    <h3 class="text-2xl text-gray-800 font-semibold mb-3">📍 Smart Navigation</h3>
+    <p class="text-gray-600">Get guided directions to your assigned parking slot for hassle-free parking.</p>
+  </div>
 
-    </section>
+  <div class="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition duration-300 text-center">
+    <h3 class="text-2xl text-gray-800 font-semibold mb-3">🧾 Digital Receipt</h3>
+    <p class="text-gray-600">Automatically receive a digital parking receipt and track your history.</p>
+  </div>
+
+  <div class="bg-white p-8 rounded-2xl shadow hover:shadow-xl transition duration-300 text-center">
+    <h3 class="text-2xl text-gray-800 font-semibold mb-3">🖥️ Admin Monitoring</h3>
+    <p class="text-gray-600">Admins can track usage, verify user reservations, and manage parking zones.</p>
+  </div>
+
+</section>
+
   </main>
 
-  <!-- paa -->
-  <footer class="w-full text-center py-5 bg-gray-200 text-gray-700">
+  <!-- FOOTER -->
+  <footer class="w-full text-center py-6 bg-gray-200 text-gray-700 mt-auto shadow-inner">
     © 2025 ParkEase | All Rights Reserved
   </footer>
+
   <!-- MODAL -->
   <input type="checkbox" id="authBlockModal" class="modal-toggle" />
-  <div class="modal hidden">
-    <div class="modal-box">
-      <h3 class="text-lg font-bold">Unauthorized</h3>
-      <p class="py-4">You must log in before accessing reservations. Redirecting you to login page.</p>
+
+  <div class="modal fixed inset-0 bg-black/60 hidden justify-center items-center" id="authModalContainer">
+    <div class="modal-box bg-white rounded-xl shadow-xl p-6 max-w-sm w-full">
+      <h3 class="text-lg font-bold text-black">Unauthorized</h3>
+      <p class="py-4 text-black">You must log in before accessing reservations.<br>Redirecting you to login page.</p>
+
       <div class="modal-action">
-        <label for="authBlockModal" class="btn">Okay</label>
+        <label for="authBlockModal" class="btn bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+          Okay
+        </label>
       </div>
     </div>
   </div>
-</body>
+
+  <!-- SCRIPT -->
   <script type="module" src="/src/main.js"></script>
 
+</body>
 </html>

@@ -99,9 +99,3 @@ button:focus-visible {
   }
 } */
 
-@media (max-width : 520px) {
-  .row3 {
-    display:  grid;
-    grid-template-columns: repeat(1 , 1fr);
-  } 
-}
