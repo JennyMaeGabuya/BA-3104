@@ -12,7 +12,11 @@
     <div class="container">
         <div class="form-wrapper">
             <div class="form-header">
-                <div class="logo">BSU</div>
+                <div class="logo">
+                    <div class="image">
+                        <img src="/booking-management/image/bat.png" alt="BSU Logo">
+                    </div>
+                </div>
                 <h1>BatStateU Clinic</h1>
                 <p>JPLPC - Malvar Campus</p>
             </div>

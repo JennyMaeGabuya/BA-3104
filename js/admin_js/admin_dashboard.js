@@ -11,11 +11,26 @@ function formatTime(timeString) {
     return `${hour12}:${String(minute).padStart(2, '0')} ${ampm}`;
 }
 
+function formatStatusLabel(status) {
+    switch (status) {
+        case "rescheduled_pending":
+            return "Rescheduled";
+        case "pending":
+            return "Pending";
+        case "completed":
+            return "Completed";
+        case "cancelled":
+            return "Cancelled";
+        default:
+            return status;
+    }
+}
+
 let appointments = [];
 let medicalRecords = [];
-let cancelledAppointments = []; // NEW: separate list for cancelled
+let cancelledAppointments = [];
 let currentAppointmentId = null;
-
+let rescheduledAppointments = [];
 // --------------------------------------------------------------
 // INIT
 // --------------------------------------------------------------
@@ -36,8 +51,12 @@ function init() {
                     email: row.email,
                     age: row.age,
                     gender: row.gender,
+                    address: row.address,
+                    dob: row.date_of_birth,
+                    doctorNote: row.doctor_note || "",   // <‑‑ add this
                     status: row.status
                 }));
+
 
                 saveData();
                 loadAppointments();
@@ -45,6 +64,17 @@ function init() {
             }
         })
         .catch(err => console.error("Error loading appointments:", err));
+
+    // Fetch medical records from DB
+    fetch("/booking-management/controllers/admin_controllers/get_medical_records.php")
+        .then(res => res.json())
+        .then(res => {
+            if (res.success) {
+                medicalRecords = res.data;
+                saveData();
+                loadMedicalRecords();
+            }
+        });
 
     // Load medical records from localStorage (client-side only)
     loadMedicalRecords();
@@ -76,167 +106,238 @@ function saveData() {
     localStorage.setItem('adminAppointments', JSON.stringify(appointments));
     localStorage.setItem('medicalRecords', JSON.stringify(medicalRecords));
 }
-
-// --------------------------------------------------------------
-// LOAD APPOINTMENTS TABLE (NO MORE ACCEPT/DECLINE)
-// --------------------------------------------------------------
 function loadAppointments() {
-    const tbody = document.getElementById('appointmentTable');
+    const container = document.getElementById("adminAppointmentCards");
     const count = document.getElementById('appointmentCount');
 
+    container.innerHTML = "";
     count.textContent = appointments.length;
 
     if (appointments.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No appointments found</td></tr>';
+        container.innerHTML = `<div class="empty-state">No appointments found</div>`;
         return;
     }
 
-    tbody.innerHTML = appointments.map(apt => {
-        const appointmentDate = new Date(apt.date);
-        const formattedDate = appointmentDate.toLocaleDateString('en-US', {
+    appointments.forEach(apt => {
+        const dateObj = new Date(apt.date);
+        const formattedDate = dateObj.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
         });
 
-        let statusBadge = '';
-        let statusActions = '';
+        container.innerHTML += `
+            <div class="admin-apt-card">
 
-        // We no longer manually accept/decline.
-        // Treat all non-completed as "Scheduled" / "Rescheduled".
-        if (apt.status === 'completed') {
-            statusBadge = `<span class="badge badge-completed">Completed</span>`;
-            statusActions = '';
-        } else if (apt.status === 'rescheduled_pending') {
-            statusBadge = `<span class="badge badge-warning">Rescheduled</span>`;
-            statusActions = `
-                <button class="btn btn-sm btn-primary" onclick="openNoteModal(${apt.id})">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Add Note
-                </button>
-            `;
-        } else {
-            // pending / accepted → both treated as scheduled
-            statusBadge = `<span class="badge badge-accepted">Scheduled</span>`;
-            statusActions = `
-                <button class="btn btn-sm btn-primary" onclick="openNoteModal(${apt.id})">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    Add Note
-                </button>
-            `;
-        }
+                <!-- ALWAYS VISIBLE -->
+                <div class="admin-apt-header">
+                    <h3 class="admin-apt-name">${apt.fullName}</h3>
+                    <button class="toggle-btn" onclick="toggleDetails(${apt.id})" id="toggle-${apt.id}">
+                        Show More ▼
+                    </button>
+                </div>
+
+                <!-- DETAILS (HIDDEN INITIALLY) -->
+                <div class="admin-apt-details" id="details-${apt.id}">
+                    
+                    <div class="two-column-card">
+
+                        <div class="left-info">
+                            <p><strong>Date:</strong> ${formattedDate}</p>
+                            <p><strong>Time:</strong> ${apt.time}</p>
+                            <p><strong>Reason:</strong> ${apt.reason}</p>
+                            <p><strong>Contact:</strong> ${apt.contactNo}</p>
+                            <p><strong>Email:</strong> ${apt.email}</p>
+                            <p><strong>Age:</strong> ${apt.age}</p>
+                            <p><strong>Gender:</strong> ${apt.gender}</p>
+                            <p><strong>Address:</strong> ${apt.address}</p>
+                            <p><strong>DOB:</strong> ${apt.dob}</p>
+                        </div>
+
+                        <div class="right-panel">
+
+                            <div class="status-box ${apt.status === 'completed' ? 'status-completed' : 'status-pending'}">
+                                <strong>Status:</strong> ${formatStatusLabel(apt.status)}
+                            </div>
+
+                            <h4>Doctor’s Note</h4>
+                           <textarea class="doctor-note-textarea" id="doctorNote-${apt.id}">${(apt.doctorNote || "").trim()}</textarea>
+
+
+                            <div class="admin-actions">
+                                <button class="btn-success" onclick="completeAppointment(${apt.id})">Complete</button>
+                                <button class="btn-primary" onclick="addNoteFromCard(${apt.id})">Add Note</button>
+                                 <button class="btn-danger" onclick="cancelAppointmentAdmin(${apt.id})">Cancel</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+    });
+}
+
+
+function renderAdminAppointments() {
+    const container = document.getElementById("adminAppointmentList");
+    const countEl = document.getElementById("adminAppointmentCount");
+    if (!container) return;
+
+    const list = appointments.filter(a => a.status !== "completed");
+    if (countEl) countEl.textContent = list.length;
+
+    if (list.length === 0) {
+        container.innerHTML = `
+            <div class="admin-empty-state">
+                No appointments found.
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = list.map(apt => {
+        const d = new Date(apt.date);
+        const formattedDate = d.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        });
+
+        const safeNote = (apt.doctorNote || "").replace(/</g, "&lt;");
 
         return `
-            <tr>
-                <td>${formattedDate}</td>
-                <td>${apt.time}</td>
-                <td>${apt.reason}</td>
-                <td><strong>${apt.fullName}</strong></td>
-                <td>${apt.contactNo}</td>
-                <td>${apt.email}</td>
-                <td>${apt.age}</td>
-                <td>${apt.gender}</td>
-                <td>
-                    <div class="status-cell">
-                        ${statusBadge}
-                        ${statusActions}
+            <div class="admin-apt-row">
+                <div class="admin-apt-left">
+                    <h3>${apt.fullName}</h3>
+
+                    <p><strong>Date:</strong> ${formattedDate}</p>
+                    <p><strong>Time:</strong> ${apt.time}</p>
+                    <p><strong>Reason:</strong> ${apt.reason}</p>
+
+                    <p><strong>Contact:</strong> ${apt.contactNo}</p>
+                    <p><strong>Email:</strong> ${apt.email}</p>
+                    <p><strong>Age:</strong> ${apt.age}</p>
+                    <p><strong>Gender:</strong> ${apt.gender}</p>
+                    <p><strong>Address:</strong> ${apt.address}</p>
+                    <p><strong>DOB:</strong> ${apt.dob}</p>
+                </div>
+
+                <div class="admin-apt-right">
+                    <div class="admin-status-chip">
+                        Status: ${formatStatusLabel(apt.status)}
                     </div>
-                </td>
-            </tr>
+
+                    <h4 class="admin-note-title">Doctor’s Note</h4>
+                    <textarea
+                        id="doctorNote-${apt.id}"
+                        class="admin-note-textarea"
+                        placeholder="Add note here...">${safeNote}</textarea>
+
+                    <div class="admin-actions">
+                        <button class="btn-success" onclick="completeAppointment(${apt.id})">
+                            Complete
+                        </button>
+                        <button class="btn-primary" onclick="saveNoteFromCard(${apt.id})">
+                            Add Note
+                        </button>
+                    </div>
+                </div>
+            </div>
         `;
-    }).join('');
+    }).join("");
+}
+
+async function saveNoteFromCard(id) {
+    const el = document.getElementById(`doctorNote-${id}`);
+    if (!el) return;
+    const note = el.value.trim();
+
+    const fd = new FormData();
+    fd.append("appointment_id", id);
+    fd.append("note", note);
+
+    const res = await fetch("/booking-management/controllers/admin_controllers/add_doctor_note.php", {
+        method: "POST",
+        body: fd
+    });
+    const data = await res.json();
+    alert(data.msg);
+
+    if (data.success) {
+        const apt = appointments.find(a => a.id === id);
+        if (apt) apt.doctorNote = note;
+        renderAdminAppointments();
+    }
 }
 
 // --------------------------------------------------------------
 // NOTIFICATIONS: CANCELLED + RESCHEDULED
 // --------------------------------------------------------------
 async function loadNotifications() {
+
     try {
         const res = await fetch("/booking-management/controllers/admin_controllers/get_cancelled_admin.php");
-
         const json = await res.json();
-
-        if (json.success && Array.isArray(json.data)) {
-            cancelledAppointments = json.data.map(row => ({
-                id: row.id,
+        cancelledAppointments = (json.success && Array.isArray(json.data))
+            ? json.data.map(row => ({
+                notifId: row.notif_id,
+                refId: row.ref_id,
                 date: row.date,
                 time: formatTime(row.time),
                 fullName: row.fullName,
                 email: row.email,
-                statusLabel: 'Cancelled'
-            }));
-        } else {
-            cancelledAppointments = [];
-        }
+                statusLabel: "Cancelled"
+            }))
+            : [];
     } catch (err) {
-        console.error("Error loading cancelled appointments:", err);
+        console.error("Error loading cancelled notifications:", err);
         cancelledAppointments = [];
     }
 
-    // 2) Rescheduled appointments: from active appointments list
-    const rescheduledAppointments = appointments
-        .filter(apt => apt.status === 'rescheduled_pending')
-        .map(apt => ({
-            ...apt,
-            statusLabel: 'Rescheduled'
-        }));
+    try {
+        const res2 = await fetch("/booking-management/controllers/admin_controllers/get_reschedule_admin.php");
+        const json2 = await res2.json();
+        rescheduledAppointments = (json2.success && Array.isArray(json2.data))
+            ? json2.data.map(row => ({
+                notifId: row.notif_id,
+                refId: row.ref_id,
+                date: row.date,
+                time: formatTime(row.time),
+                fullName: row.fullName,
+                email: row.email,
+                statusLabel: "Rescheduled"
+            }))
+            : [];
+    } catch (err) {
+        console.error("Error loading rescheduled notifications:", err);
+        rescheduledAppointments = [];
+    }
 
-    const canceledCount = document.getElementById('canceledCount');
-    const rescheduledCount = document.getElementById('rescheduledCount');
-
+    const canceledCount = document.getElementById("canceledCount");
+    const rescheduledCount = document.getElementById("rescheduledCount");
     if (canceledCount) canceledCount.textContent = cancelledAppointments.length;
     if (rescheduledCount) rescheduledCount.textContent = rescheduledAppointments.length;
 
-    updateNotificationTable('canceledTable', cancelledAppointments);
-    updateNotificationTable('rescheduledTable', rescheduledAppointments);
+    renderNotificationCards("canceledNotifications", cancelledAppointments);
+    renderNotificationCards("rescheduledNotifications", rescheduledAppointments);
+
+    // Total notifications
+    const totalAdminNotifications =
+        cancelledAppointments.length + rescheduledAppointments.length;
+
+    // Update sidebar badge
+    const sidebarBadge = document.getElementById("adminNotifCount");
+    if (sidebarBadge) sidebarBadge.textContent = totalAdminNotifications > 0 ? totalAdminNotifications : "";
+
+    // Update topbar badge
+    const topBadge = document.getElementById("adminNotifCountTop");
+    if (topBadge) topBadge.textContent = totalAdminNotifications > 0 ? totalAdminNotifications : "";
+
 }
 
-// Update notification table
-function updateNotificationTable(tableId, rows) {
-    const tbody = document.getElementById(tableId);
-    if (!tbody) return;
-
-    if (!rows || rows.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No appointments found</td></tr>';
-        return;
-    }
-
-    tbody.innerHTML = rows.map(apt => {
-        const appointmentDate = new Date(apt.date);
-        const formattedDate = appointmentDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-
-        const label = apt.statusLabel || 'Notification';
-        const isCancelled = label === 'Cancelled';
-        const badgeClass = isCancelled ? 'badge-declined' : 'badge-warning';
-
-        return `
-            <tr>
-                <td><strong>${apt.fullName}</strong></td>
-                <td>${formattedDate}</td>
-                <td>${apt.time}</td>
-                <td>${apt.email}</td>
-                <td>
-                    <span class="badge ${badgeClass}">
-                        ${label}
-                    </span>
-                </td>
-                <td>
-                    <button class="btn btn-sm btn-danger" onclick="deleteNotification(${apt.id}, '${label}')">
-                        ✖ Delete
-                    </button>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
 
 // --------------------------------------------------------------
 // MEDICAL RECORDS (unchanged)
@@ -245,16 +346,19 @@ function loadMedicalRecords() {
     const tbody = document.getElementById('medicalRecordsTable');
     const count = document.getElementById('recordsCount');
 
+    if (!tbody || !count) return;
+
     count.textContent = medicalRecords.length;
 
     if (medicalRecords.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No medical records found</td></tr>';
+        tbody.innerHTML =
+            '<tr><td colspan="11" class="empty-state">No medical records found</td></tr>';
         return;
     }
 
-    tbody.innerHTML = medicalRecords.map(record => {
-        const recordDate = new Date(record.date);
-        const formattedDate = recordDate.toLocaleDateString('en-US', {
+    tbody.innerHTML = medicalRecords.map(r => {
+        const d = new Date(r.date);
+        const formattedDate = d.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
@@ -263,10 +367,21 @@ function loadMedicalRecords() {
         return `
             <tr>
                 <td>${formattedDate}</td>
-                <td>${record.time}</td>
-                <td><strong>${record.fullName}</strong></td>
-                <td>${record.reason}</td>
-                <td>${record.doctorNote}</td>
+                <td>${r.time}</td>
+                <td><strong>${r.full_name}</strong></td>
+                <td>${r.contact_no || ''}</td>
+                <td>${r.email || ''}</td>
+                <td>${r.age ?? ''}</td>
+                <td>${r.gender || ''}</td>
+                <td>${r.address || ''}</td>
+                <td>${r.date_of_birth || ''}</td>
+                <td>${r.reason || ''}</td>
+             <td onclick="openNoteView('${(r.doctor_note || '').replace(/'/g, "\\'")}')">
+    ${(r.doctor_note || '').length > 40
+                ? r.doctor_note.substring(0, 40) + '...'
+                : r.doctor_note || ''}
+</td>
+
             </tr>
         `;
     }).join('');
@@ -319,40 +434,63 @@ function closeNoteModal() {
     currentAppointmentId = null;
 }
 
-function saveDoctorNote() {
+async function saveDoctorNote() {
     if (!currentAppointmentId) return;
+    const note = document.getElementById("doctorNote").value.trim();
 
-    const appointment = appointments.find(apt => apt.id === currentAppointmentId);
-    const note = document.getElementById('doctorNote').value.trim();
+    const fd = new FormData();
+    fd.append("appointment_id", currentAppointmentId);
+    fd.append("note", note);
 
-    if (!note) {
-        alert('Please enter a doctor\'s note.');
-        return;
-    }
+    const res = await fetch("/booking-management/controllers/admin_controllers/add_doctor_note.php", {
+        method: "POST",
+        body: fd
+    });
+    const data = await res.json();
+    alert(data.msg);
 
-    if (appointment) {
-        const medicalRecord = {
-            id: medicalRecords.length + 1,
-            date: appointment.date,
-            time: appointment.time,
-            fullName: appointment.fullName,
-            reason: appointment.reason,
-            doctorNote: note
-        };
-
-        medicalRecords.push(medicalRecord);
-
-        // Mark as completed (local only)
-        appointment.status = 'completed';
-
+    if (data.success) {
+        const apt = appointments.find(a => a.id === currentAppointmentId);
+        if (apt) apt.doctorNote = note;
         saveData();
         loadAppointments();
-        loadMedicalRecords();
-        loadNotifications();
-        closeNoteModal();
-
-        alert(`Medical record created for ${appointment.fullName}.`);
     }
+}
+
+async function completeAppointment(appointmentId) {
+    if (!confirm("Mark this appointment as completed?")) return;
+
+    const fd = new FormData();
+    fd.append("appointment_id", appointmentId);
+
+    try {
+        const res = await fetch("/booking-management/controllers/admin_controllers/complete_appointment.php", {
+            method: "POST",
+            body: fd
+        });
+        const data = await res.json();
+        alert(data.msg);
+
+        if (data.success) {
+            appointments = appointments.filter(a => a.id !== appointmentId);
+            saveData();
+            loadAppointments();
+            loadNotifications();
+            init();
+        }
+
+    } catch (err) {
+        console.error("Complete error:", err);
+        alert("Error completing appointment.");
+    }
+}
+
+function addNoteFromCard(id) {
+    currentAppointmentId = id;
+    const noteEl = document.getElementById(`doctorNote-${id}`);
+    if (!noteEl) return;
+    document.getElementById("doctorNote").value = noteEl.value; // if you still use modal
+    saveDoctorNote();
 }
 
 // --------------------------------------------------------------
@@ -386,18 +524,194 @@ window.addEventListener('click', function (event) {
 });
 
 // --------------------------------------------------------------
-// DELETE NOTIFICATION (ONLY FROM VIEW, NOT DB)
-// --------------------------------------------------------------
-function deleteNotification(id, type) {
-    if (!confirm("Delete this notification from the list?")) return;
+document.addEventListener('DOMContentLoaded', init);
 
-    if (type === 'Cancelled') {
-        cancelledAppointments = cancelledAppointments.filter(a => a.id !== id);
+
+function toggleDetails(id) {
+    const section = document.getElementById(`details-${id}`);
+    const btn = document.getElementById(`toggle-${id}`);
+
+    if (section.style.display === "block") {
+        section.style.display = "none";
+        btn.textContent = "Show More ▼";
+    } else {
+        section.style.display = "block";
+        btn.textContent = "Show Less ▲";
     }
-    // For rescheduled, we don't remove from DB or appointments; just refresh list
-    loadNotifications();
-    alert("Notification removed.");
 }
 
-// --------------------------------------------------------------
-document.addEventListener('DOMContentLoaded', init);
+
+function openNoteView(noteText) {
+    document.getElementById("noteViewText").textContent = noteText;
+    document.getElementById("noteViewModal").classList.add("active");
+}
+
+function closeNoteViewModal() {
+    document.getElementById("noteViewModal").classList.remove("active");
+}
+
+
+function renderNotificationCards(listId, items) {
+    const container = document.getElementById(listId);
+    if (!container) return;
+
+    if (!items || !items.length) {
+        container.innerHTML = `<div class="empty-state">No notifications</div>`;
+        return;
+    }
+
+    container.innerHTML = items.map(n => {
+        const d = new Date(n.date);
+        const dateFormatted = d.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        });
+
+        const icon = n.statusLabel === "Cancelled" ? " " : " ";
+        const title = n.statusLabel === "Cancelled"
+            ? "Appointment Cancelled"
+            : "Appointment Rescheduled";
+
+        return `
+            <div class="notification-card" id="notif-${n.notifId}">
+                <div class="notif-icon">${icon}</div>
+                <div class="notif-content">
+                    <h4>${title}</h4>
+                    <p><strong>${n.fullName}</strong> ${n.statusLabel === "Cancelled" ? "cancelled" : "rescheduled"
+            } their appointment.</p>
+                    <span class="notif-date">${dateFormatted} • ${n.time}</span>
+                </div>
+                <button class="notif-delete" onclick="deleteNotification(${n.notifId}, '${n.statusLabel}')">
+                    Delete
+                </button>
+            </div>
+        `;
+    }).join("");
+}
+
+async function deleteNotification(notifId, type) {
+    const card = event?.target?.closest(".notification-card");
+    if (card) {
+        card.classList.add("removing");
+        event.target.disabled = true;
+    }
+
+    const fd = new FormData();
+    fd.append("id", notifId);
+    fd.append("type", type);
+
+    const res = await fetch("/booking-management/controllers/admin_controllers/delete_notification.php", {
+        method: "POST",
+        body: fd
+    });
+
+    let data;
+    try { data = await res.json(); } catch { data = { success: false }; }
+
+    if (!data.success) {
+        if (card) card.classList.remove("removing");
+        if (event?.target) event.target.disabled = false;
+        alert(data.msg || "Failed to delete notification.");
+        return;
+    }
+
+    // CANCELLED
+    if (type === "cancelled") {
+        cancelledAppointments = cancelledAppointments.filter(
+            n => Number(n.notifId) !== Number(notifId)
+        );
+
+        renderNotificationCards("canceledNotifications", cancelledAppointments);
+
+        const canceledCount = document.getElementById("canceledCount");
+        if (canceledCount) canceledCount.textContent = cancelledAppointments.length;
+
+        return;
+    }
+
+    // RESCHEDULED
+    if (type === "rescheduled") {
+        rescheduledAppointments = rescheduledAppointments.filter(
+            n => Number(n.notifId) !== Number(notifId)
+        );
+
+        renderNotificationCards("rescheduledNotifications", rescheduledAppointments);
+
+        const rescheduledCount = document.getElementById("rescheduledCount");
+        if (rescheduledCount) rescheduledCount.textContent = rescheduledAppointments.length;
+
+        return;
+    }
+}
+
+async function cancelAppointmentAdmin(appointmentId) {
+    if (!confirm("Cancel this appointment? The patient will be notified.")) return;
+
+    const fd = new FormData();
+    fd.append("appointment_id", appointmentId);
+
+    const res = await fetch("/booking-management/controllers/admin_controllers/cancel_appointment_admin.php", {
+        method: "POST",
+        body: fd
+    });
+
+    let data;
+    try { data = await res.json(); } catch { data = { success: false }; }
+
+    if (!data.success) {
+        alert(data.msg || "Failed to cancel appointment.");
+        return;
+    }
+
+    appointments = appointments.filter(a => Number(a.id) !== Number(appointmentId));
+    saveData();
+    loadAppointments();
+    loadNotifications();
+    alert("Appointment cancelled and patient notified.");
+}
+window.cancelAppointmentAdmin = cancelAppointmentAdmin;
+window.deleteNotification = deleteNotification;
+
+async function deleteAllNotifications(type) {
+    const label = type === "cancelled" ? "all cancelled notifications" : "all rescheduled notifications";
+    if (!confirm(`Delete ${label}?`)) return;
+
+    const fd = new FormData();
+    fd.append("type", type);
+
+    const res = await fetch(
+        "/booking-management/controllers/admin_controllers/delete_all_notifications.php",
+        { method: "POST", body: fd }
+    );
+
+    let data;
+    try { data = await res.json(); } catch { data = { success: false }; }
+
+    if (!data.success) {
+        alert(data.msg || "Failed to delete notifications.");
+        return;
+    }
+
+    if (type === "cancelled") {
+        cancelledAppointments = [];
+        renderNotificationCards("canceledNotifications", cancelledAppointments);
+        const canceledCount = document.getElementById("canceledCount");
+        if (canceledCount) canceledCount.textContent = 0;
+    } else {
+        rescheduledAppointments = [];
+        renderNotificationCards("rescheduledNotifications", rescheduledAppointments);
+        const rescheduledCount = document.getElementById("rescheduledCount");
+        if (rescheduledCount) rescheduledCount.textContent = 0;
+    }
+
+    const badge = document.getElementById("sidebarNotifCount");
+    if (badge) {
+        const total = cancelledAppointments.length + rescheduledAppointments.length;
+        badge.style.display = total > 0 ? "inline-flex" : "none";
+        badge.textContent = total;
+    }
+
+    alert("Deleted successfully.");
+}
+window.deleteAllNotifications = deleteAllNotifications;

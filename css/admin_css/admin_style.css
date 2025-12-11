@@ -26,6 +26,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background-color: maroon;
 }
 
 .logo-section {
@@ -38,7 +39,6 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2563eb, #4f46e5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -47,15 +47,20 @@ body {
     font-size: 0.875rem;
 }
 
+img {
+    width: 40px;
+    border-radius: 50%;
+}
+
 .logo-text h1 {
     font-size: 1.25rem;
-    color: #111827;
+    color: #FFFFFF;
     margin-bottom: 0.125rem;
 }
 
 .logo-text p {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: #FFFFFF;
 }
 
 .header-actions {
@@ -78,13 +83,13 @@ body {
 }
 
 .btn-icon:hover {
-    background: #f3f4f6;
+    background: #6FA53E;
 }
 
 .btn-icon svg {
     width: 20px;
     height: 20px;
-    color: #6b7280;
+    color: #FFFFFF;
 }
 
 /* Mobile Menu Toggle */
@@ -133,11 +138,14 @@ body {
 /* Main Layout */
 .main-layout {
     display: flex;
+    align-items: flex-start;
     min-height: calc(100vh - 73px);
 }
 
 /* Sidebar */
 .sidebar {
+    flex: 0 0 260px;
+    min-width: 240px;
     width: 260px;
     background: white;
     border-right: 1px solid #e5e7eb;
@@ -149,11 +157,9 @@ body {
     transition: transform 0.3s ease;
 }
 
-.sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0 1rem;
+.sidebar-nav,
+.nav-item {
+    width: 100%;
 }
 
 .nav-item {
@@ -184,19 +190,19 @@ body {
 }
 
 .nav-item.active {
-    background: #eff6ff;
-    color: #2563eb;
+    background: #e44a3f33;
+    color: #E44A3F
 }
 
 .nav-item.active svg {
-    color: #2563eb;
+    color: #E44A3F;
 }
 
-/* Main Content */
 .main-content {
     flex: 1;
+    min-width: 0;
     padding: 2rem;
-    overflow-y: auto;
+
 }
 
 .content-section {
@@ -312,7 +318,6 @@ body {
     background: #10b981;
 }
 
-/* Table */
 .table-wrapper {
     overflow-x: auto;
 }
@@ -385,33 +390,26 @@ body {
 .btn-sm {
     padding: 0.375rem 0.75rem;
     font-size: 0.75rem;
+    background-color: #CC2C2C;
+    color: #FFFFFF;
 }
 
-.btn-primary {
-    background: #2563eb;
-    color: white;
-}
 
-.btn-primary:hover {
-    background: #1d4ed8;
-}
-
-.btn-success {
-    background: #22c55e;
-    color: white;
-}
-
-.btn-success:hover {
-    background: #16a34a;
-}
 
 .btn-danger {
-    background: #ef4444;
-    color: white;
+    background: #CC2C2C;
+    color: #FFFFFF;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: 0.50s;
+    font-weight: 600;
 }
 
 .btn-danger:hover {
-    background: #dc2626;
+    background: #fee2e2;
+    color: #CC2C2C;
 }
 
 .btn-outline {
@@ -424,7 +422,6 @@ body {
     background: #f3f4f6;
 }
 
-/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -547,6 +544,7 @@ body {
     .main-content {
         padding: 1.5rem;
     }
+
 }
 
 /* Tablet and Mobile - Sidebar becomes a slide-in menu */
@@ -559,6 +557,13 @@ body {
         display: flex;
         order: -1;
         margin-right: 0.5rem;
+    }
+
+    .right-panel {
+        width: 40%;
+        background: #f8f9fc;
+        padding: 20px;
+        border-radius: 10px;
     }
 
     .main-layout {
@@ -620,6 +625,8 @@ body {
     .modal-content {
         width: 95%;
     }
+
+
 }
 
 @media (max-width: 480px) {
@@ -653,4 +660,405 @@ body {
     .status-actions {
         flex-direction: column;
     }
+
+}
+
+
+/* --- CARD STYLING --- */
+.appointment-card-style {
+    background: #ffffff;
+    padding: 20px 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    margin-bottom: 20px;
+    transition: 0.2s ease-in-out;
+    margin-top: 30px;
+}
+
+.appointment-card-style:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.10);
+}
+
+/* Title */
+.appointment-card-style h4 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #1a1a1a;
+}
+
+/* Text details */
+.appointment-card-style p {
+    font-size: 15px;
+    margin: 3px 0;
+    color: #4a4a4a;
+}
+
+.appointment-card-style strong {
+    color: #1e1e1e;
+}
+
+/* Action Buttons Row */
+.admin-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+/* --- BUTTONS --- */
+.btn-success {
+    background: #22c55e;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: 0.30s;
+    font-weight: 600;
+}
+
+.btn-success:hover {
+    background: #3eee7fa6;
+    color: #266d40;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    ;
+    color: #FFFFFF;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: 0.50s;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: #75a1ff9c;
+    color: #3b82f6;
+
+}
+
+/* Badge styling */
+.badge-info {
+    background: #3b82f6;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* Section header */
+.section-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #111827;
+}
+
+.section-header p {
+    color: #6b7280;
+    font-size: 15px;
+}
+
+/* Overall card container */
+.appointment-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    margin-bottom: 25px;
+}
+
+.two-column-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    padding: 25px;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* LEFT SIDE */
+.left-info {
+    width: 55%;
+}
+
+/* RIGHT SIDE */
+.right-panel {
+    width: 40%;
+    background: #f8f9fc;
+    padding: 20px;
+    border-radius: 10px;
+    height: fit-content;
+}
+
+/* Status Box */
+.status-box {
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.status-completed {
+    background: #d4f7d4;
+    color: #1b7a1b;
+}
+
+.status-pending {
+    background: #fff4d6;
+    color: #8a6a00;
+}
+
+.note-preview h4 {
+    margin-bottom: 5px;
+}
+
+.note-preview p {
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    min-height: 60px;
+    border: 1px solid #e0e0e0;
+}
+
+
+.admin-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+
+@media (max-width: 768px) {
+    .two-column-card {
+        flex-direction: column;
+    }
+
+    .left-info {
+        width: 100%;
+    }
+
+
+}
+
+.two-column-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    padding: 25px;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    margin-bottom: 25px;
+    margin-top: 20px;
+}
+
+.left-info {
+    width: 55%;
+}
+
+.left-info p {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #444;
+}
+
+.patient-name {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.right-panel {
+    width: 100%;
+    background: #f8f9fc;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.status-box {
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.status-completed {
+    background: #d4f7d4;
+    color: #1b7a1b;
+}
+
+.status-pending {
+    background: #fff4d6;
+    color: #8a6a00;
+}
+
+.note-preview h4 {
+    margin-bottom: 5px;
+}
+
+
+
+.admin-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+
+.admin-apt-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.admin-apt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-apt-name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.toggle-btn {
+    background: #e5e7eb;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.toggle-btn:hover {
+    background: #d1d5db;
+}
+
+.admin-apt-details {
+    display: none;
+    /* HIDDEN BY DEFAULT */
+    margin-top: 15px;
+}
+
+.doctor-note-textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    text-align: left;
+    vertical-align: top !important;
+    resize: vertical;
+}
+
+#medicalRecordsTable td:nth-child(11) {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+#noteViewText {
+    white-space: pre-wrap;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #333;
+}
+
+#medicalRecordsTable td:nth-child(11):hover {
+    background: #f3f4f6;
+}
+
+
+#noteViewText {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.notification-list {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.notification-card {
+    background: #fff;
+    padding: 15px 18px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.notif-icon {
+    font-size: 22px;
+}
+
+.notif-content h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.notif-content p {
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+.notif-date {
+    font-size: 13px;
+    color: #777;
+}
+
+.notif-delete {
+    margin-left: auto;
+    background: #e44a3f33;
+    border: none;
+    padding: 7px 14px;
+    color: #ef4444;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.notification-card {
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.notification-card.removing {
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.notif-delete:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.notif-badge {
+    background: #ff3b30;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    margin-left: 8px;
 }

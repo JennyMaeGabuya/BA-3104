@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<?php
+session_start();
+
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
+?>
+
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +25,7 @@
 <body>
 
     <!-- Sidebar Overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
     <!-- Header -->
     <header class="header">
@@ -37,12 +51,24 @@
 
             <div class="header-actions">
 
-                <button class="btn-icon" title="Notifications">
+                <button class="btn-icon" id="notifBtn" title="Notifications">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
+                    <span id="notifCount" class="notif-badge" style="display:none;"></span>
                 </button>
+
+                <!-- Notifications dropdown -->
+                <div id="notifPanel" class="notif-panel">
+                    <div class="notif-header">
+                        <span>Notifications</span>
+                        <button id="notifMarkRead" class="notif-mark-read">Mark all as read</button>
+                    </div>
+                    <div id="notifList" class="notif-list">
+                        <p class="notif-empty">No new notifications.</p>
+                    </div>
+                </div>
 
                 <div class="user-info">
                     <div class="avatar">PN</div>
@@ -70,29 +96,20 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <nav class="sidebar-nav">
-
-                <button class="nav-item active" onclick="switchSection('overview')">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    <span>Overview</span>
+                <button class="nav-item active" data-section="overview" onclick="switchSection('overview')">
+                    Overview
                 </button>
 
-                <button class="nav-item" onclick="switchSection('booking')">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <span>Book Appointment</span>
+                <button class="nav-item" data-section="booking" onclick="switchSection('booking')">
+                    Book Appointment
                 </button>
 
-                <button class="nav-item" onclick="switchSection('profile')">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span>Profile</span>
+                <button class="nav-item" data-section="calendar" onclick="switchSection('calendar')">
+                    Calendar
+                </button>
+
+                <button class="nav-item" data-section="profile" onclick="switchSection('profile')">
+                    Profile
                 </button>
 
             </nav>
@@ -102,8 +119,8 @@
         <main class="main-content">
 
             <!-- ==========================
-                OVERVIEW
-            =========================== -->
+                 OVERVIEW
+             =========================== -->
             <section id="overview" class="content-section active">
 
                 <div class="section-header">
@@ -222,10 +239,9 @@
                                     <small id="slotInfo"></small>
                                 </div>
                             </div>
-
                             <div class="form-group">
                                 <label>Reason *</label>
-                                <select id="reason" class="form-select" required>
+                                <select id="reason" class="form-select" onchange="toggleOtherReason()" required>
                                     <option value="">Select reason</option>
                                     <option>General Checkup</option>
                                     <option>Follow-up</option>
@@ -233,14 +249,40 @@
                                     <option>Flu Symptoms</option>
                                     <option>Dental</option>
                                     <option>Injury</option>
+                                    <option value="other">Other</option>
                                 </select>
                             </div>
 
+                            <div class="form-group other-reason-group" id="otherReasonGroup" style="display:none;">
+                                <label class="other-label">Please specify *</label>
+                                <input
+                                    type="text"
+                                    id="otherReasonInput"
+                                    class="form-control"
+                                    placeholder="Enter your reason">
+                            </div>
                             <button type="submit" class="btn btn-primary">Book Appointment</button>
 
                         </form>
                     </div>
 
+                </div>
+            </section>
+
+            <!-- ==========================
+                CALENDAR
+            =========================== -->
+            <section id="calendar" class="content-section">
+                <div class="section-header calendar-header">
+                    <h2>Calendar</h2>
+                    <div class="calendar-nav">
+                        <button type="button" class="cal-btn" onclick="prevMonth()">‹</button>
+                        <span id="calMonthLabel"></span>
+                        <button type="button" class="cal-btn" onclick="nextMonth()">›</button>
+                    </div>
+                </div>
+                <div class="calendar-container">
+                    <div id="calendarGrid" class="calendar-grid"></div>
                 </div>
             </section>
 
@@ -298,13 +340,13 @@
                             <p id="profileDOB"></p>
                         </div>
 
-                    </div>
 
-                </div>
+                    </div>
             </section>
 
         </main>
     </div>
+
 
     <!-- ==========================
         RESCHEDULE MODAL
@@ -331,6 +373,14 @@
     </div>
 
     <script src="../../js/patient_js/patient-script.js"></script>
+
+    <script>
+        if (window.history.replaceState) {
+            window.history.replaceState(null, "", window.location.href);
+        }
+    </script>
+
+
 
 </body>
 

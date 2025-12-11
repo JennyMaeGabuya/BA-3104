@@ -5,19 +5,47 @@ document.addEventListener("DOMContentLoaded", function () {
     const sessionInput = document.getElementById("appointmentSession");
     const newDateInput = document.getElementById("newAppointmentDate");
 
-    // Booking section (new appointment)
     if (dateInput && sessionInput) {
         dateInput.addEventListener("change", refreshAvailableSlots);
         sessionInput.addEventListener("change", refreshAvailableSlots);
     }
 
-    // Reschedule modal
     if (newDateInput) {
         newDateInput.addEventListener("change", refreshRescheduleSlots);
     }
 
+    /* --------------------------------------------------------------
+       AUTO UPDATE AGE (Booking Form)
+    -------------------------------------------------------------- */
+    const dobBooking = document.getElementById("dateOfBirth");
+    const ageBooking = document.getElementById("age");
+
+    if (dobBooking && ageBooking) {
+        dobBooking.addEventListener("change", function () {
+            ageBooking.value = calculateAge(dobBooking.value);
+        });
+    }
+
+    /* --------------------------------------------------------------
+       AUTO UPDATE AGE (Edit Profile - Dynamic DOM)
+    -------------------------------------------------------------- */
+    const observer = new MutationObserver(() => {
+        const dobProfile = document.getElementById("editDOB");
+        const ageProfile = document.getElementById("editAge");
+
+        if (dobProfile && ageProfile) {
+            dobProfile.addEventListener("change", function () {
+                ageProfile.value = calculateAge(dobProfile.value);
+            });
+            observer.disconnect();
+        }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
     initializeDashboard();
+
 });
+
 
 
 /* --------------------------------------------------------------
@@ -82,8 +110,6 @@ async function refreshAvailableSlots() {
 
     const date = dateInput.value;
     const session = sessionInput.value;
-
-    // Reset
     timeSelect.innerHTML = '<option value="">Select time</option>';
     timeSelect.disabled = true;
     info.textContent = "";
@@ -113,7 +139,7 @@ async function refreshAvailableSlots() {
             return;
         }
 
-        const takenTimes = result.times || [];      // array of "HH:MM:SS"
+        const takenTimes = result.times || [];
         const bookedCount = result.count || 0;
         const limit = result.limit || config.limit;
         const remaining = Math.max(limit - bookedCount, 0);
@@ -196,15 +222,13 @@ function initializeDashboard() {
             }
 
             window.currentUserData = user;
+            const headerUser = document.getElementById("headerUserName");
+            if (headerUser) headerUser.textContent = user.name;
 
-            document.getElementById("headerUserName").textContent = user.name;
-
-            // Update profile section only if visible
             if (document.getElementById("profileFullName")) {
                 updateProfileDisplay(user);
             }
 
-            // Fill booking form
             fillBookingForm(user);
             loadBookedAppointments();
             loadCancelledAppointments();
@@ -232,6 +256,16 @@ function fillBookingForm(user) {
 async function handleBooking(event) {
     event.preventDefault();
 
+    let reasonValue = document.getElementById("reason").value;
+    if (reasonValue === "other") {
+        reasonValue = document.getElementById("otherReasonInput").value.trim();
+
+        if (!reasonValue) {
+            alert("Please specify your reason.");
+            return;
+        }
+    }
+
     const formData = new FormData();
     formData.append("name", document.getElementById("name").value.trim());
     formData.append("contactNo", document.getElementById("contactNo").value.trim());
@@ -242,7 +276,7 @@ async function handleBooking(event) {
     formData.append("dateOfBirth", document.getElementById("dateOfBirth").value);
     formData.append("appointmentDate", document.getElementById("appointmentDate").value);
     formData.append("appointmentTime", document.getElementById("appointmentTime").value);
-    formData.append("reason", document.getElementById("reason").value);
+    formData.append("reason", reasonValue);
 
     try {
         const res = await fetch("../../controllers/booking_controller.php", {
@@ -256,8 +290,11 @@ async function handleBooking(event) {
 
         if (result.success) {
             await loadBookedAppointments?.();
-            document.getElementById("appointmentTime").value = "";
             document.getElementById("reason").value = "";
+            document.getElementById("otherReasonInput").value = "";
+            document.getElementById("otherReasonGroup").style.display = "none";
+
+            document.getElementById("appointmentTime").value = "";
             document.getElementById("appointmentSession").value = "";
             document.getElementById("slotInfo").textContent = "";
         }
@@ -271,33 +308,17 @@ async function handleBooking(event) {
    SWITCH SECTION (Overview / Booking / Profile)
 -------------------------------------------------------------- */
 function switchSection(sectionId) {
-    // hide all sections
-    document.querySelectorAll(".content-section").forEach(section => {
-        section.classList.remove("active");
+    document.querySelectorAll(".content-section").forEach(sec => {
+        sec.classList.toggle("active", sec.id === sectionId);
     });
-
-    // show selected section
-    document.getElementById(sectionId).classList.add("active");
-
-    // update sidebar active button
-    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
-    document.querySelector(`[onclick="switchSection('${sectionId}')"]`)
-        .classList.add("active");
-
-    // load data only when viewing overview
-    if (sectionId === "overview") {
-        loadBookedAppointments();
-        loadCancelledAppointments();
-    } else {
-        // clear new UI cards safely
-        const pendingList = document.getElementById("pendingList");
-        const cancelledList = document.getElementById("cancelledList");
-
-        if (pendingList) pendingList.innerHTML = "";
-        if (cancelledList) cancelledList.innerHTML = "";
-    }
+    document.querySelectorAll(".nav-item[data-section]").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.section === sectionId);
+    });
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    switchSection("overview");
+});
 
 /* --------------------------------------------------------------
    TOGGLE SIDEBAR
@@ -307,25 +328,11 @@ function toggleSidebar() {
     document.getElementById("sidebarOverlay").classList.toggle("active");
 }
 
-/* --------------------------------------------------------------
-   LOAD APPOINTMENTS FOR CURRENT USER
--------------------------------------------------------------- */
-async function loadBookedAppointments() {
-    try {
-        const response = await fetch("../../controllers/get_user_appointments.php");
-        const appointments = await response.json();
-
-        console.log("Loaded appointments:", appointments);
-
-        const pending = appointments.filter(
-            (a) => a.status === "pending" || a.status === "rescheduled_pending"
-        );
-        document.getElementById("pendingCount").textContent = pending.length;
-        updateAppointmentTable("pendingTable", pending, true);
-    } catch (error) {
-        console.error("Error loading appointments:", error);
-    }
+function closeSidebar() {
+    document.getElementById("sidebar").classList.remove("active");
+    document.getElementById("sidebarOverlay").classList.remove("active");
 }
+
 
 /* --------------------------------------------------------------
    UPDATE APPOINTMENT TABLES
@@ -369,14 +376,16 @@ function renderCardList(containerId, items, withActions = false) {
                 <p><strong>Contact:</strong> ${app.contact_no}</p>
                 <p><strong>Email:</strong> ${app.email}</p>
                 <p><strong>Age:</strong> ${app.age}</p>
+                <p><strong>Gender:</strong> ${app.gender}</p>
+                <p><strong>Address:</strong> ${app.address}</p>
                 <p><strong>DOB:</strong> ${formatDate(app.date_of_birth)}</p>
 
                 ${withActions ? `
                 <div class="appointment-actions">
                     <button class="btn-action btn-reschedule"
-                        onclick="openRescheduleModal('${app.appointment_id}')">⟳</button>
+                        onclick="openRescheduleModal('${app.appointment_id}')">Reschedule</button>
                     <button class="btn-action btn-cancel"
-                        onclick="cancelAppointment('${app.appointment_id}')">✖</button>
+                        onclick="cancelAppointment('${app.appointment_id}')">Cancel</button>
                 </div>` : ""}
             </div>
 
@@ -439,8 +448,6 @@ async function refreshRescheduleSlots() {
     if (!dateInput || !timeSelect) return;
 
     const date = dateInput.value;
-
-    // Reset
     timeSelect.innerHTML = '<option value="">Select time</option>';
     timeSelect.disabled = true;
 
@@ -448,7 +455,7 @@ async function refreshRescheduleSlots() {
 
     const formData = new FormData();
     formData.append("appointmentDate", date);
-    formData.append("day_only", "1"); // special mode for reschedule
+    formData.append("day_only", "1");
     if (currentAppointmentId) {
         formData.append("exclude_appointment_id", currentAppointmentId);
     }
@@ -465,7 +472,7 @@ async function refreshRescheduleSlots() {
             return;
         }
 
-        const takenTimes = result.times || []; // array of "HH:MM:SS"
+        const takenTimes = result.times || [];
         const allSlots = [
             ...buildSessionSlots("am"),
             ...buildSessionSlots("pm"),
@@ -508,13 +515,10 @@ function openRescheduleModal(appointmentId) {
     const timeSelect = document.getElementById("newAppointmentTime");
 
     if (dateInput && timeSelect) {
-        // Clear previous values
-        // (user chooses date, then we load free slots)
         if (!dateInput.value) {
             timeSelect.innerHTML = '<option value="">Select time</option>';
             timeSelect.disabled = true;
         } else {
-            // If date is already set, immediately load available slots
             refreshRescheduleSlots();
         }
     }
@@ -546,13 +550,14 @@ async function saveReschedule() {
 
         if (result.success) {
             closeRescheduleModal();
-            loadBookedAppointments();
+            await initializeDashboard();
         }
     } catch (err) {
         console.error(err);
         alert("Reschedule failed.");
     }
 }
+
 
 function closeRescheduleModal() {
     document.getElementById("rescheduleModal").style.display = "none";
@@ -616,6 +621,10 @@ function editProfile() {
 
                 <label>Date of Birth</label>
                 <input type="date" id="editDOB" class="form-input" value="${u.date_of_birth ?? ""}" required>
+                <label>Age</label>
+<input type="number" id="editAge" class="form-input" value="${calculateAge(u.date_of_birth)}" readonly>
+
+                
 
                 <div class="modal-actions">
                     <button type="button" onclick="loadProfileSection()" class="btn-cancel">Cancel</button>
@@ -655,6 +664,9 @@ async function saveProfile(event) {
         loadProfileSection();
     }
 }
+
+
+
 
 /* --------------------------------------------------------------
    RESTORE PROFILE LAYOUT
@@ -700,8 +712,7 @@ function loadProfileSection() {
             </div>
         </div>
     `;
-
-    initializeDashboard();
+    updateProfileDisplay(window.currentUserData);
 }
 
 /* --------------------------------------------------------------
@@ -759,8 +770,9 @@ function logout() {
         });
 }
 
+
 /* --------------------------------------------------------------
-   LOAD CANCELLED APPOINTMENTS
+   LOAD CANCELLED APPOINTMENTS (FULL CARD + RESCHEDULE ONLY)
 -------------------------------------------------------------- */
 async function loadCancelledAppointments() {
     try {
@@ -770,7 +782,7 @@ async function loadCancelledAppointments() {
         document.getElementById("cancelledCount").textContent = cancelled.length;
 
         const list = document.getElementById("cancelledList");
-        if (!list) return; // Safety check
+        if (!list) return;
 
         list.innerHTML = "";
 
@@ -780,21 +792,292 @@ async function loadCancelledAppointments() {
         }
 
         cancelled.forEach(app => {
-            list.innerHTML += `
-        <div class="appointment-item simple-item">
-            <div class="appointment-summary">
-                <strong>${formatDate(app.appointment_date)}</strong>
-                <span>${formatTimeFromDB(app.appointment_time)}</span>
-            </div>
-        </div>
-    `;
-        });
 
+            const card = document.createElement("div");
+            card.classList.add("appointment-item");
+
+            card.innerHTML = `
+                <div class="appointment-summary-row">
+                    <div class="appointment-title">Cancelled Appointment</div>
+                    <div class="appointment-date-time">
+                        <strong>${formatDate(app.appointment_date)}</strong>
+                        <span>${formatTimeFromDB(app.appointment_time)}</span>
+                    </div>
+                </div>
+
+                <div class="appointment-details" style="display: none;">
+                    <p><strong>Reason:</strong> ${app.reason}</p>
+                    <p><strong>Name:</strong> ${app.name}</p>
+                    <p><strong>Contact:</strong> ${app.contact_no}</p>
+                    <p><strong>Email:</strong> ${app.email}</p>
+                    <p><strong>Age:</strong> ${app.age}</p>
+                    <p><strong>Gender:</strong> ${app.gender}</p>
+                    <p><strong>Address:</strong> ${app.address}</p>
+                    <p><strong>DOB:</strong> ${formatDate(app.date_of_birth)}</p>
+
+                    <!-- RESCHEDULE     -->
+                    <div class="appointment-actions">
+                        <button class="btn-action btn-reschedule"
+                            onclick="openRescheduleModal('${app.appointment_id}')">Reschedule</button>
+                          <button class="btn-action btn-cancel"
+        onclick="deleteAppointment('${app.appointment_id}')">Delete</button>
+
+                            
+                    </div>
+                </div>
+
+                <button class="show-more-btn" onclick="toggleDetails(this)">Show More ▼</button>
+            `;
+
+            list.appendChild(card);
+        });
 
     } catch (error) {
         console.error("Error loading cancelled appointments:", error);
     }
 }
+
+function showToast(message) {
+    const t = document.getElementById("toast");
+    t.innerText = message;
+    t.style.display = "block";
+    setTimeout(() => t.style.display = "none", 3000);
+}
+
+function toggleOtherReason() {
+    const reasonSelect = document.getElementById("reason");
+    const otherGroup = document.getElementById("otherReasonGroup");
+
+    if (reasonSelect.value === "other") {
+        otherGroup.style.display = "block";
+    } else {
+        otherGroup.style.display = "none";
+        document.getElementById("otherReasonInput").value = "";
+    }
+}
+
+function deleteAppointment(appointmentId) {
+    if (!confirm("Are you sure you want to delete this cancelled appointment?")) {
+        return;
+    }
+
+    fetch("../../controllers/delete_cancelled_appointment.php", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: "appointment_id=" + appointmentId
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+
+            if (data.success) {
+                alert("Appointment deleted successfully.");
+                loadCancelledAppointments();
+            } else {
+                alert(data.msg);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+}
+
+async function fetchNotifications() {
+    const res = await fetch("../../controllers/get_notifications.php");
+    return res.json();
+}
+
+async function refreshNotificationBadge() {
+    try {
+        const data = await fetchNotifications();
+        const badge = document.getElementById("notifCount");
+        if (!badge || !data.success) return;
+
+        const count = data.count || 0;
+        badge.textContent = count > 0 ? count : "";
+        badge.style.display = count > 0 ? "inline-block" : "none";
+        window._latestNotifications = data.notifications || [];
+    } catch (e) {
+        console.error("refreshNotificationBadge error:", e);
+    }
+}
+
+function renderNotificationPanel() {
+    const panel = document.getElementById("notifPanel");
+    const listEl = document.getElementById("notifList");
+    if (!panel || !listEl) return;
+
+    const notifications = window._latestNotifications || [];
+
+    if (!notifications.length) {
+        listEl.innerHTML = '<p class="notif-empty">No new notifications.</p>';
+        return;
+    }
+
+    listEl.innerHTML = notifications.map(n => {
+        const date = new Date(n.created_at);
+        const timeStr = date.toLocaleString();
+        const title = n.type === "appointment_completed"
+            ? "Appointment completed"
+            : "Notification";
+
+        return `
+            <div class="notif-item">
+                <div class="notif-item-title">${title}</div>
+                <div class="notif-item-body">${n.message}</div>
+                <div class="notif-item-time">${timeStr}</div>
+            </div>
+        `;
+    }).join("");
+}
+
+async function onNotifClick() {
+    const panel = document.getElementById("notifPanel");
+    if (!panel) return;
+
+    if (!panel.classList.contains("open")) {
+        await refreshNotificationBadge();
+        renderNotificationPanel();
+    }
+
+    panel.classList.toggle("open");
+}
+
+async function markAllNotificationsRead() {
+    try {
+        await fetch("../../controllers/mark_notifications_read.php", { method: "POST" });
+        window._latestNotifications = [];
+        renderNotificationPanel();
+        refreshNotificationBadge();
+    } catch (e) {
+        console.error("markAllNotificationsRead error:", e);
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    refreshNotificationBadge();
+
+    const btn = document.getElementById("notifBtn");
+    if (btn) btn.addEventListener("click", onNotifClick);
+
+    const markReadBtn = document.getElementById("notifMarkRead");
+    if (markReadBtn) markReadBtn.addEventListener("click", markAllNotificationsRead);
+
+    document.addEventListener("click", (e) => {
+        const panel = document.getElementById("notifPanel");
+        const btn = document.getElementById("notifBtn");
+        if (!panel || !btn) return;
+
+        if (!panel.contains(e.target) && !btn.contains(e.target)) {
+            panel.classList.remove("open");
+        }
+    });
+});
+
+async function deleteAllPatientNotifications() {
+    if (!confirm("Delete all notifications?")) return;
+
+    const btns = document.querySelectorAll(".link-btn");
+    btns.forEach(b => b.disabled = true);
+
+    const res = await fetch("/booking-management/controllers/patient_controllers/delete_all_notifications.php", {
+        method: "POST"
+    });
+
+    let data;
+    try { data = await res.json(); } catch { data = { success: false }; }
+
+    btns.forEach(b => b.disabled = false);
+
+    if (!data.success) {
+        alert(data.msg || "Failed to delete notifications.");
+        return;
+    }
+
+    const list = document.getElementById("notificationList");
+    if (list) list.innerHTML = `<li class="empty">No new notifications.</li>`;
+    const badge = document.getElementById("notifCount");
+    if (badge) { badge.textContent = ""; badge.style.display = "none"; }
+}
+
+let calState = { month: new Date().getMonth(), year: new Date().getFullYear() };
+let patientAppointments = [];
+
+async function loadCalendarAppointments() {
+    try {
+        const res = await fetch("/booking-management/controllers/get_calendar_appointments.php");
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+            patientAppointments = json.data;
+        } else {
+            patientAppointments = [];
+        }
+    } catch (e) {
+        console.error("Calendar fetch failed", e);
+        patientAppointments = [];
+    }
+    renderCalendar();
+}
+
+function renderCalendar() {
+    const grid = document.getElementById("calendarGrid");
+    if (!grid) return;
+
+    const { month, year } = calState;
+    const firstDay = new Date(year, month, 1);
+    const startDay = firstDay.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const apptDates = new Set(patientAppointments.map(a => a.date));
+    grid.innerHTML = "";
+
+    ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach(d => {
+        const h = document.createElement("div");
+        h.className = "cal-head";
+        h.textContent = d;
+        grid.appendChild(h);
+    });
+
+    for (let i = 0; i < startDay; i++) {
+        const e = document.createElement("div");
+        e.className = "cal-empty";
+        grid.appendChild(e);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const hasAppt = apptDates.has(dateStr);
+        const isToday = dateStr === todayStr;
+        const cell = document.createElement("div");
+        cell.className = `cal-day${hasAppt ? " has-appt" : ""}${isToday ? " cal-today" : ""}`;
+        cell.textContent = day;
+        if (hasAppt) cell.title = "You have an appointment";
+        if (isToday) cell.title = (cell.title ? cell.title + " • " : "") + "Today";
+        grid.appendChild(cell);
+    }
+
+    const label = document.getElementById("calMonthLabel");
+    if (label) label.textContent = firstDay.toLocaleString("default", { month: "long", year: "numeric" });
+}
+
+
+function prevMonth() {
+    calState.month--;
+    if (calState.month < 0) { calState.month = 11; calState.year--; }
+    renderCalendar();
+}
+function nextMonth() {
+    calState.month++;
+    if (calState.month > 11) { calState.month = 0; calState.year++; }
+    renderCalendar();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    loadCalendarAppointments();
+});
 
 
 

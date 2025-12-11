@@ -3,21 +3,23 @@ require_once "../../config/db_connection.php";
 header("Content-Type: application/json");
 
 try {
-    // Load only ACTIVE appointments (NOT declined → cancelled)
     $stmt = $conn->prepare("
         SELECT 
-            appointment_id AS id,
+            appointment_id   AS id,
             appointment_date AS date,
             appointment_time AS time,
             reason,
-            name AS fullName,
-            contact_no AS contactNo,
+            name             AS fullName,
+            contact_no       AS contactNo,
             email,
             age,
             gender,
+            address,
+            date_of_birth,
+            doctor_note,
             status
         FROM appointments
-        WHERE status != 'declined'     -- exclude cancelled
+        WHERE status <> 'completed'
         ORDER BY appointment_date ASC, appointment_time ASC
     ");
 
@@ -25,13 +27,7 @@ try {
     $result = $stmt->get_result();
     $data = $result->fetch_all(MYSQLI_ASSOC);
 
-    echo json_encode([
-        "success" => true,
-        "data" => $data
-    ]);
+    echo json_encode(["success" => true, "data" => $data]);
 } catch (Exception $e) {
-    echo json_encode([
-        "success" => false,
-        "error" => $e->getMessage()
-    ]);
+    echo json_encode(["success" => false, "msg" => $e->getMessage()]);
 }

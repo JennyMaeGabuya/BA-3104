@@ -12,7 +12,7 @@ if (!$user_id) {
 }
 
 $stmt = $conn->prepare("
-    SELECT 
+    SELECT
         appointment_id,
         appointment_date,
         appointment_time,

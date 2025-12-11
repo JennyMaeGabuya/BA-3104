@@ -1,36 +1,34 @@
 <?php
-require_once "../../config/db_connection.php";
+require_once __DIR__ . "/../../config/db_connection.php";
 header("Content-Type: application/json");
 
 try {
-    $stmt = $conn->prepare("
+    $sql = "
         SELECT 
-            id,
-            appointment_id,
-            user_id,
-            name AS fullName,
-            email,
-            contact_no AS contactNo,
-            reason,
-            appointment_date AS date,
-            appointment_time AS time,
-            status,
-            cancelled_at
-        FROM cancelled_appointments
-        ORDER BY cancelled_at DESC
-    ");
+            an.id                AS notif_id,
+            c.appointment_id     AS ref_id,
+            c.appointment_date   AS date,
+            c.appointment_time   AS time,
+            c.name               AS fullName,
+            c.email              AS email
+        FROM admin_notifications an
+        JOIN cancelled_appointments c 
+              ON c.appointment_id = an.appointment_id
+        WHERE an.type = 'cancelled'
+        ORDER BY an.created_at DESC
+    ";
 
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $data = $result->fetch_all(MYSQLI_ASSOC);
+    $res = $conn->query($sql);
+    if (!$res) throw new Exception($conn->error);
 
     echo json_encode([
         "success" => true,
-        "data" => $data
+        "data"    => $res->fetch_all(MYSQLI_ASSOC)
     ]);
-} catch (Exception $e) {
+} catch (Throwable $e) {
+    http_response_code(500);
     echo json_encode([
         "success" => false,
-        "msg" => $e->getMessage()
+        "msg"     => $e->getMessage()
     ]);
 }

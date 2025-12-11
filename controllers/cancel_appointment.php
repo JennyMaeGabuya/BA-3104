@@ -30,24 +30,40 @@ if (!$appointment) {
 // 2. Insert into cancelled_appointments table
 $insert = $conn->prepare("
     INSERT INTO cancelled_appointments 
-    (appointment_id, user_id, name, email, contact_no, reason,
+    (appointment_id, user_id, name, email, contact_no, age, gender, address, date_of_birth, reason,
      appointment_date, appointment_time, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'cancelled')
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'cancelled')
 ");
 
 $insert->bind_param(
-    "iissssss",
+    "iississsssss",
     $appointment['appointment_id'],
     $appointment['user_id'],
     $appointment['name'],
     $appointment['email'],
     $appointment['contact_no'],
+    $appointment['age'],
+    $appointment['gender'],
+    $appointment['address'],
+    $appointment['date_of_birth'],
     $appointment['reason'],
     $appointment['appointment_date'],
     $appointment['appointment_time']
 );
 
 $insert->execute();
+
+// >>> NEW: add admin notification for cancelled appointment <<<
+$adminNotif = $conn->prepare("
+    INSERT INTO admin_notifications (appointment_id, type, message)
+    VALUES (?, 'cancelled', ?)
+");
+if ($adminNotif) {
+    $msg = "Appointment for {$appointment['name']} on {$appointment['appointment_date']} at {$appointment['appointment_time']} was cancelled.";
+    $adminNotif->bind_param("is", $appointment['appointment_id'], $msg);
+    $adminNotif->execute();
+    $adminNotif->close();
+}
 
 // 3. Delete from main table
 $delete = $conn->prepare("DELETE FROM appointments WHERE appointment_id = ?");

@@ -15,7 +15,7 @@
             --dark: #1A1A1A;
             --text-light: #6D6D6D;
             --font-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --gradient: linear-gradient(135deg, #C8102E 0%, #2A8BC4 100%);
+            --gradient: maroon;
         }
 
         * {
@@ -35,7 +35,7 @@
         header {
             background: var(--gradient);
             color: var(--white);
-            padding: 80px 20px;
+            padding: 20px 20px;
             text-align: center;
 
 
@@ -45,6 +45,10 @@
             font-size: 60px;
             font-weight: bold;
             margin-bottom: 10px;
+        }
+
+        .logo .q-green {
+            color: #2ecc71;
         }
 
         header h1 {
@@ -76,10 +80,14 @@
         .btn-primary {
             background: var(--white);
             color: var(--red);
+            border: var(--white);
+            border: 2px solid var(--white);
         }
 
         .btn-primary:hover {
-            background: #f1f1f1;
+            background: maroon;
+            color: var(--white);
+            border: 2px solid var(--white);
         }
 
         .btn-outline {
@@ -175,8 +183,7 @@
 
     <!-- ================= HERO SECTION ================= -->
     <header>
-        <div class="logo">BSU</div>
-
+        <div class="logo">Clini<span class="q-green">Q</span></div>
         <h1>BatStateU Clinic Scheduling System</h1>
         <p>JPLPC - Malvar Campus</p>
 
@@ -190,9 +197,7 @@
     <section class="about-section">
         <h2>About the System</h2>
         <p>
-            The BatStateU Clinic Scheduling System is designed to simplify and digitize
-            appointment management within the campus clinic. Students and staff can book
-            consultations, check clinic availability, and receive updates — all in one platform.
+            The BatStateU Clinic Scheduling System provides a fast, digital way to manage clinic appointments. Students and staff can easily book consultations, view clinic availability, and stay updated, all in one seamless platform.
         </p>
     </section>
 

@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     console.log('Login page loaded successfully!');
 
+
     const loginForm = document.getElementById('loginForm');
 
     // Handle login form submission
@@ -40,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Redirect based on PHP controller output
             if (result.success && result.redirect) {
-                window.location.href = result.redirect;
+                window.location.replace(result.redirect);
             }
 
         } catch (error) {

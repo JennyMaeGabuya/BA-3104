@@ -21,7 +21,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
-                <div class="logo">BSU</div>
+                <div class="logo">
+                    <div class="image">
+                        <img src="/booking-management/image/bat.png" alt="BSU Logo">
+                    </div>
+                </div>
                 <div class="logo-text">
                     <h1>BatStateU Clinic</h1>
                     <p>Admin Dashboard</p>
@@ -48,12 +52,20 @@
                     </svg>
                     <span>Overview</span>
                 </button>
+
                 <button class="nav-item" onclick="switchSection('notifications')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
+
                     <span>Notifications</span>
+
+                    <span id="adminNotifCount" class="notif-badge"></span>
                 </button>
+
+
+
                 <button class="nav-item" onclick="switchSection('medical-records')">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -69,7 +81,6 @@
             <section id="overview" class="content-section active">
                 <div class="section-header">
                     <h2>Overview</h2>
-                    <p>Manage appointments and patient consultations</p>
                 </div>
 
                 <div class="appointment-card">
@@ -77,29 +88,9 @@
                         <h3>Appointment Table</h3>
                         <span class="badge badge-info" id="appointmentCount">0</span>
                     </div>
-                    <div class="table-wrapper">
-                        <table class="appointment-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Reason</th>
-                                    <th>Full Name</th>
-                                    <th>Contact No.</th>
-                                    <th>Email</th>
-                                    <th>Age</th>
-                                    <th>Gender</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="appointmentTable">
-                                <tr>
-                                    <td colspan="9" class="empty-state">No appointments found</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="appointment-list-container" id="adminAppointmentCards">
+                        <!-- Cards will be loaded here by JavaScript -->
                     </div>
-                </div>
             </section>
 
             <!-- Notifications Section -->
@@ -113,54 +104,40 @@
                     <!-- Canceled Appointments -->
                     <div class="appointment-card">
                         <div class="card-header">
-                            <h3>Canceled Appointments</h3>
+                            <h3>
+                                Canceled Appointments
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                    onclick="deleteAllNotifications('cancelled')">
+                                    Delete all
+                                </button>
+                            </h3>
                             <span class="badge badge-danger" id="canceledCount">0</span>
                         </div>
-                        <div class="table-wrapper">
-                            <table class="appointment-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Date</th>
-                                        <th>Time</th>
-                                        <th>Email</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="canceledTable">
-                                    <tr>
-                                        <td colspan="5" class="empty-state">No canceled appointments</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+
+                        <div id="canceledNotifications" class="notification-list">
+                            <p class="empty-state">No canceled appointments</p>
                         </div>
                     </div>
+
 
                     <!-- Rescheduled Appointments -->
                     <div class="appointment-card">
                         <div class="card-header">
-                            <h3>Rescheduled Appointments</h3>
+                            <h3>
+                                Rescheduled Appointments
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                    onclick="deleteAllNotifications('rescheduled')">
+                                    Delete all
+                                </button>
+                            </h3>
                             <span class="badge badge-warning" id="rescheduledCount">0</span>
                         </div>
-                        <div class="table-wrapper">
-                            <table class="appointment-table">
-                                <thead>
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Date</th>
-                                        <th>Time</th>
-                                        <th>Email</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="rescheduledTable">
-                                    <tr>
-                                        <td colspan="5" class="empty-state">No rescheduled appointments</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+
+                        <div id="rescheduledNotifications" class="notification-list">
+                            <p class="empty-state">No rescheduled appointments</p>
                         </div>
                     </div>
+
                 </div>
             </section>
 
@@ -183,16 +160,23 @@
                                     <th>Date</th>
                                     <th>Time</th>
                                     <th>Full Name</th>
+                                    <th>Contact</th>
+                                    <th>Email</th>
+                                    <th>Age</th>
+                                    <th>Gender</th>
+                                    <th>Address</th>
+                                    <th>DOB</th>
                                     <th>Reason</th>
-                                    <th>Doctor's Note</th>
+                                    <th>Doctor’s Note</th>
                                 </tr>
                             </thead>
                             <tbody id="medicalRecordsTable">
                                 <tr>
-                                    <td colspan="5" class="empty-state">No medical records found</td>
+                                    <td colspan="11" class="empty-state">No medical records found</td>
                                 </tr>
                             </tbody>
                         </table>
+
                     </div>
                 </div>
             </section>
@@ -225,6 +209,19 @@
             </div>
         </div>
     </div>
+
+    <div class="modal" id="noteViewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Doctor's Note</h3>
+                <button class="modal-close" onclick="closeNoteViewModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="noteViewText"></p>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Add Doctor's Note Modal -->
     <div class="modal" id="noteModal">
